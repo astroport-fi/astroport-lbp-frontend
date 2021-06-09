@@ -17,4 +17,17 @@ describe('CW20TokenName', () => {
     expect(await screen.findByText('Foo')).toBeInTheDocument();
     expect(getTokenName).toHaveBeenCalledWith('terra42');
   });
+
+  it('displays contract address and logs error when unable to resolve token name', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const error = new Error('failed to fetch token name');
+
+    getTokenName.mockRejectedValue(error);
+
+    render(<CW20TokenName address="terra42" />);
+    expect(await screen.findByText('terra42')).toBeInTheDocument();
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(error);
+    consoleErrorSpy.mockRestore();
+  });
 });

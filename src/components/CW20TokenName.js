@@ -6,7 +6,15 @@ function CW20TokenName({ address }) {
 
   useEffect(() => {
     const fetchName = async () => {
-      setName(await getTokenName(address));
+      try {
+        setName(await getTokenName(address));
+      } catch(e) {
+        // Fallback to displaying the contract address
+        setName(<small>{ address }</small>);
+
+        // TODO: Report error?
+        console.error(e);
+      }
     };
 
     fetchName();
