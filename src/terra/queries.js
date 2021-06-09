@@ -1,4 +1,5 @@
 import terraClient from '../terra/client';
+import config from '../config';
 
 export async function getTokenName(cw20ContractAddress) {
   const { name } = await terraClient.wasm.contractQuery(
@@ -13,8 +14,7 @@ export async function getTokenName(cw20ContractAddress) {
 
 export async function getLBPs() {
   const { pairs } = await terraClient.wasm.contractQuery(
-    // Factory contract address:
-    'terra18vd8fpwxzck93qlwghaj6arh4p7c5n896xzem5',
+    config.factoryContractAddress,
     {
       pairs: {}
     }

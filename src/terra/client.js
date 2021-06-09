@@ -1,8 +1,9 @@
 import { LCDClient } from '@terra-money/terra.js';
+import config from '../config';
 
 const terraClient = new LCDClient({
-  URL: 'http://localhost:1317',
-  chainID: 'localterra'
+  URL: config.lcdURL,
+  chainID: config.chainID
 });
 
 export default terraClient;
