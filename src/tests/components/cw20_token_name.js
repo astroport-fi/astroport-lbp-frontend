@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import CW20TokenName from '../../components/CW20TokenName';
+import CW20TokenName from '../../components/cw20_token_name';
 import { getTokenName } from '../../terra/queries';
 
 jest.mock('../../terra/queries', () => ({

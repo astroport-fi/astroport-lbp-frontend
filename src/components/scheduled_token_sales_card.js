@@ -1,6 +1,6 @@
-import ListCard from './ListCard';
+import ListCard from './list_card';
 import { saleAssetFromPair } from '../helpers/asset_pairs';
-import CW20TokenName from './CW20TokenName';
+import CW20TokenName from './cw20_token_name';
 import { timeAndDateString } from '../helpers/time_formatters';
 
 function ScheduledTokenSalesCard({ pairs }) {

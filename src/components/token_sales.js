@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import ScheduledTokenSalesCard from './ScheduledTokenSalesCard';
-import PreviousTokenSalesCard from './PreviousTokenSalesCard';
+import ScheduledTokenSalesCard from './scheduled_token_sales_card';
+import PreviousTokenSalesCard from './previous_token_sales_card';
 import { getLBPs } from '../terra/queries';
 
 function TokenSales() {

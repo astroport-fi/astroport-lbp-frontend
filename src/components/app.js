@@ -1,6 +1,6 @@
-import './App.css';
-import Header from './Header.js';
-import TokenSales from './TokenSales.js';
+import './app.css';
+import Header from './header.js';
+import TokenSales from './token_sales.js';
 
 function App() {
   return (
