@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import ScheduledTokenSalesCard from './scheduled_token_sales_card';
 import PreviousTokenSalesCard from './previous_token_sales_card';
+import CurrentTokenSale from './current_token_sale';
 import { getLBPs } from '../terra/queries';
 
 function TokenSales() {
   const [scheduledPairs, setScheduledPairs] = useState([]);
   const [previousPairs, setPreviousPairs] = useState([]);
+  const [currentPair, setCurrentPair] = useState();
 
   useEffect(() => {
     const fetchLBPs = async () => {
@@ -17,6 +19,7 @@ function TokenSales() {
 
       setScheduledPairs(lbps.filter((lbp) => lbp.start_time > currentTime));
       setPreviousPairs(lbps.filter((lbp) => lbp.end_time <= currentTime));
+      setCurrentPair(lbps.find((lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime));
     };
 
     fetchLBPs();
@@ -24,7 +27,7 @@ function TokenSales() {
 
   return (
     <>
-      <h1 className="text-lg mb-6">Foo Token Sale</h1>
+      {currentPair && <CurrentTokenSale pair={currentPair} />}
       {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs} />}
       {previousPairs.length > 0 && <PreviousTokenSalesCard pairs={previousPairs} className="mt-2" />}
     </>

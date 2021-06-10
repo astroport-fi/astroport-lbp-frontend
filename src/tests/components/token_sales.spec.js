@@ -56,22 +56,32 @@ describe('TokenSales', () => {
         end_time: (new Date(2021, 5, 14).getTime())/1000,
         native_token_denom: 'uust',
         token_contract_addr: 'terra2'
+      }),
+      buildLBP({
+        start_time: (new Date(2021, 5, 8).getTime())/1000,
+        end_time: (new Date(2021, 5, 10).getTime())/1000,
+        native_token_denom: 'uust',
+        token_contract_addr: 'terra3'
       })
     ]);
 
     getTokenName.mockImplementation(address => (
       {
         terra1: 'Foo',
-        terra2: 'Bar'
+        terra2: 'Bar',
+        terra3: 'Baz'
       }[address]
     ))
 
     render(<TokenSales />);
 
+    // Current token sale
+    expect(await screen.findByText('Baz Token Sale')).toBeInTheDocument();
+
+    // Tokens are in the correct cards with the correct time/dates
     const scheduledCard = (await screen.findByText('Scheduled Token Sales')).closest('div')
     const previousCard = (await screen.findByText('Previous Token Sales')).closest('div')
 
-    // Tokens are in the correct cards with the correct time/dates
     const barCell = await within(scheduledCard).findByText('Bar');
     expect(barCell).toBeInTheDocument();
     expect(within(barCell.closest('tr')).queryByText('00:00 (UTC) 10-06-2021')).toBeInTheDocument();
@@ -82,7 +92,9 @@ describe('TokenSales', () => {
 
     // Tokens are not present in the wrong cards
     expect(within(scheduledCard).queryByText('Foo')).toBeNull();
+    expect(within(scheduledCard).queryByText('Baz')).toBeNull();
     expect(within(previousCard).queryByText('Bar')).toBeNull();
+    expect(within(previousCard).queryByText('Baz')).toBeNull();
 
     dateNowSpy.mockRestore();
   });

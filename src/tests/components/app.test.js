@@ -3,6 +3,6 @@ import App from '../../components/app';
 
 test('renders token sale page', () => {
   render(<App />);
-  const linkElement = screen.getByText(/foo token sale/i);
+  const linkElement = screen.getByText(/token sale/i);
   expect(linkElement).toBeInTheDocument();
 });
