@@ -1,8 +1,9 @@
 import classNames from 'classnames';
+import Card from './card';
 
 function ListCard({ title, headings, rows, className }) {
   return(
-    <div className={classNames('bg-blue-gray-700 rounded-2xl pt-4 pb-6', className)}>
+    <Card className={classNames('pt-4 pb-6', className)}>
       <h2 className="text-lg mb-4 px-4">{title}</h2>
 
       <table className="w-full">
@@ -30,7 +31,7 @@ function ListCard({ title, headings, rows, className }) {
           }
         </tbody>
       </table>
-    </div>
+    </Card>
   );
 }
 
