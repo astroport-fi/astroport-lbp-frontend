@@ -6,40 +6,40 @@ import { getWeights, getPool } from '../terra/queries';
 import fetchUSTExchangeRate from '../services/fetch_ust_exchange_rate';
 import { formatUSD, formatNumber } from '../helpers/number_formatters';
 import { calcPrice } from '../terra/math';
+import { useRefreshingEffect } from '../helpers/effects';
+
+const REFRESH_INTERVAL = 30_000; // 30s
 
 function CurrentTokenSale({ pair }) {
-  const [weights, setWeights] = useState([]);
+  const [nativeTokenWeight, setNativeTokenWeight] = useState();
+  const [saleTokenWeight, setSaleTokenWeight] = useState();
   const [pool, setPool] = useState();
   const [ustPrice, setUSTPrice] = useState();
   const [usdPrice, setUSDPrice] = useState();
+  const [ustExchangeRate, setUSTExchangeRate] = useState();
 
-  // TODO: Refresh automatically
-  useEffect(() => {
-    const fetchWeights = async () => {
-      const price = await getWeights(
+  useRefreshingEffect(async () => {
+    const [[nativeTokenWeight, saleTokenWeight], pool] = await Promise.all([
+      getWeights(
         pair.contract_addr,
         nativeTokenFromPair(pair.asset_infos).info.native_token.denom
-      );
+      ),
+      getPool(pair.contract_addr)
+    ]);
 
-      setWeights(price);
-    }
+    setNativeTokenWeight(nativeTokenWeight);
+    setSaleTokenWeight(saleTokenWeight);
+    setPool(pool);
+  }, REFRESH_INTERVAL, [pair]);
 
-    fetchWeights();
-  }, [pair]);
+  useRefreshingEffect(async() => {
+    const exchangeRate = await fetchUSTExchangeRate();
 
-  // TODO: Refresh automatically
-  useEffect(() => {
-    const fetchPool = async () => {
-      const pool = await getPool(pair.contract_addr);
-
-      setPool(pool);
-    }
-
-    fetchPool();
-  }, [pair]);
+    setUSTExchangeRate(exchangeRate);
+  }, REFRESH_INTERVAL);
 
   useEffect(() => {
-    if(pool?.assets == null || weights.length == 0){
+    if(pool?.assets == null || nativeTokenWeight === undefined || saleTokenWeight === undefined){
       setUSTPrice(null);
       return;
     }
@@ -47,26 +47,20 @@ function CurrentTokenSale({ pair }) {
     setUSTPrice(calcPrice({
       ustPoolSize: nativeTokenFromPair(pool.assets).amount,
       tokenPoolSize: saleAssetFromPair(pool.assets).amount,
-      ustWeight: weights[0],
-      tokenWeight: weights[1]
+      ustWeight: nativeTokenWeight,
+      tokenWeight: saleTokenWeight
     }));
-  }, [pool, weights]);
+  }, [pool, nativeTokenWeight, saleTokenWeight]);
 
   useEffect(() => {
-    // Don't bother converting if ust price is null
-    if(ustPrice == null) {
+    // Don't convert if ust price or exchange rate is null
+    if(ustPrice == null || ustExchangeRate == null) {
       setUSDPrice(null);
       return;
     }
 
-    const convertUSTPriceToUSD = async () => {
-      const exchangeRate = await fetchUSTExchangeRate();
-
-      setUSDPrice(ustPrice * exchangeRate);
-    }
-
-    convertUSTPriceToUSD();
-  }, [ustPrice]);
+    setUSDPrice(ustPrice * ustExchangeRate);
+  }, [ustExchangeRate, ustPrice]);
 
   // TODO: Fetch time remaining
 
@@ -80,7 +74,7 @@ function CurrentTokenSale({ pair }) {
         <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice == null} />
         <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool == null} />
         <InfoCard label="Time Remaining" value="1d : 22h : 25m" />
-        <InfoCard label="Current Weight" value={weights.map(w => Math.round(w)).join(' : ')} loading={weights.length == 0} />
+        <InfoCard label="Current Weight" value={`${Math.round(nativeTokenWeight)} : ${Math.round(saleTokenWeight)}`} loading={nativeTokenWeight === undefined} />
       </div>
     </>
   );
