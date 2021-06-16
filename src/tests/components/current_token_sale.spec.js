@@ -63,8 +63,13 @@ describe('CurrentTokenSale', () => {
             }
           }
         }
-      ]
+      ],
+      end_time: (new Date(2021, 5, 18, 11, 10)).getTime() / 1000
     };
+
+    const dateNowSpy = jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => new Date(2021, 5, 16, 8).getTime());
 
     render(<CurrentTokenSale pair={pair} />);
 
@@ -80,13 +85,15 @@ describe('CurrentTokenSale', () => {
 
     expect(within(coinsRemainingCard).getByText('42,000,000')).toBeInTheDocument();
 
-    // TODO
-    // expect(within(timeRemainingCard).getByText('1d : 22h : 25m')).toBeInTheDocument();
+    // 2021-06-16 @ 8am -> 2021-06-18 @ 11:10am
+    expect(within(timeRemainingCard).getByText('2d : 3h : 10m')).toBeInTheDocument();
 
     expect(within(currentWeightCard).getByText('5 : 95')).toBeInTheDocument();
 
     expect(getTokenName).toHaveBeenCalledWith('terra123');
     expect(getWeights).toHaveBeenCalledWith('terra1', 'uusd');
     expect(getPool).toHaveBeenCalledWith('terra1');
+
+    dateNowSpy.mockRestore();
   });
 });

@@ -13,3 +13,17 @@ export function timeAndDateString(timeMs) {
 
   return `${timeString} ${dateString(date)}`;
 }
+
+// Returns a string like: 1d : 22h : 25m
+// When seconds < 60, returns "< 1m"
+// Behavior when seconds <=0 is unspecified
+export function durationString(seconds) {
+  const minutes = seconds / 60;
+  const hours = minutes / 60;
+
+  if(seconds >= 60) {
+    return `${Math.floor(hours / 24)}d : ${Math.floor(hours % 24)}h : ${Math.floor(minutes % 60)}m`;
+  } else {
+    return '< 1m';
+  }
+}
