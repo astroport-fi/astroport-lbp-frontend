@@ -11,7 +11,7 @@ jest.mock('../../terra/queries', () => ({
 // Simple stub for CurrentTokenSale component,
 // which is unit tested separately.
 jest.mock('../../components/current_token_sale', () =>
-  () => (<div>Current Token Sale</div>)
+  () => (<div>Current Token Info</div>)
 );
 
 function buildLBP({
@@ -81,8 +81,11 @@ describe('App', () => {
 
     render(<App />);
 
-    // Current token sale
-    expect(await screen.findByText('Current Token Sale')).toBeInTheDocument();
+    // Heading with sale token name
+    expect(await screen.findByText('Baz Token Sale')).toBeInTheDocument();
+
+    // Current token info component
+    expect(await screen.findByText('Current Token Info')).toBeInTheDocument();
 
     // Tokens are in the correct cards with the correct time/dates
     const scheduledCard = (await screen.findByText('Scheduled Token Sales')).closest('div')
@@ -101,10 +104,6 @@ describe('App', () => {
     expect(within(scheduledCard).queryByText('Baz')).toBeNull();
     expect(within(previousCard).queryByText('Bar')).toBeNull();
     expect(within(previousCard).queryByText('Baz')).toBeNull();
-
-    // The current token address should never be fetched,
-    // because the CurrentTokenSale component is stubbed out
-    expect(getTokenName).not.toHaveBeenCalledWith('terra3');
 
     dateNowSpy.mockRestore();
   });

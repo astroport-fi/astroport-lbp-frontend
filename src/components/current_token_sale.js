@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
-import CW20TokenName from './cw20_token_name';
 import InfoCard from './info_card';
 import { getWeights, getPool } from '../terra/queries';
 import fetchUSTExchangeRate from '../services/fetch_ust_exchange_rate';
@@ -87,10 +86,6 @@ function CurrentTokenSale({ pair }) {
 
   return (
     <>
-      <h1 className="text-lg">
-        <CW20TokenName address={saleAssetFromPair(pair.asset_infos).info.token.contract_addr} /> Token Sale
-      </h1>
-
       <div className="grid grid-cols-4 gap-6 my-6">
         <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice == null} />
         <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool == null} />

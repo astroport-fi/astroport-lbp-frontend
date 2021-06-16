@@ -1,13 +1,12 @@
 import CurrentTokenSale from '../../components/current_token_sale';
-import { getWeights, getPool, getTokenName } from '../../terra/queries';
+import { getWeights, getPool } from '../../terra/queries';
 import fetchUSTExchangeRate from '../../services/fetch_ust_exchange_rate';
 import { render, screen, within } from '@testing-library/react';
 
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getWeights: jest.fn(),
-  getPool: jest.fn(),
-  getTokenName: jest.fn()
+  getPool: jest.fn()
 }));
 
 jest.mock('../../services/fetch_ust_exchange_rate', () => ({
@@ -18,7 +17,6 @@ jest.mock('../../services/fetch_ust_exchange_rate', () => ({
 describe('CurrentTokenSale', () => {
   it('fetches and displays data for current token sale', async () => {
     fetchUSTExchangeRate.mockResolvedValue(0.99);
-    getTokenName.mockResolvedValue('Foo');
     getWeights.mockResolvedValue([5, 95]);
     getPool.mockResolvedValue({
       assets: [
@@ -73,8 +71,6 @@ describe('CurrentTokenSale', () => {
 
     render(<CurrentTokenSale pair={pair} />);
 
-    expect(await screen.findByText('Foo Token Sale')).toBeInTheDocument();
-
     const priceCard = (await screen.findByText('Price')).closest('div');
     const coinsRemainingCard = (await screen.findByText('Coins Remaining')).closest('div');
     const timeRemainingCard = (await screen.findByText('Time Remaining')).closest('div');
@@ -90,7 +86,6 @@ describe('CurrentTokenSale', () => {
 
     expect(within(currentWeightCard).getByText('5 : 95')).toBeInTheDocument();
 
-    expect(getTokenName).toHaveBeenCalledWith('terra123');
     expect(getWeights).toHaveBeenCalledWith('terra1', 'uusd');
     expect(getPool).toHaveBeenCalledWith('terra1');
 
