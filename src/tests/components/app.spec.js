@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import TokenSales from '../../components/token_sales';
+import App from '../../components/app';
 import { getTokenName, getLBPs } from '../../terra/queries';
 
 jest.mock('../../terra/queries', () => ({
@@ -44,7 +44,7 @@ function buildLBP({
   };
 };
 
-describe('TokenSales', () => {
+describe('App', () => {
   it('renders Scheduled and Previous Token Sales cards', async () => {
     const dateNowSpy = jest
       .spyOn(Date, 'now')
@@ -79,7 +79,7 @@ describe('TokenSales', () => {
       }[address]
     ))
 
-    render(<TokenSales />);
+    render(<App />);
 
     // Current token sale
     expect(await screen.findByText('Current Token Sale')).toBeInTheDocument();
