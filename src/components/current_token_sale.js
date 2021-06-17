@@ -70,7 +70,7 @@ function CurrentTokenSale({ pair }) {
       // Since we only display the time left with minute granularity,
       // we only need to recalculate on the next whole minute
       const secondsToNextMinute = (secondsRemaining % 60);
-      const delay = secondsToNextMinute == 0 ? 60 : secondsToNextMinute;
+      const delay = secondsToNextMinute === 0 ? 60 : secondsToNextMinute;
 
       timeout = setTimeout(tick, delay * 1000);
     };
