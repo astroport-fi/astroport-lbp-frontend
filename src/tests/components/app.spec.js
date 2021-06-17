@@ -1,6 +1,11 @@
 import { render, screen, within } from '@testing-library/react';
 import App from '../../components/app';
 import { getTokenName, getLBPs } from '../../terra/queries';
+import { Extension } from '@terra-money/terra.js';
+import { mockSuccessfullyConnectedExtension } from '../test_helpers/terra-js_mocks';
+import userEvent from "@testing-library/user-event";
+
+jest.mock('@terra-money/terra.js');
 
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
@@ -106,5 +111,30 @@ describe('App', () => {
     expect(within(previousCard).queryByText('Baz')).toBeNull();
 
     dateNowSpy.mockRestore();
+  });
+
+  it('displays partial wallet address after successful browser extension connection', async () => {
+    mockSuccessfullyConnectedExtension(Extension, { address: 'terra1234567890' });
+
+    getLBPs.mockResolvedValue([
+      buildLBP({
+        start_time: Date.now()/1000 - 60*60*24, // 1 day ago
+        end_time: Date.now()/1000 + 60*60*24, // 1 day from now
+        native_token_denom: 'uust',
+        token_contract_addr: 'terra3'
+      })
+    ]);
+
+    render(<App />);
+
+    // Wait for data to load and Connect Wallet button to become visible
+    await screen.findByText('Connect Wallet');
+
+    // Wallet address should not yet be displayed
+    expect(screen.queryByText('567890')).toBeNull();
+
+    userEvent.click(screen.getByText('Connect Wallet'));
+
+    expect(screen.getByText('terra1...567890')).toBeInTheDocument();
   });
 });

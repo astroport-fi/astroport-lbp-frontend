@@ -5,12 +5,15 @@ import CurrentTokenSale from './current_token_sale';
 import { getLBPs } from '../terra/queries';
 import CW20TokenName from './cw20_token_name';
 import { saleAssetFromPair } from '../helpers/asset_pairs';
+import ConnectWalletButton from './connect_wallet_button';
+import ConnectedWallet from './connected_wallet';
 
 function App() {
   const [loading, setLoading] = useState(true);
   const [scheduledPairs, setScheduledPairs] = useState([]);
   const [previousPairs, setPreviousPairs] = useState([]);
   const [currentPair, setCurrentPair] = useState();
+  const [walletAddress, setWalletAddress] = useState();
 
   useEffect(() => {
     const fetchLBPs = async () => {
@@ -35,9 +38,21 @@ function App() {
   } else {
     return (
       <div className="container mx-auto mt-10">
-        <h1 className="text-lg">
-          <CW20TokenName address={saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr}/> Token Sale
-        </h1>
+        {
+          currentPair &&
+            <div className="flex justify-between items-center">
+              <h1 className="text-lg">
+                <CW20TokenName address={saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr}/> Token Sale
+              </h1>
+
+              {
+                walletAddress ?
+                  <ConnectedWallet address={walletAddress} />
+                  :
+                  <ConnectWalletButton onConnect={({ address }) => setWalletAddress(address)} />
+              }
+            </div>
+        }
 
         {currentPair && <CurrentTokenSale pair={currentPair}/>}
         {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs}/>}
