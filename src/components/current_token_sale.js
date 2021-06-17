@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import InfoCard from './info_card';
 import { getWeights, getPool } from '../terra/queries';
@@ -14,8 +14,6 @@ function CurrentTokenSale({ pair }) {
   const [nativeTokenWeight, setNativeTokenWeight] = useState();
   const [saleTokenWeight, setSaleTokenWeight] = useState();
   const [pool, setPool] = useState();
-  const [ustPrice, setUSTPrice] = useState();
-  const [usdPrice, setUSDPrice] = useState();
   const [ustExchangeRate, setUSTExchangeRate] = useState();
   const [secondsRemaining, setSecondsRemaining] = useState();
 
@@ -39,28 +37,26 @@ function CurrentTokenSale({ pair }) {
     setUSTExchangeRate(exchangeRate);
   }, REFRESH_INTERVAL);
 
-  useEffect(() => {
-    if(pool?.assets == null || nativeTokenWeight === undefined || saleTokenWeight === undefined){
-      setUSTPrice(null);
+  const ustPrice = useMemo(() => {
+    if(pool === undefined || nativeTokenWeight === undefined || saleTokenWeight === undefined){
       return;
     }
 
-    setUSTPrice(calcPrice({
+    return calcPrice({
       ustPoolSize: nativeTokenFromPair(pool.assets).amount,
       tokenPoolSize: saleAssetFromPair(pool.assets).amount,
       ustWeight: nativeTokenWeight,
       tokenWeight: saleTokenWeight
-    }));
+    });
   }, [pool, nativeTokenWeight, saleTokenWeight]);
 
-  useEffect(() => {
+  const usdPrice = useMemo(() => {
     // Don't convert if ust price or exchange rate is null
-    if(ustPrice == null || ustExchangeRate == null) {
-      setUSDPrice(null);
+    if(ustPrice === undefined || ustExchangeRate === undefined) {
       return;
     }
 
-    setUSDPrice(ustPrice * ustExchangeRate);
+    return ustPrice * ustExchangeRate;
   }, [ustExchangeRate, ustPrice]);
 
   useEffect(() => {
@@ -87,8 +83,8 @@ function CurrentTokenSale({ pair }) {
   return (
     <>
       <div className="grid grid-cols-4 gap-6 my-6">
-        <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice == null} />
-        <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool == null} />
+        <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice === undefined} />
+        <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool === undefined} />
         <InfoCard label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
         <InfoCard label="Current Weight" value={`${Math.round(nativeTokenWeight)} : ${Math.round(saleTokenWeight)}`} loading={nativeTokenWeight === undefined} />
       </div>
