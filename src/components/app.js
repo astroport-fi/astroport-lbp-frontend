@@ -9,6 +9,7 @@ import ConnectedWallet from './connected_wallet';
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [errorLoadingData, setErrorLoadingData] = useState(false);
   const [scheduledPairs, setScheduledPairs] = useState([]);
   const [previousPairs, setPreviousPairs] = useState([]);
   const [currentPair, setCurrentPair] = useState();
@@ -17,32 +18,39 @@ function App() {
 
   useEffect(() => {
     const fetchLBPs = async () => {
-      const lbps = await getLBPs();
+      try {
+        const lbps = await getLBPs();
 
-      lbps.sort((a, b) => a.start_time - b.start_time);
+        lbps.sort((a, b) => a.start_time - b.start_time);
 
-      const currentTime = Math.floor(Date.now() / 1000);
+        const currentTime = Math.floor(Date.now() / 1000);
 
-      setScheduledPairs(lbps.filter((lbp) => lbp.start_time > currentTime));
-      setPreviousPairs(lbps.filter((lbp) => lbp.end_time <= currentTime));
+        setScheduledPairs(lbps.filter((lbp) => lbp.start_time > currentTime));
+        setPreviousPairs(lbps.filter((lbp) => lbp.end_time <= currentTime));
 
-      const currentPair = lbps.find(
-        (lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime
-      );
-
-      setCurrentPair(currentPair);
-
-      // If there's an ongoing sale,
-      // fetch the sale token info (name, symbol, decimals, etc.)
-      if(currentPair) {
-        const saleTokenAddress = saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr;
-
-        setSaleTokenInfo(
-          await getTokenInfo(saleTokenAddress)
+        const currentPair = lbps.find(
+          (lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime
         );
-      }
 
-      setLoading(false);
+        setCurrentPair(currentPair);
+
+        // If there's an ongoing sale,
+        // fetch the sale token info (name, symbol, decimals, etc.)
+        if(currentPair) {
+          const saleTokenAddress = saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr;
+
+          setSaleTokenInfo(
+            await getTokenInfo(saleTokenAddress)
+          );
+        }
+      } catch(e) {
+        // TODO: Report error
+        // TODO: Some kind of retry behavior?
+        console.error(e);
+        setErrorLoadingData(true);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchLBPs();
@@ -51,6 +59,8 @@ function App() {
   if(loading) {
     // TODO: Proper spinner/loading indicator
     return <div className="m-10 text-center">Loading...</div>;
+  } else if(errorLoadingData) {
+    return <div className="m-10 text-center text-red-500">Error connecting to node</div>;
   } else {
     return (
       <div className="container mx-auto mt-10">
