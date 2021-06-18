@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTokenName } from '../terra/queries';
+import { getTokenInfo } from '../terra/queries';
 
 function CW20TokenName({ address }) {
   const [name, setName] = useState();
@@ -7,7 +7,9 @@ function CW20TokenName({ address }) {
   useEffect(() => {
     const fetchName = async () => {
       try {
-        setName(await getTokenName(address));
+        const tokenInfo = await getTokenInfo(address);
+
+        setName(tokenInfo.name);
       } catch(e) {
         // Fallback to displaying the contract address
         setName(<small>{ address }</small>);

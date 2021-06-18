@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import ScheduledTokenSalesCard from './scheduled_token_sales_card';
 import PreviousTokenSalesCard from './previous_token_sales_card';
 import CurrentTokenSale from './current_token_sale';
-import { getLBPs } from '../terra/queries';
-import CW20TokenName from './cw20_token_name';
+import { getLBPs, getTokenInfo } from '../terra/queries';
 import { saleAssetFromPair } from '../helpers/asset_pairs';
 import ConnectWalletButton from './connect_wallet_button';
 import ConnectedWallet from './connected_wallet';
@@ -13,6 +12,7 @@ function App() {
   const [scheduledPairs, setScheduledPairs] = useState([]);
   const [previousPairs, setPreviousPairs] = useState([]);
   const [currentPair, setCurrentPair] = useState();
+  const [saleTokenInfo, setSaleTokenInfo] = useState();
   const [walletAddress, setWalletAddress] = useState();
 
   useEffect(() => {
@@ -25,7 +25,23 @@ function App() {
 
       setScheduledPairs(lbps.filter((lbp) => lbp.start_time > currentTime));
       setPreviousPairs(lbps.filter((lbp) => lbp.end_time <= currentTime));
-      setCurrentPair(lbps.find((lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime));
+
+      const currentPair = lbps.find(
+        (lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime
+      );
+
+      setCurrentPair(currentPair);
+
+      // If there's an ongoing sale,
+      // fetch the sale token info (name, symbol, decimals, etc.)
+      if(currentPair) {
+        const saleTokenAddress = saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr;
+
+        setSaleTokenInfo(
+          await getTokenInfo(saleTokenAddress)
+        );
+      }
+
       setLoading(false);
     };
 
@@ -42,7 +58,7 @@ function App() {
           currentPair &&
             <div className="flex justify-between items-center">
               <h1 className="text-lg">
-                <CW20TokenName address={saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr}/> Token Sale
+                {saleTokenInfo.name} Token Sale
               </h1>
 
               {

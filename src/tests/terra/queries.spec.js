@@ -1,5 +1,5 @@
 import terraClient from '../../terra/client';
-import { getTokenName, getLBPs, getWeights, getPool } from '../../terra/queries';
+import { getTokenInfo, getLBPs, getWeights, getPool } from '../../terra/queries';
 
 jest.mock('../../terra/client', () => ({
   __esModule: true,
@@ -10,13 +10,17 @@ jest.mock('../../terra/client', () => ({
   }
 }));
 
-describe('getTokenName', () => {
+describe('getTokenInfo', () => {
   it('queries contract for info and returns name', async () => {
-    terraClient.wasm.contractQuery.mockResolvedValue({
-      name: 'Foo'
-    });
+    const tokenInfo = {
+      name: 'Foo',
+      symbol: 'FOO',
+      decimals: 6
+    };
 
-    expect(await getTokenName('terra1234')).toEqual('Foo');
+    terraClient.wasm.contractQuery.mockResolvedValue(tokenInfo);
+
+    expect(await getTokenInfo('terra1234')).toEqual(tokenInfo);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra1234',

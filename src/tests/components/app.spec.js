@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import App from '../../components/app';
-import { getTokenName, getLBPs } from '../../terra/queries';
+import { getLBPs, getTokenInfo } from '../../terra/queries';
 import { Extension } from '@terra-money/terra.js';
 import { mockSuccessfullyConnectedExtension } from '../test_helpers/terra-js_mocks';
 import userEvent from "@testing-library/user-event";
@@ -10,7 +10,7 @@ jest.mock('@terra-money/terra.js');
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getLBPs: jest.fn(),
-  getTokenName: jest.fn()
+  getTokenInfo: jest.fn()
 }));
 
 // Simple stub for CurrentTokenSale component,
@@ -76,11 +76,17 @@ describe('App', () => {
       })
     ]);
 
-    getTokenName.mockImplementation(address => (
+    getTokenInfo.mockImplementation(address => (
       {
-        terra1: 'Foo',
-        terra2: 'Bar',
-        terra3: 'Baz'
+        terra1: {
+          name: 'Foo'
+        },
+        terra2: {
+          name: 'Bar'
+        },
+        terra3: {
+          name: 'Baz'
+        }
       }[address]
     ))
 
@@ -124,6 +130,10 @@ describe('App', () => {
         token_contract_addr: 'terra3'
       })
     ]);
+
+    getTokenInfo.mockResolvedValue({
+      name: 'Foo'
+    });
 
     render(<App />);
 
