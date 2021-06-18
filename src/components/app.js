@@ -80,7 +80,7 @@ function App() {
             </div>
         }
 
-        {currentPair && <CurrentTokenSale pair={currentPair}/>}
+        {currentPair && <CurrentTokenSale pair={currentPair} saleTokenInfo={saleTokenInfo} walletAddress={walletAddress} />}
         {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs}/>}
         {previousPairs.length > 0 && <PreviousTokenSalesCard pairs={previousPairs} className="mt-2"/>}
       </div>

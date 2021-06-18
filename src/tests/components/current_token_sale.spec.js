@@ -65,11 +65,15 @@ describe('CurrentTokenSale', () => {
       end_time: (new Date(2021, 5, 18, 11, 10)).getTime() / 1000
     };
 
+    const saleTokenInfo = {
+      symbol: 'FOO'
+    };
+
     const dateNowSpy = jest
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date(2021, 5, 16, 8).getTime());
 
-    render(<CurrentTokenSale pair={pair} />);
+    render(<CurrentTokenSale pair={pair} saleTokenInfo={saleTokenInfo} />);
 
     const priceCard = (await screen.findByText('Price')).closest('div');
     const coinsRemainingCard = (await screen.findByText('Coins Remaining')).closest('div');

@@ -88,7 +88,7 @@ describe('App', () => {
           name: 'Baz'
         }
       }[address]
-    ))
+    ));
 
     render(<App />);
 

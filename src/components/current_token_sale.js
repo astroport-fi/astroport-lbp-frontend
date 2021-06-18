@@ -7,10 +7,11 @@ import { formatUSD, formatNumber } from '../helpers/number_formatters';
 import { calcPrice } from '../terra/math';
 import { useRefreshingEffect } from '../helpers/effects';
 import { durationString } from '../helpers/time_formatters';
+import SwapCard from './swap_card';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
-function CurrentTokenSale({ pair }) {
+function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
   const [nativeTokenWeight, setNativeTokenWeight] = useState();
   const [saleTokenWeight, setSaleTokenWeight] = useState();
   const [pool, setPool] = useState();
@@ -87,6 +88,15 @@ function CurrentTokenSale({ pair }) {
         <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool === undefined} />
         <InfoCard label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
         <InfoCard label="Current Weight" value={`${Math.round(nativeTokenWeight)} : ${Math.round(saleTokenWeight)}`} loading={nativeTokenWeight === undefined} />
+      </div>
+
+      <div className="flex">
+        <SwapCard
+          pair={pair}
+          saleTokenInfo={saleTokenInfo}
+          walletAddress={walletAddress}
+          ustExchangeRate={ustExchangeRate}
+        />
       </div>
     </>
   );

@@ -23,21 +23,37 @@ export async function getLBPs() {
   return pairs;
 }
 
-// Returns array with [Native Token weight, Sale Token weight]
-export async function getWeights(pairAddress, nativeToken) {
-  const { ask_weight, offer_weight } = await terraClient.wasm.contractQuery(
+// Runs a simulation to purchase the other asset given
+// the specified amount of the specified asset.
+// offerAssetInfo should be an object with either
+// a 'token' or 'native_token' top-level key,
+// and then a 'contract_addr' or 'denom' child key,
+// respectively. This mirrors the contract interface.
+export async function getSimulation(pairAddress, amount, offerAssetInfo) {
+  const result = await terraClient.wasm.contractQuery(
     pairAddress,
     {
       simulation: {
         offer_asset: {
-          amount: '0',
-          info: {
-            native_token: {
-              denom: nativeToken
-            }
-          }
+          amount: String(amount),
+          info: offerAssetInfo
         },
         block_time: Math.floor(Date.now()/1000)
+      }
+    }
+  );
+
+  return result;
+}
+
+// Returns array with [Native Token weight, Sale Token weight]
+export async function getWeights(pairAddress, nativeToken) {
+  const { ask_weight, offer_weight } = await getSimulation(
+    pairAddress,
+    0,
+    {
+      native_token: {
+        denom: nativeToken
       }
     }
   );

@@ -1,5 +1,11 @@
 import terraClient from '../../terra/client';
-import { getTokenInfo, getLBPs, getWeights, getPool } from '../../terra/queries';
+import {
+  getTokenInfo,
+  getLBPs,
+  getSimulation,
+  getWeights,
+  getPool
+} from '../../terra/queries';
 
 jest.mock('../../terra/client', () => ({
   __esModule: true,
@@ -65,11 +71,60 @@ describe('getLBPs', () => {
   });
 });
 
+describe('getSimulation', () => {
+  it('runs a simulation for the given pair address, amount, and offer asset and returns the result', async () => {
+    const simulationResult = {
+      return_amount: '424242',
+      spread_amount: '123',
+      ask_weight: '90.58',
+      offer_weight: '9.42',
+      commission_amount: '456'
+    };
+
+    terraClient.wasm.contractQuery.mockResolvedValue(simulationResult);
+
+    const dateNowSpy = jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => new Date(2021, 6, 14).getTime());
+
+    const simulation = await getSimulation(
+      'terra1234',
+      742,
+      {
+        native_token: {
+          denom: 'uusd'
+        }
+      }
+    );
+
+    expect(simulation).toEqual(simulationResult);
+
+    expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
+      'terra1234',
+      {
+        simulation: {
+          offer_asset: {
+            amount: '742',
+            info: {
+              native_token: {
+                denom: 'uusd'
+              }
+            }
+          },
+          block_time: Math.floor(new Date(2021, 6, 14).getTime()/1000)
+        }
+      }
+    );
+
+    dateNowSpy.mockRestore();
+  });
+});
+
 describe('getWeights', () => {
   it('fetches and returns current weights for given pair address', async () => {
     terraClient.wasm.contractQuery.mockResolvedValue({
-      ask_weight: 90.58,
-      offer_weight: 9.42
+      ask_weight: '90.58',
+      offer_weight: '9.42'
     });
 
     const dateNowSpy = jest
