@@ -46,7 +46,7 @@ function AssetInput({ label, className, amount, usdAmount, assets, selectedAsset
         <div className="border-l border-blue-gray-350 pl-4">
           <label htmlFor={selectId} className="sr-only">Asset</label>
 
-          <select id={selectId} className="bg-transparent outline-none" value={selectedAsset} onChange={e => onAssetChange(e.target.value)}>
+          <select id={selectId} className="bg-transparent outline-none cursor-pointer" value={selectedAsset} onChange={e => onAssetChange(e.target.value)}>
             {
               assets.map(asset => <option value={asset.type} key={asset.type}>{asset.symbol}</option>)
             }
