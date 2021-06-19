@@ -3,6 +3,7 @@ import {
   getTokenInfo,
   getLBPs,
   getSimulation,
+  getReverseSimulation,
   getWeights,
   getPool
 } from '../../terra/queries';
@@ -108,6 +109,55 @@ describe('getSimulation', () => {
             info: {
               native_token: {
                 denom: 'uusd'
+              }
+            }
+          },
+          block_time: Math.floor(new Date(2021, 6, 14).getTime()/1000)
+        }
+      }
+    );
+
+    dateNowSpy.mockRestore();
+  });
+});
+
+describe('getReverseSimulation', () => {
+  it('runs a reverse simulation for the given pair address, amount, and ask asset and returns the result', async () => {
+    const result = {
+      offer_amount: '424242',
+      spread_amount: '123',
+      ask_weight: '90.58',
+      offer_weight: '9.42',
+      commission_amount: '456'
+    };
+
+    terraClient.wasm.contractQuery.mockResolvedValue(result);
+
+    const dateNowSpy = jest
+      .spyOn(Date, 'now')
+      .mockImplementation(() => new Date(2021, 6, 14).getTime());
+
+    const simulation = await getReverseSimulation(
+      'terra1234',
+      742,
+      {
+        token: {
+          contract_addr: 'terra456'
+        }
+      }
+    );
+
+    expect(simulation).toEqual(result);
+
+    expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
+      'terra1234',
+      {
+        reverse_simulation: {
+          ask_asset: {
+            amount: '742',
+            info: {
+              token: {
+                contract_addr: 'terra456'
               }
             }
           },

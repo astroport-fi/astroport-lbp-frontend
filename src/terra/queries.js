@@ -46,6 +46,23 @@ export async function getSimulation(pairAddress, amount, offerAssetInfo) {
   return result;
 }
 
+export async function getReverseSimulation(pairAddress, amount, askAssetInfo) {
+  const result = await terraClient.wasm.contractQuery(
+    pairAddress,
+    {
+      reverse_simulation: {
+        ask_asset: {
+          amount: String(amount),
+          info: askAssetInfo
+        },
+        block_time: Math.floor(Date.now()/1000)
+      }
+    }
+  );
+
+  return result;
+}
+
 // Returns array with [Native Token weight, Sale Token weight]
 export async function getWeights(pairAddress, nativeToken) {
   const { ask_weight, offer_weight } = await getSimulation(

@@ -6,8 +6,9 @@ import { useRef } from 'react'
 
 // TODO: Better display of huge numbers (currently overflows container)
 
-function AssetInput({ label, className, amount, usdAmount, onChange, symbol }) {
+function AssetInput({ label, className, amount, usdAmount, assets, selectedAsset, onAmountChange, onAssetChange }) {
   const inputId = nextId();
+  const selectId = nextId();
   const inputEl = useRef();
 
   // TODO: Fetch actual balance
@@ -29,7 +30,7 @@ function AssetInput({ label, className, amount, usdAmount, onChange, symbol }) {
             id={inputId}
             type="number"
             value={amount}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => onAmountChange(e.target.value)}
             className="max-w-max"
             inputClassName="bg-transparent outline-none input-no-spinner"
             autoComplete="off"
@@ -43,7 +44,13 @@ function AssetInput({ label, className, amount, usdAmount, onChange, symbol }) {
         </div>
 
         <div className="border-l border-blue-gray-350 pl-4">
-          {symbol}
+          <label htmlFor={selectId} className="sr-only">Asset</label>
+
+          <select id={selectId} className="bg-transparent outline-none" value={selectedAsset} onChange={e => onAssetChange(e.target.value)}>
+            {
+              assets.map(asset => <option value={asset.type} key={asset.type}>{asset.symbol}</option>)
+            }
+          </select>
         </div>
       </div>
     </div>
