@@ -38,6 +38,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     setToAmount(parseInt(simulation.return_amount) / 10 ** saleTokenInfo.decimals);
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSimulation = useCallback(
     debounce(amount => simulatePurchase(amount), 200),
     []
