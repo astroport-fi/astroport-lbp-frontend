@@ -1,3 +1,5 @@
+![CI/CD Badge](https://github.com/room118solutions/astroport-token-sales/actions/workflows/ci.yml/badge.svg)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
