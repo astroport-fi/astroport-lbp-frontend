@@ -1,72 +1,58 @@
+# Astroport Token Sales
 ![CI/CD Badge](https://github.com/room118solutions/astroport-token-sales/actions/workflows/ci.yml/badge.svg)
 
-# Getting Started with Create React App
+## Development
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Requirements
 
-## Available Scripts
+- `node` v14.
+- `npm` v6.
 
-In the project directory, you can run:
+If you have `nvm` installed, it should select the correct version for you based on the `.nvmrc`.
 
-### `npm start`
+### Install dependencies
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```console
+$ npm install
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Configuration
 
-### `npm test`
+- The mainnet and testnet networks are configured in `src/config/networks.js`,
+  but you can configure additional networks, or override those networks entirely,
+  in `src/config/environments/development.js`. See `development.js.sample` for a template.
+- The default network is selected based on the `REACT_APP_DEFAULT_NETWORK` env variable.
+  By default (in `.env`), it's set to `mainnet`. You can override this to a network
+  that you specify in `src/config/environments/development.js` in a `.env.development.local`
+  file. See `.env.development.local.sample` for a template.
+- A sensible configuration for local development would be to define a `localterra` network in `src/config/environments/development.js`,
+  and set `REACT_APP_DEFAULT_NETWORK` to `localterra` in `.env.development.local`.
+  
+### Running the development server
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```console
+$ npm start
+```
 
-### `npm run build`
+You can then access the application by going to [`http://localhost:3000`](http://localhost:3000) in your web browser.
 
-Builds the app for production to the `build` folder.\
+The page will reload if you make edits. You will also see any lint errors in the console.
+
+### Testing
+
+```console
+$ npm test
+```
+
+Launches the test runner in the interactive watch mode.
+
+### Building
+
+```console
+$ npm run build
+```
+
+Builds the app for production to the `build` folder.
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+The build is minified and the filenames include the hashes.
