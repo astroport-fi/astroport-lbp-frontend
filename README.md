@@ -1,5 +1,5 @@
 # Astroport Token Sales
-![CI/CD Badge](https://github.com/room118solutions/astroport-token-sales/actions/workflows/ci.yml/badge.svg)
+![Staging CI/CD Badge](https://github.com/room118solutions/astroport-token-sales/actions/workflows/staging_ci_cd.yml/badge.svg)
 
 ## Development
 
