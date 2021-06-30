@@ -1,5 +1,9 @@
 module.exports = {
-  lcdURL: '',
-  chainID: '',
-  factoryContractAddress: 'terra-factoryContractAddress'
+  networks: {
+    stubnet: {
+      lcdURL: '',
+      chainID: '',
+      factoryContractAddress: 'terra-factoryContractAddress'
+    }
+  }
 }

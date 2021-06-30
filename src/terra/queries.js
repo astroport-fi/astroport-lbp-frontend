@@ -1,5 +1,5 @@
 import terraClient from '../terra/client';
-import config from '../config';
+import { defaultNetwork } from '../config/networks';
 
 export async function getTokenInfo(cw20ContractAddress) {
   const info = await terraClient.wasm.contractQuery(
@@ -14,7 +14,7 @@ export async function getTokenInfo(cw20ContractAddress) {
 
 export async function getLBPs() {
   const { pairs } = await terraClient.wasm.contractQuery(
-    config.factoryContractAddress,
+    defaultNetwork.factoryContractAddress,
     {
       pairs: {}
     }

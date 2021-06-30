@@ -1,9 +1,9 @@
 import { LCDClient } from '@terra-money/terra.js';
-import config from '../config';
+import { defaultNetwork } from '../config/networks';
 
 const terraClient = new LCDClient({
-  URL: config.lcdURL,
-  chainID: config.chainID
+  URL: defaultNetwork.lcdURL,
+  chainID: defaultNetwork.chainID
 });
 
 export default terraClient;
