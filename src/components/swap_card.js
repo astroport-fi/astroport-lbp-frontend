@@ -64,7 +64,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       requestAsset.info
     );
 
-    const simulatedAmount = parseInt(simulation[type == 'forward' ? 'return_amount' : 'offer_amount']);
+    const simulatedAmount = parseInt(simulation[type === 'forward' ? 'return_amount' : 'offer_amount']);
 
     setter(simulatedAmount / 10 ** assetDecimals[assets[1]]);
   }
