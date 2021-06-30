@@ -34,7 +34,7 @@ jobs:
       - name: Build app
         run: npm run build
         env:
-          REACT_APP_DEFAULT_NETWORK=testnet
+          REACT_APP_DEFAULT_NETWORK: testnet
 
       - name: Deploy app to Netlify
         uses: netlify/actions/cli@master
