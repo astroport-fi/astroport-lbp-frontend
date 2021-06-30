@@ -7,12 +7,12 @@ if(process.env.NODE_ENV !== 'production') {
 
 const networks = {
   mainnet: {
-    lcdUrl: 'https://lcd.terra.dev',
+    lcdURL: 'https://lcd.terra.dev',
     chainID: 'columbus-4',
     factoryContractAddress: '' // TBD
   },
   testnet: {
-    lcd: 'https://tequila-lcd.terra.dev',
+    lcdURL: 'https://tequila-lcd.terra.dev',
     chainID: 'tequila-0004',
     factoryContractAddress: 'terra1fyn0x6n4gutqljjju6nkwxesxy24thaxu9vjpx'
   },
