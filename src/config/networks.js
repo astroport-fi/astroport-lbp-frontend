@@ -14,7 +14,7 @@ const networks = {
   testnet: {
     lcdURL: 'https://tequila-lcd.terra.dev',
     chainID: 'tequila-0004',
-    factoryContractAddress: 'terra1fyn0x6n4gutqljjju6nkwxesxy24thaxu9vjpx'
+    factoryContractAddress: 'terra1y358sk0fcdc8zkhrwwrwkaph93jmw5kctvn6fw'
   },
   ...envNetworks
 };
