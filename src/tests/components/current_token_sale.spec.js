@@ -26,7 +26,7 @@ describe('CurrentTokenSale', () => {
               denom: 'uusd'
             }
           },
-          amount: '5000000',
+          amount: '5000000000000', // 5,000,000.000000
           start_weight: '2',
           end_weight: '60'
         },
@@ -36,7 +36,7 @@ describe('CurrentTokenSale', () => {
               contract_addr: 'terra123'
             }
           },
-          amount: '42000000',
+          amount: '42000000123456', // 42,000,000.123456
           start_weight: '98',
           end_weight: '40'
         }
@@ -66,7 +66,8 @@ describe('CurrentTokenSale', () => {
     };
 
     const saleTokenInfo = {
-      symbol: 'FOO'
+      symbol: 'FOO',
+      decimals: 6
     };
 
     const dateNowSpy = jest
@@ -80,10 +81,10 @@ describe('CurrentTokenSale', () => {
     const timeRemainingCard = (await screen.findByText('Time Remaining')).closest('div');
     const currentWeightCard = (await screen.findByText('Current Weight')).closest('div');
 
-    // ((5000000 / 5) / (42000000 / 95)) = 2.261904762 * $0.99 = $2.239285714
+    // ((500000000000 / 5) / (42000000123456 / 95)) = 2.261904755 * $0.99 = $2.239285714
     expect(within(priceCard).getByText('$2.24')).toBeInTheDocument();
 
-    expect(within(coinsRemainingCard).getByText('42,000,000')).toBeInTheDocument();
+    expect(within(coinsRemainingCard).getByText('42,000,000.123456')).toBeInTheDocument();
 
     // 2021-06-16 @ 8am -> 2021-06-18 @ 11:10am
     expect(within(timeRemainingCard).getByText('2d : 3h : 10m')).toBeInTheDocument();

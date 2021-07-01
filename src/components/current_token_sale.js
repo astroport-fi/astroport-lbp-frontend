@@ -3,7 +3,7 @@ import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import InfoCard from './info_card';
 import { getWeights, getPool } from '../terra/queries';
 import fetchUSTExchangeRate from '../services/fetch_ust_exchange_rate';
-import { formatUSD, formatNumber } from '../helpers/number_formatters';
+import { formatUSD, formatTokenAmount } from '../helpers/number_formatters';
 import { calcPrice } from '../terra/math';
 import { useRefreshingEffect } from '../helpers/effects';
 import { durationString } from '../helpers/time_formatters';
@@ -85,7 +85,7 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
     <>
       <div className="grid grid-cols-4 gap-6 my-6">
         <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice === undefined} />
-        <InfoCard label="Coins Remaining" value={pool && formatNumber(saleAssetFromPair(pool.assets).amount)} loading={pool === undefined} />
+        <InfoCard label="Coins Remaining" value={pool && formatTokenAmount(saleAssetFromPair(pool.assets).amount, saleTokenInfo.decimals)} loading={pool === undefined} />
         <InfoCard label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
         <InfoCard label="Current Weight" value={`${Math.round(nativeTokenWeight)} : ${Math.round(saleTokenWeight)}`} loading={nativeTokenWeight === undefined} />
       </div>

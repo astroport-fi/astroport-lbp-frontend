@@ -4,6 +4,15 @@ export function formatUSD(amount) {
   return formatter.format(amount)
 };
 
-export function formatNumber(amount) {
-  return new Intl.NumberFormat().format(amount);
+export function formatNumber(amount, opts={}) {
+  return new Intl.NumberFormat(undefined, opts).format(amount);
 };
+
+export function formatTokenAmount(amount, decimals) {
+  const wholeTokens = amount/10**decimals;
+
+  return formatNumber(
+    wholeTokens,
+    { maximumSignificantDigits: String(amount).length }
+  );
+}
