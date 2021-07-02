@@ -5,6 +5,7 @@ import { getSimulation, getReverseSimulation } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
+import { swapFromUST } from '../terra/swap';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -120,34 +121,61 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     swapFromTo();
   }
 
+  async function swapFormSubmitted(e) {
+    e.preventDefault();
+
+    const uusdAmount = parseFloat(fromAmount) * 10 ** 6;
+
+    try {
+      await swapFromUST({
+        walletAddress,
+        pair,
+        uusdAmount
+      });
+
+      // TODO: Clear form
+      // TODO: Refresh UI
+      alert('Success!');
+    } catch (e) {
+      console.error(e);
+
+      alert('Error!');
+    }
+  }
+
   return (
     <Card className="w-2/5 p-6 border border-blue-gray-300">
-      <h1 className="text-lg mb-7">
-        Swap
-      </h1>
-      
-      <AssetInput
-        label="From"
-        amount={fromAmount}
-        onAmountChange={fromAmountChanged}
-        usdAmount={fromUSDAmount}
-        symbol="UST"
-        assets={pairAssets}
-        selectedAsset={fromAsset}
-        onAssetChange={fromAssetChanged}
-      />
+      <form onSubmit={swapFormSubmitted}>
+        <h1 className="text-lg mb-7">
+          Swap
+        </h1>
 
-      <AssetInput
-        label="To (estimated)"
-        amount={toAmount}
-        onAmountChange={toAmountChanged}
-        usdAmount={0} // TODO: Figure out how to calculate this
-        symbol={saleTokenInfo.symbol}
-        className="mt-10"
-        assets={pairAssets}
-        selectedAsset={toAsset}
-        onAssetChange={toAssetChanged}
-      />
+        <AssetInput
+          label="From"
+          amount={fromAmount}
+          onAmountChange={fromAmountChanged}
+          usdAmount={fromUSDAmount}
+          symbol="UST"
+          assets={pairAssets}
+          selectedAsset={fromAsset}
+          onAssetChange={fromAssetChanged}
+          required={true}
+        />
+
+        <AssetInput
+          label="To (estimated)"
+          amount={toAmount}
+          onAmountChange={toAmountChanged}
+          usdAmount={0} // TODO: Figure out how to calculate this
+          symbol={saleTokenInfo.symbol}
+          className="mt-10"
+          assets={pairAssets}
+          selectedAsset={toAsset}
+          onAssetChange={toAssetChanged}
+        />
+
+        <button type="submit" className="bg-yellow text-black py-2 px-6 rounded-lg w-full mt-12">Swap</button>
+      </form>
     </Card>
   );
 }

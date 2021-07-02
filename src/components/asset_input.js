@@ -6,7 +6,7 @@ import { useRef } from 'react'
 
 // TODO: Better display of huge numbers (currently overflows container)
 
-function AssetInput({ label, className, amount, usdAmount, assets, selectedAsset, onAmountChange, onAssetChange }) {
+function AssetInput({ label, required, className, amount, usdAmount, assets, selectedAsset, onAmountChange, onAssetChange }) {
   const inputId = nextId();
   const selectId = nextId();
   const inputEl = useRef();
@@ -36,6 +36,7 @@ function AssetInput({ label, className, amount, usdAmount, assets, selectedAsset
             autoComplete="off"
             placeholder="0.000"
             ref={inputEl}
+            required={required}
           />
 
           <span className="text-white text-opacity-50 text-xs select-none">
