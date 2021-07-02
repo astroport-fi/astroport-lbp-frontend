@@ -124,6 +124,11 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   async function swapFormSubmitted(e) {
     e.preventDefault();
 
+    if(fromAsset !== 'native_token') {
+      alert('Swapping from token to native token is not yet supported');
+      return;
+    }
+
     const uusdAmount = parseFloat(fromAmount) * 10 ** 6;
 
     try {
