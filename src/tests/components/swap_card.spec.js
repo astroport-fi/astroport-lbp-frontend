@@ -50,7 +50,7 @@ describe('SwapCard', () => {
       return_amount: '210000000'
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} />);
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
 
     const fromInput = screen.getByLabelText('From');
 
@@ -94,7 +94,7 @@ describe('SwapCard', () => {
       offer_amount: '42000000'
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} />);
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
 
     const toInput = screen.getByLabelText('To (estimated)');
 
@@ -131,7 +131,7 @@ describe('SwapCard', () => {
       }
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} />);
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
 
     // First enter a from value (UST -> FOO)
     const fromInput = screen.getByLabelText('From');
@@ -189,7 +189,7 @@ describe('SwapCard', () => {
       }
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} />);
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
 
     // First enter a to value (UST <- FOO)
     const fromInput = screen.getByLabelText('To (estimated)');

@@ -148,39 +148,41 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     }
   }
 
+  const form = <form onSubmit={swapFormSubmitted}>
+    <h1 className="text-lg mb-7">
+      Swap
+    </h1>
+
+    <AssetInput
+      label="From"
+      amount={fromAmount}
+      onAmountChange={fromAmountChanged}
+      usdAmount={fromUSDAmount}
+      symbol="UST"
+      assets={pairAssets}
+      selectedAsset={fromAsset}
+      onAssetChange={fromAssetChanged}
+      required={true}
+    />
+
+    <AssetInput
+      label="To (estimated)"
+      amount={toAmount}
+      onAmountChange={toAmountChanged}
+      usdAmount={0} // TODO: Figure out how to calculate this
+      symbol={saleTokenInfo.symbol}
+      className="mt-10"
+      assets={pairAssets}
+      selectedAsset={toAsset}
+      onAssetChange={toAssetChanged}
+    />
+
+    <button type="submit" className="bg-yellow text-black py-2 px-6 rounded-lg w-full mt-12">Swap</button>
+  </form>;
+
   return (
     <Card className="w-2/5 p-6 border border-blue-gray-300">
-      <form onSubmit={swapFormSubmitted}>
-        <h1 className="text-lg mb-7">
-          Swap
-        </h1>
-
-        <AssetInput
-          label="From"
-          amount={fromAmount}
-          onAmountChange={fromAmountChanged}
-          usdAmount={fromUSDAmount}
-          symbol="UST"
-          assets={pairAssets}
-          selectedAsset={fromAsset}
-          onAssetChange={fromAssetChanged}
-          required={true}
-        />
-
-        <AssetInput
-          label="To (estimated)"
-          amount={toAmount}
-          onAmountChange={toAmountChanged}
-          usdAmount={0} // TODO: Figure out how to calculate this
-          symbol={saleTokenInfo.symbol}
-          className="mt-10"
-          assets={pairAssets}
-          selectedAsset={toAsset}
-          onAssetChange={toAssetChanged}
-        />
-
-        <button type="submit" className="bg-yellow text-black py-2 px-6 rounded-lg w-full mt-12">Swap</button>
-      </form>
+      { walletAddress ? form : 'Please connect your wallet to swap' }
     </Card>
   );
 }
