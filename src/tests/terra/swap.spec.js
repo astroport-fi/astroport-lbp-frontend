@@ -53,7 +53,7 @@ describe('swapFromUST', () => {
   it('estimates fee, makes request via the extension,' +
     'and returns a promise that resolves when the transaction posts successfully', async () => {
     const pair = buildPair({
-      contractAddr: 'token-pair-addr'
+      contractAddr: 'terra-pair-addr'
     });
     const walletAddress = 'terra-wallet-addr';
     const uusdAmount = 42 * 1e6;
@@ -124,8 +124,8 @@ describe('swapFromToken', () => {
   it('estimates fee, makes request via the extension,' +
     'and returns a promise that resolves when the transaction posts successfully', async () => {
     const pair = buildPair({
-      contractAddr: 'token-pair-addr',
-      tokenContractAddr: 'token-contract-addr'
+      contractAddr: 'terra-pair-addr',
+      tokenContractAddr: 'terra-token-addr'
     });
     const walletAddress = 'terra-wallet-addr';
     const tokenAmount = 7 * 1e6;
@@ -145,10 +145,10 @@ describe('swapFromToken', () => {
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
       walletAddress,
-      'token-contract-addr',
+      'terra-token-addr',
       {
         send: {
-          contract: 'token-pair-addr',
+          contract: 'terra-pair-addr',
           amount: '7000000',
           msg: 'eyJzd2FwIjp7fX0='
         }
