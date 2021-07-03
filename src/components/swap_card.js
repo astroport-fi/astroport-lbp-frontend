@@ -5,7 +5,7 @@ import { getSimulation, getReverseSimulation } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
-import { swapFromUST } from '../terra/swap';
+import { swapFromToken, swapFromUST } from '../terra/swap';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -124,19 +124,24 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   async function swapFormSubmitted(e) {
     e.preventDefault();
 
-    if(fromAsset !== 'native_token') {
-      alert('Swapping from token to native token is not yet supported');
-      return;
-    }
-
-    const uusdAmount = parseFloat(fromAmount) * 10 ** 6;
-
     try {
-      await swapFromUST({
-        walletAddress,
-        pair,
-        uusdAmount
-      });
+      const uusdAmount = parseFloat(fromAmount) * 10 ** 6;
+
+      if(fromAsset === 'native_token') {
+        await swapFromUST({
+          walletAddress,
+          pair,
+          uusdAmount
+        });
+      } else {
+        const tokenAmount = parseFloat(fromAmount) * 10 ** saleTokenInfo.decimals;
+
+        await swapFromToken({
+          walletAddress,
+          pair,
+          tokenAmount
+        });
+      }
 
       // TODO: Clear form
       // TODO: Refresh UI

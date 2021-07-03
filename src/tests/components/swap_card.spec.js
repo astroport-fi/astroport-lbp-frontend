@@ -3,7 +3,7 @@ import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
-import { swapFromUST } from '../../terra/swap';
+import { swapFromUST, swapFromToken } from '../../terra/swap';
 
 // Simulation is normally debounced
 // This mocks the debounce function to just invoke the
@@ -224,7 +224,7 @@ describe('SwapCard', () => {
   it('performs native -> token swap and alerts user on success', async () => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
-      return_amount: String(5 * 1e6)
+      return_amount: String(5 * 1e5)
     });
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
@@ -243,6 +243,40 @@ describe('SwapCard', () => {
       walletAddress: 'terra42',
       pair,
       uusdAmount: 1e6
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith('Success!');
+    alertSpy.mockRestore();
+  });
+
+  it('performs token -> native token swap and alerts user on success', async () => {
+    // Simulation is performed on input change
+    getSimulation.mockResolvedValue({
+      return_amount: String(1e6)
+    });
+
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
+
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+
+    // Change the from asset (FOO -> UST)
+    const fromSelect = screen.getAllByLabelText('Asset')[0];
+    await act(async () => {
+      await userEvent.selectOptions(fromSelect, 'FOO');
+    });
+
+    const fromInput = screen.getByLabelText('From');
+    await act(async () => {
+      await userEvent.type(fromInput, '5');
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+
+    expect(swapFromToken).toHaveBeenCalledTimes(1);
+    expect(swapFromToken).toHaveBeenCalledWith({
+      walletAddress: 'terra42',
+      pair,
+      tokenAmount: 5e5
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
