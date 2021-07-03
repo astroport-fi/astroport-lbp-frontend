@@ -2,6 +2,7 @@ import { render, screen, act, within } from '@testing-library/react';
 import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation } from '../../terra/queries';
+import { buildPair } from '../test_helpers/factories';
 
 // Simulation is normally debounced
 // This mocks the debounce function to just invoke the
@@ -18,25 +19,10 @@ jest.mock('../../terra/queries', () => ({
 }));
 
 describe('SwapCard', () => {
-  const pair = {
-    contract_addr: 'terra1',
-    asset_infos: [
-      {
-        info: {
-          native_token: {
-            denom: 'uusd'
-          }
-        }
-      },
-      {
-        info: {
-          token: {
-            contract_addr: 'terra2'
-          }
-        }
-      }
-    ]
-  };
+  const pair = buildPair({
+    contractAddr: 'terra1',
+    tokenContractAddr: 'terra2'
+  });
 
   const saleTokenInfo = {
     symbol: 'FOO',

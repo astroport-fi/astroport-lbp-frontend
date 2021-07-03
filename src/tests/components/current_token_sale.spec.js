@@ -2,6 +2,7 @@ import CurrentTokenSale from '../../components/current_token_sale';
 import { getWeights, getPool } from '../../terra/queries';
 import fetchUSTExchangeRate from '../../services/fetch_ust_exchange_rate';
 import { render, screen, within } from '@testing-library/react';
+import { buildPair } from '../test_helpers/factories';
 
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
@@ -44,26 +45,11 @@ describe('CurrentTokenSale', () => {
       total_share: '60000000'
     });
 
-    const pair = {
-      contract_addr: 'terra1',
-      asset_infos: [
-        {
-          info: {
-            native_token: {
-              denom: 'uusd'
-            }
-          }
-        },
-        {
-          info: {
-            token: {
-              contract_addr: 'terra123'
-            }
-          }
-        }
-      ],
-      end_time: (new Date(2021, 5, 18, 11, 10)).getTime() / 1000
-    };
+    const pair = buildPair({
+      contractAddr: 'terra1',
+      tokenContractAddr: 'terra123',
+      endTime: Math.floor((new Date(2021, 5, 18, 11, 10)).getTime() / 1000)
+    });
 
     const saleTokenInfo = {
       symbol: 'FOO',
