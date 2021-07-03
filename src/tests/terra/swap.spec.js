@@ -15,9 +15,27 @@ jest.mock('../../terra/client', () => ({
 }));
 
 describe('swapFromUST', () => {
+  let mockPost;
+
+  beforeEach(() => {
+    MsgExecuteContract.mockClear();
+    StdTx.mockClear();
+    Extension.mockClear();
+
+    Extension.mockImplementation(() => {
+      return {
+        _postOnceCallback: null,
+        once(event, fn) {
+          // Store off callback to later be called by mock post() implementation
+          this._postOnceCallback=fn;
+        },
+        post: mockPost
+      };
+    });
+  });
+
   it('estimates fee, makes request via the extension,' +
     'and returns a promise that resolves when the transaction posts successfully', async () => {
-
     const pair = buildPair();
     const walletAddress = 'terra-wallet-addr';
     const uusdAmount = 42 * 1e6;
@@ -30,21 +48,10 @@ describe('swapFromUST', () => {
 
     terraClient.tx.estimateFee.mockResolvedValue(mockStdFee);
 
-    const mockPost = jest.fn().mockImplementation(function() {
+    mockPost = jest.fn().mockImplementation(function() {
       // Immediately invoke callback,
       // simulating successful message post
       this._postOnceCallback({ success: true });
-    });
-
-    Extension.mockImplementation(() => {
-      return {
-        _postOnceCallback: null,
-        once(event, fn) {
-          // Store off callback to later be called by mock post() implementation
-          this._postOnceCallback=fn;
-        },
-        post: mockPost
-      };
     });
 
     await swapFromUST({ pair, walletAddress, uusdAmount });
@@ -84,5 +91,21 @@ describe('swapFromUST', () => {
       msgs: [mockMsg],
       fee: mockStdFee
     });
+  });
+
+  it('rejects when extension returns error', () => {
+    const mockError = jest.mock();
+
+    mockPost = jest.fn().mockImplementation(function() {
+      // Immediately invoke callback,
+      // simulating failed message post
+      this._postOnceCallback({ success: false, error: mockError });
+    });
+
+    const pair = buildPair()
+    const walletAddress = 'terra-wallet-addr';
+    const uusdAmount = 42 * 1e6;
+
+    return expect(swapFromUST({ pair, walletAddress, uusdAmount })).rejects.toEqual(mockError);
   });
 });
