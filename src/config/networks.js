@@ -9,12 +9,14 @@ const networks = {
   mainnet: {
     lcdURL: 'https://lcd.terra.dev',
     chainID: 'columbus-4',
-    factoryContractAddress: '' // TBD
+    factoryContractAddress: '', // TBD
+    gasPrices: { uusd: 0.15 }
   },
   testnet: {
     lcdURL: 'https://tequila-lcd.terra.dev',
     chainID: 'tequila-0004',
-    factoryContractAddress: 'terra1y358sk0fcdc8zkhrwwrwkaph93jmw5kctvn6fw'
+    factoryContractAddress: 'terra1y358sk0fcdc8zkhrwwrwkaph93jmw5kctvn6fw',
+    gasPrices: { uusd: 0.15 }
   },
   ...envNetworks
 };

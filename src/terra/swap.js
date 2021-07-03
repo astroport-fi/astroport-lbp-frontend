@@ -1,4 +1,4 @@
-import { Extension, MsgExecuteContract } from '@terra-money/terra.js';
+import { Extension, MsgExecuteContract, StdTx, StdFee } from '@terra-money/terra.js';
 import { nativeTokenFromPair } from '../helpers/asset_pairs';
 import terraClient from './client';
 
@@ -24,11 +24,11 @@ export async function swapFromUST({ pair, walletAddress, uusdAmount }) {
     { uusd: uusdAmount }
   );
 
-  // For automatic fee calculation/estimation
-  // More info here: https://github.com/terra-money/terra.js/issues/64
-  const tx = await terraClient.tx.create(walletAddress, {
-    msgs: [msg]
-  });
+  // Estimate the fee (gas + stability fee/tax)
+  // This is very similar to what the TxAPI create method does to estimate fees:
+  //    https://github.com/terra-money/terra.js/blob/b7e7c88151fe2f404437ce7de88b9fa2a03de26a/src/client/lcd/api/TxAPI.ts#L181-L185
+  const stdTx = new StdTx([msg], new StdFee(0), [])
+  const fee = await terraClient.tx.estimateFee(stdTx);
 
   const promise = new Promise((resolve, reject) => {
     extension.once('onPost', ({ success, error }) => {
@@ -42,7 +42,7 @@ export async function swapFromUST({ pair, walletAddress, uusdAmount }) {
 
   extension.post({
     msgs: [msg],
-    fee: tx.fee
+    fee
   });
 
   return promise;

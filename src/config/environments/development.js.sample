@@ -5,7 +5,9 @@ module.exports = {
       chainID: 'localterra',
 
       // Set to the address of the LBP factory contract on your localterra
-      factoryContractAddress: ''
+      factoryContractAddress: '',
+
+      gasPrices: { uusd: 0.15 }
     }
   }
 }

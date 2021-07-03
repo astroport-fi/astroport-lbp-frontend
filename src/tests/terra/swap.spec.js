@@ -1,7 +1,7 @@
 import { swapFromUST } from '../../terra/swap';
 import terraClient from '../../terra/client';
 import { buildPair } from '../test_helpers/factories';
-import { Extension, MsgExecuteContract } from '@terra-money/terra.js';
+import { Extension, MsgExecuteContract, StdFee, StdTx } from '@terra-money/terra.js';
 
 jest.mock('@terra-money/terra.js');
 
@@ -9,7 +9,7 @@ jest.mock('../../terra/client', () => ({
   __esModule: true,
   default: {
     tx: {
-      create: jest.fn()
+      estimateFee: jest.fn()
     }
   }
 }));
@@ -21,12 +21,14 @@ describe('swapFromUST', () => {
     const pair = buildPair();
     const walletAddress = 'terra-wallet-addr';
     const uusdAmount = 42 * 1e6;
-    const msg = jest.mock();
-    const stdFee = jest.mock();
+    const mockMsg = jest.mock();
+    const mockStdFee = jest.mock();
+    const mockStdTx = jest.mock();
 
-    MsgExecuteContract.mockReturnValue(msg);
+    MsgExecuteContract.mockReturnValue(mockMsg);
+    StdTx.mockReturnValue(mockStdTx);
 
-    terraClient.tx.create.mockResolvedValue({ fee: stdFee });
+    terraClient.tx.estimateFee.mockResolvedValue(mockStdFee);
 
     const mockPost = jest.fn().mockImplementation(function() {
       // Immediately invoke callback,
@@ -67,16 +69,20 @@ describe('swapFromUST', () => {
       { uusd: uusdAmount }
     );
 
-    expect(terraClient.tx.create).toHaveBeenCalledTimes(1);
-    expect(terraClient.tx.create).toHaveBeenCalledWith(walletAddress, {
-      msgs: [msg]
-    });
+    // Builds a tx to use for fee estimation
+    expect(StdTx).toHaveBeenCalledTimes(1);
+    expect(StdTx).toHaveBeenCalledWith([mockMsg], expect.any(StdFee), []);
 
+    // Estimates fee
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledTimes(1);
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(mockStdTx);
+
+    // Posts msg to extension
     expect(Extension).toHaveBeenCalledTimes(1);
     expect(mockPost).toHaveBeenCalledTimes(1);
     expect(mockPost).toHaveBeenCalledWith({
-      msgs: [msg],
-      fee: stdFee
+      msgs: [mockMsg],
+      fee: mockStdFee
     });
   });
 });
