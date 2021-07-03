@@ -3,6 +3,7 @@ import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
+import { swapFromUST } from '../../terra/swap';
 
 // Simulation is normally debounced
 // This mocks the debounce function to just invoke the
@@ -17,6 +18,8 @@ jest.mock('../../terra/queries', () => ({
   getSimulation: jest.fn(),
   getReverseSimulation: jest.fn()
 }));
+
+jest.mock('../../terra/swap');
 
 describe('SwapCard', () => {
   const pair = buildPair({
@@ -216,5 +219,33 @@ describe('SwapCard', () => {
         }
       }
     );
+  });
+
+  it('performs native -> token swap and alerts user on success', async () => {
+    // Simulation is performed on input change
+    getSimulation.mockResolvedValue({
+      return_amount: String(5 * 1e6)
+    });
+
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
+
+    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+
+    const fromInput = screen.getByLabelText('From');
+    await act(async () => {
+      await userEvent.type(fromInput, '1');
+    });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+
+    expect(swapFromUST).toHaveBeenCalledTimes(1);
+    expect(swapFromUST).toHaveBeenCalledWith({
+      walletAddress: 'terra42',
+      pair,
+      uusdAmount: 1e6
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith('Success!');
+    alertSpy.mockRestore();
   });
 });
