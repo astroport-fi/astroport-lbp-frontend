@@ -123,7 +123,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     swapFromTo();
   }
 
-  const updateBalances = async () => {
+  const updateBalances = useCallback(async () => {
     if (walletAddress) {
       const nativeToken = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
 
@@ -137,11 +137,11 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
         token: balances[1]
       });
     }
-  }
+  }, [walletAddress, pair]);
 
   useEffect(() => {
     updateBalances();
-  }, [walletAddress, pair]);
+  }, [updateBalances]);
 
   const decimals = useMemo(() => {
     return {
