@@ -1,3 +1,5 @@
+import { Dec } from '@terra-money/terra.js';
+
 export function formatUSD(amount) {
   const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
@@ -9,10 +11,10 @@ export function formatNumber(amount, opts={}) {
 };
 
 export function formatTokenAmount(amount, decimals) {
-  const wholeTokens = amount/10**decimals;
+  const tokens = Dec.withPrec(amount, decimals);
 
   return formatNumber(
-    wholeTokens,
+    parseFloat(tokens.toString()),
     { maximumSignificantDigits: String(amount).length }
   );
 }

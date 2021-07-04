@@ -1,3 +1,4 @@
+import { Coin, Coins, Int } from '@terra-money/terra.js';
 import terraClient from '../../terra/client';
 import {
   getTokenInfo,
@@ -5,7 +6,9 @@ import {
   getSimulation,
   getReverseSimulation,
   getWeights,
-  getPool
+  getPool,
+  getBalance,
+  getTokenBalance
 } from '../../terra/queries';
 
 jest.mock('../../terra/client', () => ({
@@ -13,6 +16,9 @@ jest.mock('../../terra/client', () => ({
   default: {
     wasm: {
       contractQuery: jest.fn()
+    },
+    bank: {
+      balance: jest.fn()
     }
   }
 }));
@@ -240,6 +246,49 @@ describe('getPool', () => {
       'terra1234',
       {
         pool: {}
+      }
+    );
+  });
+});
+
+describe('getBalance', () => {
+  it('fetches and returns current balance (as Int) of given native token for given wallet address', async () => {
+    const uusdIntAmount = new Int(42123456);
+    const ustCoin = new Coin('uusd', uusdIntAmount);
+    const fooCoin = new Coin('foo', 7);
+    const coins = new Coins([ustCoin, fooCoin]);
+    terraClient.bank.balance.mockResolvedValue(coins);
+
+    expect(await getBalance('uusd', 'terra1234')).toEqual(uusdIntAmount);
+
+    expect(terraClient.bank.balance).toHaveBeenCalledWith('terra1234');
+  });
+
+  it('returns Int 0 balance when wallet does not have requested token', async () => {
+    const fooCoin = new Coin('foo', 7);
+    const coins = new Coins([fooCoin]);
+    terraClient.bank.balance.mockResolvedValue(coins);
+
+    expect(await getBalance('uusd', 'terra1234')).toEqual(new Int(0));
+
+    expect(terraClient.bank.balance).toHaveBeenCalledWith('terra1234');
+  });
+});
+
+describe('getTokenBalance', () => {
+  it('fetches and returns current balance (as Int) of given contract token for given wallet address', async () => {
+    terraClient.wasm.contractQuery.mockResolvedValue({
+      balance: '123456'
+    });
+
+    expect(await getTokenBalance('terra-token-addr', 'terra-wallet-addr')).toEqual(new Int(123456));
+
+    expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
+      'terra-token-addr',
+      {
+        balance: {
+          address: 'terra-wallet-addr'
+        }
       }
     );
   });

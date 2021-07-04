@@ -1,7 +1,7 @@
 import { render, screen, act, within } from '@testing-library/react';
 import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
-import { getSimulation, getReverseSimulation } from '../../terra/queries';
+import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
 import { swapFromUST, swapFromToken } from '../../terra/swap';
 
@@ -16,7 +16,9 @@ jest.mock('lodash/debounce', () => ({
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getSimulation: jest.fn(),
-  getReverseSimulation: jest.fn()
+  getReverseSimulation: jest.fn(),
+  getBalance: jest.fn(),
+  getTokenBalance: jest.fn()
 }));
 
 jest.mock('../../terra/swap');
@@ -221,22 +223,40 @@ describe('SwapCard', () => {
     );
   });
 
-  it('performs native -> token swap and alerts user on success', async () => {
+  it('performs native -> token swap, alerts user on success, and updates balances', async () => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
       return_amount: String(5 * 1e5)
     });
 
+    // Before balances
+    getBalance.mockResolvedValueOnce(2000000);
+    getTokenBalance.mockResolvedValueOnce(0);
+
+    // After balances
+    getBalance.mockResolvedValueOnce(1000000);
+    getTokenBalance.mockResolvedValueOnce(5 * 1e5);
+
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+
+    // Initial balances
+    expect(await screen.findByText('Balance: 2')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
 
     const fromInput = screen.getByLabelText('From');
     await act(async () => {
       await userEvent.type(fromInput, '1');
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    // New balances
+    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
 
     expect(swapFromUST).toHaveBeenCalledTimes(1);
     expect(swapFromUST).toHaveBeenCalledWith({
@@ -249,15 +269,27 @@ describe('SwapCard', () => {
     alertSpy.mockRestore();
   });
 
-  it('performs token -> native token swap and alerts user on success', async () => {
+  it('performs token -> native token swap, alerts user on success, and updates balances', async () => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
       return_amount: String(1e6)
     });
 
+    // Before balances
+    getTokenBalance.mockResolvedValueOnce(10 * 1e5);
+    getBalance.mockResolvedValueOnce(0);
+
+    // After balances
+    getTokenBalance.mockResolvedValueOnce(5 * 1e5);
+    getBalance.mockResolvedValueOnce(1e6);
+
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+
+    // Initial balances
+    expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
 
     // Change the from asset (FOO -> UST)
     const fromSelect = screen.getAllByLabelText('Asset')[0];
@@ -270,7 +302,13 @@ describe('SwapCard', () => {
       await userEvent.type(fromInput, '5');
     });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    // New balances
+    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
 
     expect(swapFromToken).toHaveBeenCalledTimes(1);
     expect(swapFromToken).toHaveBeenCalledWith({

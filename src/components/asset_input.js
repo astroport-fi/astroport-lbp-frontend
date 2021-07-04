@@ -1,18 +1,15 @@
 import './asset_input.css';
 import AutosizeInput from 'react-input-autosize';
 import nextId from 'react-id-generator';
-import { formatNumber, formatUSD } from '../helpers/number_formatters';
+import { formatUSD } from '../helpers/number_formatters';
 import { useRef } from 'react'
 
 // TODO: Better display of huge numbers (currently overflows container)
 
-function AssetInput({ label, required, className, amount, usdAmount, assets, selectedAsset, onAmountChange, onAssetChange }) {
+function AssetInput({ label, required, className, amount, usdAmount, assets, selectedAsset, balanceString, onAmountChange, onAssetChange }) {
   const inputId = nextId();
   const selectId = nextId();
   const inputEl = useRef();
-
-  // TODO: Fetch actual balance
-  const balance = 0;
 
   return (
     <div className={className}>
@@ -20,7 +17,7 @@ function AssetInput({ label, required, className, amount, usdAmount, assets, sel
         <label htmlFor={inputId}>{label}</label>
 
         <span>
-          Balance: {formatNumber(balance)}
+          Balance: {balanceString}
         </span>
       </div>
 

@@ -1,11 +1,12 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import Card from './card';
 import AssetInput from './asset_input';
-import { getSimulation, getReverseSimulation } from '../terra/queries';
+import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
 import { swapFromToken, swapFromUST } from '../terra/swap';
+import { formatTokenAmount } from '../helpers/number_formatters';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -16,6 +17,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   const [toAmount, setToAmount] = useState('');
   const [fromAsset, setFromAsset] = useState('native_token');
   const [toAsset, setToAsset] = useState('token');
+  const [balances, setBalances] = useState({});
 
   const fromUSDAmount = useMemo(() => {
     const floatFromAmount = parseFloat(fromAmount);
@@ -121,6 +123,28 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     swapFromTo();
   }
 
+  const updateBalances = async () => {
+    if (walletAddress) {
+      const nativeToken = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
+
+      setBalances({
+        native_token: await getBalance(nativeToken, walletAddress),
+        token: await getTokenBalance(saleAssetFromPair(pair.asset_infos).info.token.contract_addr, walletAddress)
+      });
+    }
+  }
+
+  useEffect(() => {
+    updateBalances();
+  }, [walletAddress, pair]);
+
+  const decimals = useMemo(() => {
+    return {
+      native_token: 6,
+      token: saleTokenInfo.decimals
+    }
+  }, [saleTokenInfo]);
+
   async function swapFormSubmitted(e) {
     e.preventDefault();
 
@@ -145,6 +169,8 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
       // TODO: Clear form
       // TODO: Refresh UI
+      updateBalances();
+
       alert('Success!');
     } catch (e) {
       console.error(e);
@@ -168,6 +194,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       selectedAsset={fromAsset}
       onAssetChange={fromAssetChanged}
       required={true}
+      balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
     />
 
     <AssetInput
@@ -180,6 +207,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       assets={pairAssets}
       selectedAsset={toAsset}
       onAssetChange={toAssetChanged}
+      balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
     />
 
     <button type="submit" className="bg-yellow text-black py-2 px-6 rounded-lg w-full mt-12">Swap</button>

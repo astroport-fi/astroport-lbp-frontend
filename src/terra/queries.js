@@ -1,3 +1,4 @@
+import { Int } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
 import { defaultNetwork } from '../config/networks';
 
@@ -89,3 +90,22 @@ export async function getPool(pairAddress) {
 
   return response;
 };
+
+export async function getBalance(denom, address) {
+  const response = await terraClient.bank.balance(address);
+
+  return response.get(denom)?.amount || new Int(0);
+}
+
+export async function getTokenBalance(tokenAddress, walletAddress) {
+  const response = await terraClient.wasm.contractQuery(
+    tokenAddress,
+    {
+      balance: {
+        address: walletAddress
+      }
+    }
+  );
+
+  return new Int(response.balance);
+}
