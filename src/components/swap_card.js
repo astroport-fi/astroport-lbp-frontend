@@ -127,9 +127,14 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     if (walletAddress) {
       const nativeToken = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
 
+      const balances = await Promise.all([
+        getBalance(nativeToken, walletAddress),
+        getTokenBalance(saleAssetFromPair(pair.asset_infos).info.token.contract_addr, walletAddress)
+      ]);
+
       setBalances({
-        native_token: await getBalance(nativeToken, walletAddress),
-        token: await getTokenBalance(saleAssetFromPair(pair.asset_infos).info.token.contract_addr, walletAddress)
+        native_token: balances[0],
+        token: balances[1]
       });
     }
   }
