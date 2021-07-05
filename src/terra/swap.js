@@ -11,9 +11,9 @@ async function postMsg(msg) {
   const extension = new Extension();
 
   const promise = new Promise((resolve, reject) => {
-    extension.once('onPost', ({ success, error }) => {
+    extension.once('onPost', ({ success, error, result }) => {
       if(success) {
-        resolve();
+        resolve(result);
       } else {
         reject(error);
       }

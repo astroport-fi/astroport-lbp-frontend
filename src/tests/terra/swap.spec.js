@@ -37,7 +37,12 @@ function successfulPostMock() {
   return jest.fn().mockImplementation(function() {
     // Immediately invoke callback,
     // simulating successful message post
-    this._postOnceCallback({ success: true });
+    this._postOnceCallback({
+      success: true,
+      result: {
+        txhash: '123ABC'
+      }
+    });
   });
 }
 
@@ -69,7 +74,10 @@ describe('swapFromNativeToken', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromNativeToken({ pair, walletAddress, nativeIntAmount });
+    const result = await swapFromNativeToken({ pair, walletAddress, nativeIntAmount });
+    expect(result).toEqual({
+      txhash: '123ABC'
+    });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
@@ -141,7 +149,10 @@ describe('swapFromContractToken', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromContractToken({ pair, walletAddress, tokenIntAmount });
+    const result = await swapFromContractToken({ pair, walletAddress, tokenIntAmount });
+    expect(result).toEqual({
+      txhash: '123ABC'
+    });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
