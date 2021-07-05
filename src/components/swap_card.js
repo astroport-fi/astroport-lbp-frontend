@@ -5,7 +5,7 @@ import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
-import { swapFromToken, swapFromUST } from '../terra/swap';
+import { swapFromNativeToken, swapFromContractToken } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 
@@ -155,18 +155,18 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     e.preventDefault();
 
     try {
-      const uusdIntAmount = (new Dec(fromAmount)).mul(1e6).toInt();
+      const nativeIntAmount = (new Dec(fromAmount)).mul(1e6).toInt();
 
       if(fromAsset === 'native_token') {
-        await swapFromUST({
+        await swapFromNativeToken({
           walletAddress,
           pair,
-          uusdIntAmount
+          nativeIntAmount
         });
       } else {
         const tokenIntAmount = (new Dec(fromAmount)).mul(10 ** saleTokenInfo.decimals).toInt();
 
-        await swapFromToken({
+        await swapFromContractToken({
           walletAddress,
           pair,
           tokenIntAmount

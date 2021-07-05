@@ -1,4 +1,4 @@
-import { swapFromToken, swapFromUST } from '../../terra/swap';
+import { swapFromNativeToken, swapFromContractToken } from '../../terra/swap';
 import terraClient from '../../terra/client';
 import { buildPair } from '../test_helpers/factories';
 import { Extension, MsgExecuteContract, StdFee, StdTx, Int } from '@terra-money/terra.js';
@@ -49,14 +49,15 @@ function failedPostMock(error) {
   });
 }
 
-describe('swapFromUST', () => {
+describe('swapFromNativeToken', () => {
   it('estimates fee, makes request via the extension,' +
     'and returns a promise that resolves when the transaction posts successfully', async () => {
     const pair = buildPair({
-      contractAddr: 'terra-pair-addr'
+      contractAddr: 'terra-pair-addr',
+      nativeToken: 'uusd'
     });
     const walletAddress = 'terra-wallet-addr';
-    const uusdIntAmount = new Int(42 * 1e6);
+    const nativeIntAmount = new Int(42 * 1e6);
     const mockMsg = jest.mock();
     const mockStdFee = jest.mock();
     const mockStdTx = jest.mock();
@@ -68,7 +69,7 @@ describe('swapFromUST', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromUST({ pair, walletAddress, uusdIntAmount });
+    await swapFromNativeToken({ pair, walletAddress, nativeIntAmount });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
@@ -82,12 +83,12 @@ describe('swapFromUST', () => {
                 denom: 'uusd'
               }
             },
-            amount: uusdIntAmount
+            amount: nativeIntAmount
           },
           to: walletAddress
         }
       },
-      { uusd: uusdIntAmount }
+      { uusd: nativeIntAmount }
     );
 
     // Builds a tx to use for fee estimation
@@ -114,13 +115,13 @@ describe('swapFromUST', () => {
 
     const pair = buildPair()
     const walletAddress = 'terra-wallet-addr';
-    const uusdIntAmount = new Int(42 * 1e6);
+    const nativeIntAmount = new Int(42 * 1e6);
 
-    return expect(swapFromUST({ pair, walletAddress, uusdIntAmount })).rejects.toEqual(mockError);
+    return expect(swapFromNativeToken({ pair, walletAddress, nativeIntAmount })).rejects.toEqual(mockError);
   });
 });
 
-describe('swapFromToken', () => {
+describe('swapFromContractToken', () => {
   it('estimates fee, makes request via the extension,' +
     'and returns a promise that resolves when the transaction posts successfully', async () => {
     const pair = buildPair({
@@ -140,7 +141,7 @@ describe('swapFromToken', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromToken({ pair, walletAddress, tokenIntAmount });
+    await swapFromContractToken({ pair, walletAddress, tokenIntAmount });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
@@ -181,6 +182,6 @@ describe('swapFromToken', () => {
     const walletAddress = 'terra-wallet-addr';
     const tokenIntAmount = new Int(7 * 1e6);
 
-    return expect(swapFromToken({ pair, walletAddress, tokenIntAmount })).rejects.toEqual(mockError);
+    return expect(swapFromContractToken({ pair, walletAddress, tokenIntAmount })).rejects.toEqual(mockError);
   });
 });

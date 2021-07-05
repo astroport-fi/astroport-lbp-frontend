@@ -3,7 +3,7 @@ import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
-import { swapFromUST, swapFromToken } from '../../terra/swap';
+import { swapFromNativeToken, swapFromContractToken } from '../../terra/swap';
 import { Int } from '@terra-money/terra.js';
 
 // Simulation is normally debounced
@@ -259,11 +259,11 @@ describe('SwapCard', () => {
     expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
 
-    expect(swapFromUST).toHaveBeenCalledTimes(1);
-    expect(swapFromUST).toHaveBeenCalledWith({
+    expect(swapFromNativeToken).toHaveBeenCalledTimes(1);
+    expect(swapFromNativeToken).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
-      uusdIntAmount: new Int(1e6)
+      nativeIntAmount: new Int(1e6)
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
@@ -311,8 +311,8 @@ describe('SwapCard', () => {
     expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
 
-    expect(swapFromToken).toHaveBeenCalledTimes(1);
-    expect(swapFromToken).toHaveBeenCalledWith({
+    expect(swapFromContractToken).toHaveBeenCalledTimes(1);
+    expect(swapFromContractToken).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
       tokenIntAmount: new Int(5e5)

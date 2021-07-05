@@ -38,10 +38,12 @@ async function postMsg(msg) {
  * Creates native token -> contract token swap message and posts to station extension
  * @param pair - Asset pair from queries/getLBPs
  * @param {Address} walletAddress - User's wallet address
- * @param {Int} uusdIntAmount - Int amount to swap in smallest unit of token
+ * @param {Int} nativeIntAmount - Int amount to swap in smallest unit of native token
  * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
  */
-export function swapFromUST({ pair, walletAddress, uusdIntAmount }) {
+export function swapFromNativeToken({ pair, walletAddress, nativeIntAmount }) {
+  const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
+
   const msg = new MsgExecuteContract(
     walletAddress,
     pair.contract_addr,
@@ -50,15 +52,15 @@ export function swapFromUST({ pair, walletAddress, uusdIntAmount }) {
         offer_asset: {
           info: {
             native_token: {
-              denom: nativeTokenFromPair(pair.asset_infos).info.native_token.denom
+              denom
             }
           },
-          amount: uusdIntAmount
+          amount: nativeIntAmount
         },
         to: walletAddress
       }
     },
-    { uusd: uusdIntAmount }
+    { [denom]: nativeIntAmount }
   );
 
   return postMsg(msg);
@@ -71,7 +73,7 @@ export function swapFromUST({ pair, walletAddress, uusdIntAmount }) {
  * @param {Int} tokenIntAmount - Int amount to swap in smallest unit of token
  * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
  */
-export function swapFromToken({ pair, walletAddress, tokenIntAmount }) {
+export function swapFromContractToken({ pair, walletAddress, tokenIntAmount }) {
   const tokenAddr = saleAssetFromPair(pair.asset_infos).info.token.contract_addr;
 
   const msg = new MsgExecuteContract(
