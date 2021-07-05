@@ -2,6 +2,11 @@ import { Extension, MsgExecuteContract, StdTx, StdFee } from '@terra-money/terra
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import terraClient from './client';
 
+/**
+ * Terra account address
+ * @typedef {string} Address
+ */
+
 async function postMsg(msg) {
   const extension = new Extension();
 
@@ -29,7 +34,14 @@ async function postMsg(msg) {
   return promise;
 }
 
-export function swapFromUST({ pair, walletAddress, uusdAmount }) {
+/**
+ * Creates native token -> contract token swap message and posts to station extension
+ * @param pair - Asset pair from queries/getLBPs
+ * @param {Address} walletAddress - User's wallet address
+ * @param {Int} uusdIntAmount - Int amount to swap in smallest unit of token
+ * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
+ */
+export function swapFromUST({ pair, walletAddress, uusdIntAmount }) {
   const msg = new MsgExecuteContract(
     walletAddress,
     pair.contract_addr,
@@ -41,18 +53,25 @@ export function swapFromUST({ pair, walletAddress, uusdAmount }) {
               denom: nativeTokenFromPair(pair.asset_infos).info.native_token.denom
             }
           },
-          amount: String(uusdAmount)
+          amount: uusdIntAmount
         },
         to: walletAddress
       }
     },
-    { uusd: uusdAmount }
+    { uusd: uusdIntAmount }
   );
 
   return postMsg(msg);
 }
 
-export function swapFromToken({ pair, walletAddress, tokenAmount }) {
+/**
+ * Creates contract token -> native token swap message and posts to station extension
+ * @param pair - Asset pair from queries/getLBPs
+ * @param {Address} walletAddress - User's wallet address
+ * @param {Int} tokenIntAmount - Int amount to swap in smallest unit of token
+ * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
+ */
+export function swapFromToken({ pair, walletAddress, tokenIntAmount }) {
   const tokenAddr = saleAssetFromPair(pair.asset_infos).info.token.contract_addr;
 
   const msg = new MsgExecuteContract(
@@ -61,7 +80,7 @@ export function swapFromToken({ pair, walletAddress, tokenAmount }) {
     {
       send: {
         contract: pair.contract_addr,
-        amount: String(tokenAmount),
+        amount: tokenIntAmount,
         msg: btoa(
           JSON.stringify({
             swap: {}

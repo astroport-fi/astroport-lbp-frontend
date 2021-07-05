@@ -7,6 +7,7 @@ import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
 import { swapFromToken, swapFromUST } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
+import { Dec } from '@terra-money/terra.js';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -154,21 +155,21 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     e.preventDefault();
 
     try {
-      const uusdAmount = parseFloat(fromAmount) * 10 ** 6;
+      const uusdIntAmount = (new Dec(fromAmount)).mul(1e6).toInt();
 
       if(fromAsset === 'native_token') {
         await swapFromUST({
           walletAddress,
           pair,
-          uusdAmount
+          uusdIntAmount
         });
       } else {
-        const tokenAmount = parseFloat(fromAmount) * 10 ** saleTokenInfo.decimals;
+        const tokenIntAmount = (new Dec(fromAmount)).mul(10 ** saleTokenInfo.decimals).toInt();
 
         await swapFromToken({
           walletAddress,
           pair,
-          tokenAmount
+          tokenIntAmount
         });
       }
 

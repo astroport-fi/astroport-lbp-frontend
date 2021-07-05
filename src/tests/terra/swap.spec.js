@@ -1,7 +1,7 @@
 import { swapFromToken, swapFromUST } from '../../terra/swap';
 import terraClient from '../../terra/client';
 import { buildPair } from '../test_helpers/factories';
-import { Extension, MsgExecuteContract, StdFee, StdTx } from '@terra-money/terra.js';
+import { Extension, MsgExecuteContract, StdFee, StdTx, Int } from '@terra-money/terra.js';
 
 jest.mock('@terra-money/terra.js');
 
@@ -56,7 +56,7 @@ describe('swapFromUST', () => {
       contractAddr: 'terra-pair-addr'
     });
     const walletAddress = 'terra-wallet-addr';
-    const uusdAmount = 42 * 1e6;
+    const uusdIntAmount = new Int(42 * 1e6);
     const mockMsg = jest.mock();
     const mockStdFee = jest.mock();
     const mockStdTx = jest.mock();
@@ -68,7 +68,7 @@ describe('swapFromUST', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromUST({ pair, walletAddress, uusdAmount });
+    await swapFromUST({ pair, walletAddress, uusdIntAmount });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
@@ -82,12 +82,12 @@ describe('swapFromUST', () => {
                 denom: 'uusd'
               }
             },
-            amount: String(uusdAmount)
+            amount: uusdIntAmount
           },
           to: walletAddress
         }
       },
-      { uusd: uusdAmount }
+      { uusd: uusdIntAmount }
     );
 
     // Builds a tx to use for fee estimation
@@ -114,9 +114,9 @@ describe('swapFromUST', () => {
 
     const pair = buildPair()
     const walletAddress = 'terra-wallet-addr';
-    const uusdAmount = 42 * 1e6;
+    const uusdIntAmount = new Int(42 * 1e6);
 
-    return expect(swapFromUST({ pair, walletAddress, uusdAmount })).rejects.toEqual(mockError);
+    return expect(swapFromUST({ pair, walletAddress, uusdIntAmount })).rejects.toEqual(mockError);
   });
 });
 
@@ -128,7 +128,7 @@ describe('swapFromToken', () => {
       tokenContractAddr: 'terra-token-addr'
     });
     const walletAddress = 'terra-wallet-addr';
-    const tokenAmount = 7 * 1e6;
+    const tokenIntAmount = new Int(7 * 1e6);
     const mockMsg = jest.mock();
     const mockStdFee = jest.mock();
     const mockStdTx = jest.mock();
@@ -140,7 +140,7 @@ describe('swapFromToken', () => {
 
     mockPost = successfulPostMock();
 
-    await swapFromToken({ pair, walletAddress, tokenAmount });
+    await swapFromToken({ pair, walletAddress, tokenIntAmount });
 
     expect(MsgExecuteContract).toHaveBeenCalledTimes(1);
     expect(MsgExecuteContract).toHaveBeenCalledWith(
@@ -149,7 +149,7 @@ describe('swapFromToken', () => {
       {
         send: {
           contract: 'terra-pair-addr',
-          amount: '7000000',
+          amount: tokenIntAmount,
           msg: 'eyJzd2FwIjp7fX0='
         }
       }
@@ -179,8 +179,8 @@ describe('swapFromToken', () => {
 
     const pair = buildPair()
     const walletAddress = 'terra-wallet-addr';
-    const tokenAmount = 7 * 1e6;
+    const tokenIntAmount = new Int(7 * 1e6);
 
-    return expect(swapFromToken({ pair, walletAddress, tokenAmount })).rejects.toEqual(mockError);
+    return expect(swapFromToken({ pair, walletAddress, tokenIntAmount })).rejects.toEqual(mockError);
   });
 });

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
 import { swapFromUST, swapFromToken } from '../../terra/swap';
+import { Int } from '@terra-money/terra.js';
 
 // Simulation is normally debounced
 // This mocks the debounce function to just invoke the
@@ -262,7 +263,7 @@ describe('SwapCard', () => {
     expect(swapFromUST).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
-      uusdAmount: 1e6
+      uusdIntAmount: new Int(1e6)
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
@@ -314,7 +315,7 @@ describe('SwapCard', () => {
     expect(swapFromToken).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
-      tokenAmount: 5e5
+      tokenIntAmount: new Int(5e5)
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
