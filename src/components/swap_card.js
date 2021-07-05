@@ -151,7 +151,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     }
   }, [saleTokenInfo]);
 
-  async function swapFormSubmitted(e) {
+  const swapFormSubmitted = useCallback(async function (e) {
     e.preventDefault();
 
     const fromInfo = {
@@ -184,7 +184,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
       alert('Error!');
     }
-  }
+  }, [saleTokenInfo, pair, walletAddress, fromAmount, fromAsset]);
 
   const form = <form onSubmit={swapFormSubmitted}>
     <h1 className="text-lg mb-7">
