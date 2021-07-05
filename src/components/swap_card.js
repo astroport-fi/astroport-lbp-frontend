@@ -154,24 +154,25 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   async function swapFormSubmitted(e) {
     e.preventDefault();
 
-    try {
-      const nativeIntAmount = (new Dec(fromAmount)).mul(1e6).toInt();
-
-      if(fromAsset === 'native_token') {
-        await swapFromNativeToken({
-          walletAddress,
-          pair,
-          nativeIntAmount
-        });
-      } else {
-        const tokenIntAmount = (new Dec(fromAmount)).mul(10 ** saleTokenInfo.decimals).toInt();
-
-        await swapFromContractToken({
-          walletAddress,
-          pair,
-          tokenIntAmount
-        });
+    const fromInfo = {
+      native_token: {
+        fn: swapFromNativeToken,
+        decimals: 6
+      },
+      token: {
+        fn: swapFromContractToken,
+        decimals: saleTokenInfo.decimals
       }
+    }[fromAsset];
+
+    const intAmount = (new Dec(fromAmount)).mul(10 ** fromInfo.decimals).toInt();
+
+    try {
+      await fromInfo.fn({
+        walletAddress,
+        pair,
+        intAmount
+      });
 
       // TODO: Clear form
       // TODO: Refresh UI

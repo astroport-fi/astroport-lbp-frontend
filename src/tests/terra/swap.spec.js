@@ -62,7 +62,7 @@ describe('swapFromNativeToken', () => {
       nativeToken: 'uusd'
     });
     const walletAddress = 'terra-wallet-addr';
-    const nativeIntAmount = new Int(42 * 1e6);
+    const intAmount = new Int(42 * 1e6);
     const mockMsg = jest.mock();
     const mockStdFee = jest.mock();
     const mockStdTx = jest.mock();
@@ -74,7 +74,7 @@ describe('swapFromNativeToken', () => {
 
     mockPost = successfulPostMock();
 
-    const result = await swapFromNativeToken({ pair, walletAddress, nativeIntAmount });
+    const result = await swapFromNativeToken({ pair, walletAddress, intAmount });
     expect(result).toEqual({
       txhash: '123ABC'
     });
@@ -91,12 +91,12 @@ describe('swapFromNativeToken', () => {
                 denom: 'uusd'
               }
             },
-            amount: nativeIntAmount
+            amount: intAmount
           },
           to: walletAddress
         }
       },
-      { uusd: nativeIntAmount }
+      { uusd: intAmount }
     );
 
     // Builds a tx to use for fee estimation
@@ -123,9 +123,9 @@ describe('swapFromNativeToken', () => {
 
     const pair = buildPair()
     const walletAddress = 'terra-wallet-addr';
-    const nativeIntAmount = new Int(42 * 1e6);
+    const intAmount = new Int(42 * 1e6);
 
-    return expect(swapFromNativeToken({ pair, walletAddress, nativeIntAmount })).rejects.toEqual(mockError);
+    return expect(swapFromNativeToken({ pair, walletAddress, intAmount })).rejects.toEqual(mockError);
   });
 });
 
@@ -137,7 +137,7 @@ describe('swapFromContractToken', () => {
       tokenContractAddr: 'terra-token-addr'
     });
     const walletAddress = 'terra-wallet-addr';
-    const tokenIntAmount = new Int(7 * 1e6);
+    const intAmount = new Int(7 * 1e6);
     const mockMsg = jest.mock();
     const mockStdFee = jest.mock();
     const mockStdTx = jest.mock();
@@ -149,7 +149,7 @@ describe('swapFromContractToken', () => {
 
     mockPost = successfulPostMock();
 
-    const result = await swapFromContractToken({ pair, walletAddress, tokenIntAmount });
+    const result = await swapFromContractToken({ pair, walletAddress, intAmount });
     expect(result).toEqual({
       txhash: '123ABC'
     });
@@ -161,7 +161,7 @@ describe('swapFromContractToken', () => {
       {
         send: {
           contract: 'terra-pair-addr',
-          amount: tokenIntAmount,
+          amount: intAmount,
           msg: 'eyJzd2FwIjp7fX0='
         }
       }
@@ -191,8 +191,8 @@ describe('swapFromContractToken', () => {
 
     const pair = buildPair()
     const walletAddress = 'terra-wallet-addr';
-    const tokenIntAmount = new Int(7 * 1e6);
+    const intAmount = new Int(7 * 1e6);
 
-    return expect(swapFromContractToken({ pair, walletAddress, tokenIntAmount })).rejects.toEqual(mockError);
+    return expect(swapFromContractToken({ pair, walletAddress, intAmount })).rejects.toEqual(mockError);
   });
 });

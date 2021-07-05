@@ -263,7 +263,7 @@ describe('SwapCard', () => {
     expect(swapFromNativeToken).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
-      nativeIntAmount: new Int(1e6)
+      intAmount: new Int(1e6)
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
@@ -315,7 +315,7 @@ describe('SwapCard', () => {
     expect(swapFromContractToken).toHaveBeenCalledWith({
       walletAddress: 'terra42',
       pair,
-      tokenIntAmount: new Int(5e5)
+      intAmount: new Int(5e5)
     });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');

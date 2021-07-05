@@ -38,10 +38,10 @@ async function postMsg(msg) {
  * Creates native token -> contract token swap message and posts to station extension
  * @param pair - Asset pair from queries/getLBPs
  * @param {Address} walletAddress - User's wallet address
- * @param {Int} nativeIntAmount - Int amount to swap in smallest unit of native token
+ * @param {Int} intAmount - Int amount to swap in smallest unit of native token
  * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
  */
-export function swapFromNativeToken({ pair, walletAddress, nativeIntAmount }) {
+export function swapFromNativeToken({ pair, walletAddress, intAmount }) {
   const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
 
   const msg = new MsgExecuteContract(
@@ -55,12 +55,12 @@ export function swapFromNativeToken({ pair, walletAddress, nativeIntAmount }) {
               denom
             }
           },
-          amount: nativeIntAmount
+          amount: intAmount
         },
         to: walletAddress
       }
     },
-    { [denom]: nativeIntAmount }
+    { [denom]: intAmount }
   );
 
   return postMsg(msg);
@@ -70,10 +70,10 @@ export function swapFromNativeToken({ pair, walletAddress, nativeIntAmount }) {
  * Creates contract token -> native token swap message and posts to station extension
  * @param pair - Asset pair from queries/getLBPs
  * @param {Address} walletAddress - User's wallet address
- * @param {Int} tokenIntAmount - Int amount to swap in smallest unit of token
+ * @param {Int} intAmount - Int amount to swap in smallest unit of token
  * @returns {Promise} - Resolves/rejects when station extension emits next onPost event
  */
-export function swapFromContractToken({ pair, walletAddress, tokenIntAmount }) {
+export function swapFromContractToken({ pair, walletAddress, intAmount }) {
   const tokenAddr = saleAssetFromPair(pair.asset_infos).info.token.contract_addr;
 
   const msg = new MsgExecuteContract(
@@ -82,7 +82,7 @@ export function swapFromContractToken({ pair, walletAddress, tokenIntAmount }) {
     {
       send: {
         contract: pair.contract_addr,
-        amount: tokenIntAmount,
+        amount: intAmount,
         msg: btoa(
           JSON.stringify({
             swap: {}
