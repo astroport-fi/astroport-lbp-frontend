@@ -5,6 +5,7 @@ import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from
 import { buildPair } from '../test_helpers/factories';
 import { swapFromNativeToken, swapFromContractToken } from '../../terra/swap';
 import { Int } from '@terra-money/terra.js';
+import terraClient from '../../terra/client';
 
 // Simulation is normally debounced
 // This mocks the debounce function to just invoke the
@@ -23,6 +24,15 @@ jest.mock('../../terra/queries', () => ({
 }));
 
 jest.mock('../../terra/swap');
+
+jest.mock('../../terra/client', () => ({
+  __esModule: true,
+  default: {
+    tx: {
+      txInfo: jest.fn()
+    }
+  }
+}));
 
 describe('SwapCard', () => {
   const pair = buildPair({
@@ -238,6 +248,8 @@ describe('SwapCard', () => {
     getBalance.mockResolvedValueOnce(1000000);
     getTokenBalance.mockResolvedValueOnce(5 * 1e5);
 
+    swapFromNativeToken.mockResolvedValue({ txhash: '123ABC' });
+
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
@@ -250,6 +262,9 @@ describe('SwapCard', () => {
     await act(async () => {
       await userEvent.type(fromInput, '1');
     });
+
+    // Mock mined tx to trigger balance update
+    terraClient.tx.txInfo.mockResolvedValue({});
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
@@ -265,6 +280,8 @@ describe('SwapCard', () => {
       pair,
       intAmount: new Int(1e6)
     });
+
+    expect(terraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
     alertSpy.mockRestore();
@@ -283,6 +300,8 @@ describe('SwapCard', () => {
     // After balances
     getTokenBalance.mockResolvedValueOnce(5 * 1e5);
     getBalance.mockResolvedValueOnce(1e6);
+
+    swapFromContractToken.mockResolvedValue({ txhash: 'ABC123' });
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
@@ -303,6 +322,9 @@ describe('SwapCard', () => {
       await userEvent.type(fromInput, '5');
     });
 
+    // Mock mined tx to trigger balance update
+    terraClient.tx.txInfo.mockResolvedValue({});
+
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
@@ -317,6 +339,8 @@ describe('SwapCard', () => {
       pair,
       intAmount: new Int(5e5)
     });
+
+    expect(terraClient.tx.txInfo).toHaveBeenCalledWith('ABC123');
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
     alertSpy.mockRestore();

@@ -8,6 +8,7 @@ import debounce from 'lodash/debounce';
 import { swapFromNativeToken, swapFromContractToken } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
+import terraClient from '../terra/client';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -151,6 +152,23 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     }
   }, [saleTokenInfo]);
 
+  // Checks up on the tx until it's mined
+  // NOTE: This could also be used to convey the status
+  //       of the tx to the user
+  const refreshBalancesWhenTxMined = useCallback(async function (txhash) {
+    try {
+      // Once the tx has been included on the blockchain,
+      // update the balances
+      await terraClient.tx.txInfo(txhash);
+
+      updateBalances();
+      // TODO: Update rest of UI
+    } catch {
+      // Not on chain yet, try again in 5s
+      setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
+    }
+  }, []);
+
   const swapFormSubmitted = useCallback(async function (e) {
     e.preventDefault();
 
@@ -168,15 +186,15 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     const intAmount = (new Dec(fromAmount)).mul(10 ** fromInfo.decimals).toInt();
 
     try {
-      await fromInfo.fn({
+      const { txhash } = await fromInfo.fn({
         walletAddress,
         pair,
         intAmount
       });
 
+      refreshBalancesWhenTxMined(txhash);
+
       // TODO: Clear form
-      // TODO: Refresh UI
-      updateBalances();
 
       alert('Success!');
     } catch (e) {
