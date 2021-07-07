@@ -3,13 +3,14 @@ import Card from './card';
 import AssetInput from './asset_input';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
-import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
+import { NATIVE_TOKEN_SYMBOLS } from '../constants';
 import debounce from 'lodash/debounce';
 import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg } from '../terra/swap';
-import { formatTokenAmount, formatNumber, formatUSD } from '../helpers/number_formatters';
+import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
 import classNames from 'classnames';
+import SwapRates from './swap_rates';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -311,29 +312,15 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
     />
 
-    <dl className="bg-blue-gray-500 text-xs rounded rounded-lg px-3 py-1 mt-4">
-      <div className="flex justify-between my-2">
-        <dt className="opacity-60">Rate</dt>
-        <dd>1 {saleTokenInfo.symbol} = {formatNumber(ustPrice, { maximumFractionDigits: 3 })} {NATIVE_TOKEN_SYMBOLS[nativeTokenFromPair(pair.asset_infos).info.native_token.denom]}</dd>
-      </div>
-
-      <div className="flex justify-between my-2">
-        <dt className="opacity-60">$ Price {NATIVE_TOKEN_SYMBOLS[nativeTokenFromPair(pair.asset_infos).info.native_token.denom]}</dt>
-        <dd>{formatUSD(ustExchangeRate)}</dd>
-      </div>
-
-      <div className="flex justify-between my-2">
-        <dt className="opacity-60">$ Price {saleTokenInfo.symbol}</dt>
-        <dd>{ustPrice && ustExchangeRate && formatUSD(ustPrice.mul(ustExchangeRate))}</dd>
-      </div>
-
-      { priceImpact &&
-        <div className="flex justify-between my-2">
-          <dt className="opacity-60">Price Impact</dt>
-          <dd>{formatNumber(priceImpact, { style: 'percent', maximumFractionDigits: 2 })}</dd>
-        </div>
-      }
-    </dl>
+    { ustPrice && ustExchangeRate &&
+      <SwapRates
+        pair={pair}
+        saleTokenInfo={saleTokenInfo}
+        ustPrice={ustPrice}
+        ustExchangeRate={ustExchangeRate}
+        priceImpact={priceImpact}
+      />
+    }
 
     <button
       type="submit"
