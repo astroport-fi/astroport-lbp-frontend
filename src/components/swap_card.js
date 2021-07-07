@@ -6,7 +6,7 @@ import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
 import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg } from '../terra/swap';
-import { formatTokenAmount } from '../helpers/number_formatters';
+import { formatTokenAmount, formatNumber, formatUSD } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
 import classNames from 'classnames';
@@ -15,7 +15,7 @@ import classNames from 'classnames';
 // TODO: Reject input with too many decimals
 // TODO: Error handling
 
-function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
+function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice }) {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [fromAsset, setFromAsset] = useState('native_token');
@@ -24,6 +24,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   const [tx, setTx] = useState({ msg: null, fee: null });
   const [calculatingFees, setCalculatingFees] = useState(false);
   const [usingMaxNativeAmount, setUsingMaxNativeAmount] = useState(false);
+  const [priceImpact, setPriceImpact] = useState();
 
   const fromUSDAmount = useMemo(() => {
     const floatFromAmount = parseFloat(fromAmount);
@@ -54,6 +55,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       decAmount = new Dec(amountString);
     } catch {
       setter('');
+      setPriceImpact(null);
       return;
     }
 
@@ -80,6 +82,16 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
     // Drop insignificant zeroes
     setter(parseFloat(simulatedAmountDec.toFixed(assetDecimals[assets[0]])).toString());
+
+    // Calculate and set price impact
+    let simulatedPrice;
+    if(type === 'forward') {
+      simulatedPrice = decAmount.div(simulatedAmountDec);
+    } else {
+      simulatedPrice = simulatedAmountDec.div(decAmount);
+    }
+
+    setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
   }
 
   const pairAssets = useMemo(() => {
@@ -309,6 +321,30 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       onAssetChange={toAssetChanged}
       balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
     />
+
+    <dl className="bg-blue-gray-500 text-xs rounded rounded-lg px-3 py-1 mt-4">
+      <div className="flex justify-between my-2">
+        <dt className="opacity-60">Rate</dt>
+        <dd>1 {saleTokenInfo.symbol} = {formatNumber(ustPrice, { maximumFractionDigits: 3 })} {NATIVE_TOKEN_SYMBOLS[nativeTokenFromPair(pair.asset_infos).info.native_token.denom]}</dd>
+      </div>
+
+      <div className="flex justify-between my-2">
+        <dt className="opacity-60">$ Price {NATIVE_TOKEN_SYMBOLS[nativeTokenFromPair(pair.asset_infos).info.native_token.denom]}</dt>
+        <dd>{formatUSD(ustExchangeRate)}</dd>
+      </div>
+
+      <div className="flex justify-between my-2">
+        <dt className="opacity-60">$ Price {saleTokenInfo.symbol}</dt>
+        <dd>{ustExchangeRate && formatUSD(ustPrice.mul(ustExchangeRate))}</dd>
+      </div>
+
+      { priceImpact &&
+        <div className="flex justify-between my-2">
+          <dt className="opacity-60">Price Impact</dt>
+          <dd>{formatNumber(priceImpact, { style: 'percent', maximumFractionDigits: 2 })}</dd>
+        </div>
+      }
+    </dl>
 
     <button
       type="submit"

@@ -97,6 +97,7 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
           saleTokenInfo={saleTokenInfo}
           walletAddress={walletAddress}
           ustExchangeRate={ustExchangeRate}
+          ustPrice={ustPrice}
         />
       </div>
     </>
