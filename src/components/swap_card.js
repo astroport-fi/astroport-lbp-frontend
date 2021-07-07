@@ -46,7 +46,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   // and sets the toAmount to the result.
   // A reverse simulation runs a reverse simulation to the given amount,
   // and sets the fromAmount to the result.
-  async function simulation(type, amountString, fromAsset, toAsset) {
+  async function simulate(type, amountString, fromAsset, toAsset) {
     const assets=[fromAsset, toAsset];
 
     let setter, decAmount;
@@ -97,8 +97,8 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSimulation = useCallback(
-    debounce((type, amountString, fromAsset, toAsset) => simulation(type, amountString, fromAsset, toAsset), 200),
+  const debouncedSimulate = useCallback(
+    debounce((type, amountString, fromAsset, toAsset) => simulate(type, amountString, fromAsset, toAsset), 200),
     [ustPrice, decimals]
   );
 
@@ -122,13 +122,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
     setFromAmount(amount);
 
-    debouncedSimulation('forward', amount, fromAsset, toAsset);
+    debouncedSimulate('forward', amount, fromAsset, toAsset);
   }
 
   function toAmountChanged(amount) {
     setToAmount(amount);
 
-    debouncedSimulation('reverse', amount, fromAsset, toAsset);
+    debouncedSimulate('reverse', amount, fromAsset, toAsset);
   }
 
   function swapFromTo() {
@@ -144,13 +144,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   // we don't bother checking what the actual change was - any change implies a reversal
   function fromAssetChanged() {
     // Swap assets when running simulation because we're about to swap them
-    simulation('forward', fromAmount, toAsset, fromAsset);
+    simulate('forward', fromAmount, toAsset, fromAsset);
 
     swapFromTo();
   }
 
   function toAssetChanged() {
-    simulation('reverse', toAmount, toAsset, fromAsset);
+    simulate('reverse', toAmount, toAsset, fromAsset);
 
     swapFromTo();
   }
@@ -276,7 +276,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     setFromAmount(parseFloat(amountStr));
 
     // Run simulation to project received tokens if entire wallet balance were swapped
-    simulation('forward', amountStr, fromAsset, toAsset)
+    simulate('forward', amountStr, fromAsset, toAsset)
   }
 
   const form = <form onSubmit={swapFormSubmitted}>
