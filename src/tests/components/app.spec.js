@@ -26,11 +26,11 @@ describe('App', () => {
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date(2021, 5, 9).getTime());
 
-    // Mock toLocaleString to always use en-US locale
+    // Mock toLocaleString to always use en-US locale in EDT timezone
     const toLocaleStringSpy = jest.spyOn(Date.prototype, 'toLocaleString');
     toLocaleStringSpy.mockImplementation(
       function (locale, options) {
-        return new Intl.DateTimeFormat('en-US', options).format(this);
+        return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'America/New_York' }).format(this);
       }
     )
 

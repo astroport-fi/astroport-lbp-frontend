@@ -7,7 +7,8 @@ describe('dateString', () => {
     const enUSFormattedDate = date.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
+      timeZone: 'America/New_York'
     });
 
     const toLocaleStringSpy = jest.spyOn(date, 'toLocaleString');
@@ -27,7 +28,8 @@ describe('timeAndDateString', () => {
       minute: '2-digit',
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit'
+      day: '2-digit',
+      timeZone: 'America/New_York'
     });
 
     const toLocaleStringSpy = jest.spyOn(date, 'toLocaleString');
