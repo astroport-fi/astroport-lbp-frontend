@@ -183,6 +183,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       // Not on chain yet, try again in 5s
       setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function updateFeeEstimate(msg) {
@@ -229,9 +230,10 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       debouncedUpdateFeeEstimate(msg);
     }
   // usingMaxNativeAmount intentionally omitted
-  }, [fromAmount, fromAsset]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromAmount, fromAsset, pair, walletAddress, saleTokenInfo]);
 
-  const swapFormSubmitted = useCallback(async function (e) {
+  async function swapFormSubmitted (e) {
     e.preventDefault();
 
     try {
@@ -247,9 +249,9 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
       alert('Error!');
     }
-  }, [tx]);
+  }
 
-  const selectMaxFromAsset = useCallback(async function () {
+  async function selectMaxFromAsset () {
     let amount;
 
     if(fromAsset === 'native_token') {
@@ -274,7 +276,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
     // Run simulation to project received tokens if entire wallet balance were swapped
     simulation('forward', amountStr, fromAsset, toAsset)
-  }, [fromAsset, toAsset, pair, walletAddress, balances]);
+  }
 
   const form = <form onSubmit={swapFormSubmitted}>
     <h1 className="text-lg mb-7">
