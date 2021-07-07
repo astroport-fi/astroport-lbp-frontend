@@ -84,6 +84,7 @@ describe('SwapCard', () => {
     renderCard({ ustPrice: new Dec(0.49) });
 
     const fromInput = screen.getByLabelText('From');
+    const toInput = screen.getByLabelText('To (estimated)');
 
     await act(async () => {
       // We need to delay between inputs otherwise we end up with a field value of "1"
@@ -95,7 +96,11 @@ describe('SwapCard', () => {
     expect(within(fromField).getByText('($990.00)')).toBeInTheDocument(); // 1000 * 0.99
 
     // "To" value is properly set to value returned by simulation
-    expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('2000');
+    expect(toInput).toHaveDisplayValue('2000');
+
+    // "To" value is correctly converted to USD
+    const toField = toInput.closest('.border');
+    expect(within(toField).getByText('($970.20)')).toBeInTheDocument(); // 2000 * 0.49 * .99
 
     // Simulated price is $0.01 higher than the spot price ($0.49),
     // so the price impact is $0.01/$0.49 = 0.0204

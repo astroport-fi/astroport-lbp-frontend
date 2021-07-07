@@ -34,13 +34,34 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     }
   }, [saleTokenInfo]);
 
+  const usdExchangeRateForAsset = useCallback(function (asset) {
+    if(asset === 'native_token') {
+      return new Dec(ustExchangeRate);
+    } else {
+      return ustPrice.mul(ustExchangeRate);
+    }
+  }, [ustPrice, ustExchangeRate]);
+
+  const convertAmountToUSD = useCallback(function (amountStr, asset) {
+    let decAmount;
+
+    try {
+      decAmount = new Dec(amountStr);
+    } catch {
+      return 0;
+    }
+
+    const rate = usdExchangeRateForAsset(asset);
+    return decAmount.mul(rate);
+  }, [usdExchangeRateForAsset]);
+
   const fromUSDAmount = useMemo(() => {
-    const floatFromAmount = parseFloat(fromAmount);
+    return convertAmountToUSD(fromAmount, fromAsset);
+  }, [fromAmount, fromAsset, convertAmountToUSD]);
 
-    if(isNaN(floatFromAmount)) return 0;
-
-    return floatFromAmount * ustExchangeRate;
-  }, [fromAmount, ustExchangeRate]);
+  const toUSDAmount = useMemo(() => {
+    return convertAmountToUSD(toAmount, toAsset);
+  }, [toAmount, toAsset, convertAmountToUSD]);
 
   // Runs either a regular/forward or reverse simulation based on the given type
   // A forward simulation runs a regular simulation from the given amount,
@@ -303,7 +324,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       label="To (estimated)"
       amount={toAmount}
       onAmountChange={toAmountChanged}
-      usdAmount={0} // TODO: Figure out how to calculate this
+      usdAmount={toUSDAmount}
       symbol={saleTokenInfo.symbol}
       className="mt-10"
       assets={pairAssets}
