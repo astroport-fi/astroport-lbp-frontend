@@ -85,7 +85,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
     // Calculate and set price impact
     let simulatedPrice;
-    if(type === 'forward') {
+    if(assets[0] === 'native_token') {
       simulatedPrice = decAmount.div(simulatedAmountDec);
     } else {
       simulatedPrice = simulatedAmountDec.div(decAmount);

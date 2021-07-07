@@ -1,4 +1,5 @@
-import { render, screen, act, within, waitFor } from '@testing-library/react';
+import { render, screen, act, within } from '@testing-library/react';
+import { getDescriptionByTermEl } from '../test_helpers/dom-queries';
 import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../../terra/queries';
@@ -63,54 +64,46 @@ describe('SwapCard', () => {
 
   const ustExchangeRate = 0.99;
 
-  function renderCard() {
+  function renderCard({ ustPrice } = {}) {
     render(
       <SwapCard
         pair={pair}
         saleTokenInfo={saleTokenInfo}
         ustExchangeRate={ustExchangeRate}
         walletAddress="terra42"
-        ustPrice={new Dec(1)}
+        ustPrice={ustPrice || new Dec(1)}
       />
     );
   }
 
-  it('runs simulation and populates "to" field with simulated amount received', async () => {
+  it('runs simulation, populates "to" field with simulated amount received, and calculates price impact', async () => {
     getSimulation.mockResolvedValue({
-      return_amount: '210000000'
+      return_amount: '200000000' // 0.50 UST valuation
     });
 
-    renderCard();
+    renderCard({ ustPrice: new Dec(0.49) });
 
     const fromInput = screen.getByLabelText('From');
 
     await act(async () => {
-      // We need to delay between inputs otherwise we end up with a field value of "2"
-      await userEvent.type(fromInput, '42', { delay: 1 });
+      // We need to delay between inputs otherwise we end up with a field value of "1"
+      await userEvent.type(fromInput, '1000', { delay: 1 });
     });
 
     // "From" value is correctly converted to USD
     const fromField = fromInput.closest('.border');
-    expect(within(fromField).getByText('($41.58)')).toBeInTheDocument(); // 42 * 0.99
+    expect(within(fromField).getByText('($990.00)')).toBeInTheDocument(); // 1000 * 0.99
 
     // "To" value is properly set to value returned by simulation
-    expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('2100');
+    expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('2000');
 
-    // Since we've mocked out lodash's debounce function,
-    // we'll run one simulation per keypress
-    expect(getSimulation).toHaveBeenCalledWith(
-      'terra1',
-      new Int(4000000),
-      {
-        native_token: {
-          denom: 'uusd'
-        }
-      }
-    );
+    // Simulated price is $0.01 higher than the spot price ($0.49),
+    // so the price impact is $0.01/$0.49 = 0.0204
+    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('2.04%');
 
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      new Int(42000000),
+      new Int(1000000000),
       {
         native_token: {
           denom: 'uusd'
@@ -124,7 +117,7 @@ describe('SwapCard', () => {
       offer_amount: '42000000'
     });
 
-    renderCard();
+    renderCard({ ustPrice: new Dec(5.95) });
 
     const toInput = screen.getByLabelText('To (estimated)');
 
@@ -134,6 +127,10 @@ describe('SwapCard', () => {
 
     // "From" value is properly set to value returned by reverse simulation
     expect(screen.getByLabelText('From')).toHaveDisplayValue('42');
+
+    // Simulated price is $0.05 higher than the spot price ($5.95),
+    // so the price impact is $0.05/$5.95 = 0.0084
+    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('0.84%');
 
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
@@ -156,17 +153,17 @@ describe('SwapCard', () => {
       } else {
         // Mocked response when offer asset is the sale token
         return {
-          return_amount: '1000000' // 6 decimals
+          return_amount: '2000000' // 6 decimals
         }
       }
     });
 
-    renderCard();
+    renderCard({ ustPrice: new Dec(.48) });
 
     // First enter a from value (UST -> FOO)
     const fromInput = screen.getByLabelText('From');
     await act(async () => {
-      await userEvent.type(fromInput, '7');
+      await userEvent.type(fromInput, '4');
     });
 
     // Assert simulated value set
@@ -179,12 +176,16 @@ describe('SwapCard', () => {
     });
 
     // "To" value is properly set to value returned by simulation
-    expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('1');
+    expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('2');
+
+    // Simulated price is $0.02 higher than the spot price ($0.48),
+    // so the price impact is $0.02/$0.48 = 0.0417
+    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('4.17%');
 
     // First simulation when initial "from" amount was entered
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      new Int(7000000), // 6 decimals
+      new Int(4 * 1e6), // 6 decimals
       {
         native_token: {
           denom: 'uusd'
@@ -195,7 +196,7 @@ describe('SwapCard', () => {
     // Second simulation when "from" asset was changed
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      new Int(700000), // 5 decimals
+      new Int(4 * 1e5), // 5 decimals
       {
         token: {
           contract_addr: 'terra2'
@@ -209,26 +210,26 @@ describe('SwapCard', () => {
       if(askAssetInfo.native_token) {
         // Mocked response when ask asset is the native token
         return {
-          offer_amount: '1000' // 5 decimals
+          offer_amount: '909000' // 5 decimals
         };
       } else {
         // Mocked response when ask asset is the sale token
         return {
-          offer_amount: '100000000' // 6 decimals
+          offer_amount: '2600000' // 6 decimals
         }
       }
     });
 
-    renderCard();
+    renderCard({ ustPrice: new Dec(0.50) });
 
     // First enter a to value (UST <- FOO)
     const fromInput = screen.getByLabelText('To (estimated)');
     await act(async () => {
-      await userEvent.type(fromInput, '1');
+      await userEvent.type(fromInput, '5');
     });
 
     // Assert simulated value set
-    expect(screen.getByLabelText('From')).toHaveDisplayValue('100');
+    expect(screen.getByLabelText('From')).toHaveDisplayValue('2.6');
 
     // Now change the to asset (FOO <- UST)
     const fromSelect = screen.getAllByLabelText('Asset')[1];
@@ -237,12 +238,16 @@ describe('SwapCard', () => {
     });
 
     // "From" value is properly set to value returned by reverse simulation
-    expect(screen.getByLabelText('From')).toHaveDisplayValue('0.01');
+    expect(screen.getByLabelText('From')).toHaveDisplayValue('9.09');
+
+    // Simulated price is $0.05005 higher than the spot price ($0.50),
+    // so the price impact is $0.05005/$0.50 = 0.1001
+    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('10.01%');
 
     // First reverse simulation when initial "to" amount was entered
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
-      new Int(100000), // 5 decimals
+      new Int(5 * 1e5), // 5 decimals
       {
         token: {
           contract_addr: 'terra2'
@@ -253,7 +258,7 @@ describe('SwapCard', () => {
     // Second reverse simulation when "to" asset was changed
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
-      new Int(1000000), // 6 decimals
+      new Int(5 * 1e6), // 6 decimals
       {
         native_token: {
           denom: 'uusd'
