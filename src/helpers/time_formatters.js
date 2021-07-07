@@ -1,17 +1,22 @@
-function padded(int) {
-  return String(int).padStart(2, '0');
-}
-
 export function dateString(date) {
-  return `${padded(date.getDate())}-${padded(date.getMonth()+1)}-${date.getFullYear()}`;
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
 }
 
 export function timeAndDateString(timeMs) {
   const date = new Date(timeMs);
 
-  const timeString = `${padded(date.getHours())}:${padded(date.getMinutes())} (UTC)`;
-
-  return `${timeString} ${dateString(date)}`;
+  return date.toLocaleString(undefined, {
+    timeZoneName: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
 }
 
 // Returns a string like: 1d : 22h : 25m

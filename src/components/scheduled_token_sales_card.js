@@ -7,7 +7,7 @@ function ScheduledTokenSalesCard({ pairs }) {
   return(
     <ListCard
       title="Scheduled Token Sales"
-      headings={['Asset', 'Starting Time/Date']}
+      headings={['Asset', 'Starting Date/Time']}
       rows={
         pairs.map((pair) => ({
           key: pair.contract_addr,

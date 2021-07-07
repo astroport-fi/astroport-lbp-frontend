@@ -1,17 +1,39 @@
 import { dateString, timeAndDateString, durationString } from '../../helpers/time_formatters';
 
 describe('dateString', () => {
-  it('returns DD-MM-YYYY date string for given Date', () => {
-    expect(dateString(new Date(2021, 6, 4))).toEqual('04-07-2021');
+  it('returns locale-specific date string for given Date', () => {
+    const date = new Date(2021, 6, 4);
+
+    const enUSFormattedDate = date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const toLocaleStringSpy = jest.spyOn(date, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue(enUSFormattedDate);
+
+    expect(dateString(date)).toEqual('07/04/2021');
   })
 });
 
-
 describe('timeAndDateString', () => {
-  it('returns HH:MM (UTC) DD-MM-YYYY formatted date and time string for given ms since epoch', () => {
+  it('returns locale-specific formatted date and time string for given ms since epoch', () => {
     const date = new Date(2021, 9, 1, 14, 7)
 
-    expect(timeAndDateString(date.getTime())).toEqual('14:07 (UTC) 01-10-2021');
+    const enUSFormattedDate = date.toLocaleString('en-US', {
+      timeZoneName: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const toLocaleStringSpy = jest.spyOn(date, 'toLocaleString');
+    toLocaleStringSpy.mockReturnValue(enUSFormattedDate);
+
+    expect(timeAndDateString(date.getTime())).toEqual('10/01/2021, 02:07 PM EDT');
   })
 });
 

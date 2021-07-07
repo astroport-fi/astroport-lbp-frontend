@@ -26,6 +26,14 @@ describe('App', () => {
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date(2021, 5, 9).getTime());
 
+    // Mock toLocaleString to always use en-US locale
+    const toLocaleStringSpy = jest.spyOn(Date.prototype, 'toLocaleString');
+    toLocaleStringSpy.mockImplementation(
+      function (locale, options) {
+        return new Intl.DateTimeFormat('en-US', options).format(this);
+      }
+    )
+
     getLBPs.mockResolvedValue([
       buildPair({
         startTime: Math.floor((new Date(2021, 0, 1).getTime())/1000),
@@ -72,11 +80,11 @@ describe('App', () => {
 
     const barCell = await within(scheduledCard).findByText('Bar');
     expect(barCell).toBeInTheDocument();
-    expect(within(barCell.closest('tr')).queryByText('00:00 (UTC) 10-06-2021')).toBeInTheDocument();
+    expect(within(barCell.closest('tr')).queryByText('06/10/2021, 12:00 AM EDT')).toBeInTheDocument();
 
     const fooCell = await within(previousCard).findByText('Foo')
     expect(fooCell).toBeInTheDocument();
-    expect(within(fooCell.closest('tr')).queryByText('01-01-2021 - 04-01-2021')).toBeInTheDocument();
+    expect(within(fooCell.closest('tr')).queryByText('01/01/2021 - 01/04/2021')).toBeInTheDocument();
 
     // Tokens are not present in the wrong cards
     expect(within(scheduledCard).queryByText('Foo')).toBeNull();
