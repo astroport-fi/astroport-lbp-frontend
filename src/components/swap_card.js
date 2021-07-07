@@ -26,6 +26,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   const [calculatingFees, setCalculatingFees] = useState(false);
   const [usingMaxNativeAmount, setUsingMaxNativeAmount] = useState(false);
   const [priceImpact, setPriceImpact] = useState();
+  const [error, setError] = useState();
 
   const decimals = useMemo(() => {
     return {
@@ -69,6 +70,8 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   // A reverse simulation runs a reverse simulation to the given amount,
   // and sets the fromAmount to the result.
   async function simulate(type, amountString, fromAsset, toAsset) {
+    setError(); // Reset error state
+
     const assets=[fromAsset, toAsset];
 
     let setter, decAmount;
@@ -95,27 +98,32 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       reverse: getReverseSimulation
     }
 
-    const simulation = await getters[type](
-      pair.contract_addr,
-      decAmount.mul(10 ** decimals[assets[0]]).toInt(),
-      requestAsset.info
-    );
+    try {
+      const simulation = await getters[type](
+        pair.contract_addr,
+        decAmount.mul(10 ** decimals[assets[0]]).toInt(),
+        requestAsset.info
+      );
 
-    const simulatedAmount = simulation[type === 'forward' ? 'return_amount' : 'offer_amount'];
-    const simulatedAmountDec = Dec.withPrec(simulatedAmount, decimals[assets[1]]);
+      const simulatedAmount = simulation[type === 'forward' ? 'return_amount' : 'offer_amount'];
+      const simulatedAmountDec = Dec.withPrec(simulatedAmount, decimals[assets[1]]);
 
-    // Drop insignificant zeroes
-    setter(parseFloat(simulatedAmountDec.toFixed(decimals[assets[0]])).toString());
+      // Drop insignificant zeroes
+      setter(parseFloat(simulatedAmountDec.toFixed(decimals[assets[0]])).toString());
 
-    // Calculate and set price impact
-    let simulatedPrice;
-    if(assets[0] === 'native_token') {
-      simulatedPrice = decAmount.div(simulatedAmountDec);
-    } else {
-      simulatedPrice = simulatedAmountDec.div(decAmount);
+      // Calculate and set price impact
+      let simulatedPrice;
+      if (assets[0] === 'native_token') {
+        simulatedPrice = decAmount.div(simulatedAmountDec);
+      } else {
+        simulatedPrice = simulatedAmountDec.div(decAmount);
+      }
+
+      setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
+    } catch (e) {
+      // TODO: Notify error reporting service?
+      setError('Simulation failed');
     }
-
-    setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -341,6 +349,10 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
         ustExchangeRate={ustExchangeRate}
         priceImpact={priceImpact}
       />
+    }
+
+    { error &&
+      <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
     }
 
     <button
