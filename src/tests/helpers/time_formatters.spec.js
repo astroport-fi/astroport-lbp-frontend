@@ -2,7 +2,7 @@ import { dateString, timeAndDateString, durationString } from '../../helpers/tim
 
 describe('dateString', () => {
   it('returns locale-specific date string for given Date', () => {
-    const date = new Date(2021, 6, 4);
+    const date = new Date(Date.UTC(2021, 6, 4, 12));
 
     const enUSFormattedDate = date.toLocaleString('en-US', {
       year: 'numeric',
@@ -20,9 +20,9 @@ describe('dateString', () => {
 
 describe('timeAndDateString', () => {
   it('returns locale-specific formatted date and time string for given ms since epoch', () => {
-    const date = new Date(2021, 9, 1, 14, 7)
+    const timestamp = Date.UTC(2021, 9, 1, 18, 7);
 
-    const enUSFormattedDate = date.toLocaleString('en-US', {
+    const enUSFormattedDate = new Date(timestamp).toLocaleString('en-US', {
       timeZoneName: 'short',
       hour: '2-digit',
       minute: '2-digit',
@@ -32,10 +32,10 @@ describe('timeAndDateString', () => {
       timeZone: 'America/New_York'
     });
 
-    const toLocaleStringSpy = jest.spyOn(date, 'toLocaleString');
+    const toLocaleStringSpy = jest.spyOn(Date.prototype, 'toLocaleString');
     toLocaleStringSpy.mockReturnValue(enUSFormattedDate);
 
-    expect(timeAndDateString(date.getTime())).toEqual('10/01/2021, 02:07 PM EDT');
+    expect(timeAndDateString(timestamp)).toEqual('10/01/2021, 02:07 PM EDT');
   })
 });
 

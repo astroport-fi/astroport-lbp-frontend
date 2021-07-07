@@ -36,18 +36,18 @@ describe('App', () => {
 
     getLBPs.mockResolvedValue([
       buildPair({
-        startTime: Math.floor((new Date(2021, 0, 1).getTime())/1000),
-        endTime: Math.floor((new Date(2021, 0, 4).getTime())/1000),
+        startTime: Math.floor(Date.UTC(2021, 0, 1, 12)/1000),
+        endTime: Math.floor(Date.UTC(2021, 0, 4, 12)/1000),
         tokenContractAddr: 'terra1'
       }),
       buildPair({
-        startTime: Math.floor((new Date(2021, 5, 10).getTime())/1000),
-        endTime: Math.floor((new Date(2021, 5, 14).getTime())/1000),
+        startTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
+        endTime: Math.floor(Date.UTC(2021, 5, 14, 12)/1000),
         tokenContractAddr: 'terra2'
       }),
       buildPair({
-        startTime: Math.floor((new Date(2021, 5, 8).getTime())/1000),
-        endTime: Math.floor((new Date(2021, 5, 10).getTime())/1000),
+        startTime: Math.floor(Date.UTC(2021, 5, 8, 12)/1000),
+        endTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
         tokenContractAddr: 'terra3'
       })
     ]);
@@ -80,7 +80,7 @@ describe('App', () => {
 
     const barCell = await within(scheduledCard).findByText('Bar');
     expect(barCell).toBeInTheDocument();
-    expect(within(barCell.closest('tr')).queryByText('06/10/2021, 12:00 AM EDT')).toBeInTheDocument();
+    expect(within(barCell.closest('tr')).queryByText('06/10/2021, 08:00 AM EDT')).toBeInTheDocument();
 
     const fooCell = await within(previousCard).findByText('Foo')
     expect(fooCell).toBeInTheDocument();
