@@ -26,6 +26,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   const [usingMaxNativeAmount, setUsingMaxNativeAmount] = useState(false);
   const [priceImpact, setPriceImpact] = useState();
 
+  const decimals = useMemo(() => {
+    return {
+      native_token: 6,
+      token: saleTokenInfo.decimals
+    }
+  }, [saleTokenInfo]);
+
   const fromUSDAmount = useMemo(() => {
     const floatFromAmount = parseFloat(fromAmount);
 
@@ -59,11 +66,6 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       return;
     }
 
-    const assetDecimals = {
-      native_token: NATIVE_TOKEN_DECIMALS,
-      token: saleTokenInfo.decimals
-    }
-
     const requestAsset = assets[0] === 'native_token' ? nativeTokenFromPair(pair.asset_infos) : saleAssetFromPair(pair.asset_infos);
 
     const getters = {
@@ -73,15 +75,15 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
     const simulation = await getters[type](
       pair.contract_addr,
-      decAmount.mul(10 ** assetDecimals[assets[0]]).toInt(),
+      decAmount.mul(10 ** decimals[assets[0]]).toInt(),
       requestAsset.info
     );
 
     const simulatedAmount = simulation[type === 'forward' ? 'return_amount' : 'offer_amount'];
-    const simulatedAmountDec = Dec.withPrec(simulatedAmount, assetDecimals[assets[1]]);
+    const simulatedAmountDec = Dec.withPrec(simulatedAmount, decimals[assets[1]]);
 
     // Drop insignificant zeroes
-    setter(parseFloat(simulatedAmountDec.toFixed(assetDecimals[assets[0]])).toString());
+    setter(parseFloat(simulatedAmountDec.toFixed(decimals[assets[0]])).toString());
 
     // Calculate and set price impact
     let simulatedPrice;
@@ -93,6 +95,12 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
     setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
   }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSimulation = useCallback(
+    debounce((type, amountString, fromAsset, toAsset) => simulation(type, amountString, fromAsset, toAsset), 200),
+    [ustPrice, decimals]
+  );
 
   const pairAssets = useMemo(() => {
     return [
@@ -106,12 +114,6 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       }
     ];
   }, [pair, saleTokenInfo.symbol]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSimulation = useCallback(
-    debounce((type, amountString, fromAsset, toAsset) => simulation(type, amountString, fromAsset, toAsset), 200),
-    [ustPrice]
-  );
 
   function fromAmountChanged(amount) {
     // If the from amount changes from an input event,
@@ -173,13 +175,6 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     updateBalances();
   }, [updateBalances]);
 
-  const decimals = useMemo(() => {
-    return {
-      native_token: 6,
-      token: saleTokenInfo.decimals
-    }
-  }, [saleTokenInfo]);
-
   // Checks up on the tx until it's mined
   // NOTE: This could also be used to convey the status
   //       of the tx to the user
@@ -217,19 +212,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       return;
     }
 
-    const fromInfo = {
-      native_token: {
-        builder: buildSwapFromNativeTokenMsg,
-        decimals: 6
-      },
-      token: {
-        builder: buildSwapFromContractTokenMsg,
-        decimals: saleTokenInfo.decimals
-      }
-    }[fromAsset];
+    const builders = {
+      native_token: buildSwapFromNativeTokenMsg,
+      token: buildSwapFromContractTokenMsg
+    };
 
-    const intAmount = (new Dec(fromAmount || 0)).mul(10 ** fromInfo.decimals).toInt();
-    const msg = fromInfo.builder({ pair, walletAddress, intAmount });
+    const intAmount = (new Dec(fromAmount || 0)).mul(10 ** decimals[fromAsset]).toInt();
+    const msg = builders[fromAsset]({ pair, walletAddress, intAmount });
 
     // Fetch fees unless the user selected "max" for the native amount
     // (that logic already calculated the fee by backing it out of the wallet balance)
@@ -243,7 +232,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     }
   // usingMaxNativeAmount intentionally omitted
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromAmount, fromAsset, pair, walletAddress, saleTokenInfo]);
+  }, [fromAmount, fromAsset, pair, walletAddress, decimals]);
 
   async function swapFormSubmitted (e) {
     e.preventDefault();
