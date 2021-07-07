@@ -110,7 +110,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSimulation = useCallback(
     debounce((type, amountString, fromAsset, toAsset) => simulation(type, amountString, fromAsset, toAsset), 200),
-    []
+    [ustPrice]
   );
 
   function fromAmountChanged(amount) {
