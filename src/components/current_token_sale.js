@@ -8,6 +8,7 @@ import { calcPrice } from '../terra/math';
 import { useRefreshingEffect } from '../helpers/effects';
 import { durationString } from '../helpers/time_formatters';
 import SwapCard from './swap_card';
+import { Int, Dec } from '@terra-money/terra.js';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -27,8 +28,8 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
       getPool(pair.contract_addr)
     ]);
 
-    setNativeTokenWeight(nativeTokenWeight);
-    setSaleTokenWeight(saleTokenWeight);
+    setNativeTokenWeight(new Dec(nativeTokenWeight));
+    setSaleTokenWeight(new Dec(saleTokenWeight));
     setPool(pool);
   }, REFRESH_INTERVAL, [pair]);
 
@@ -44,8 +45,8 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
     }
 
     return calcPrice({
-      ustPoolSize: nativeTokenFromPair(pool.assets).amount,
-      tokenPoolSize: saleAssetFromPair(pool.assets).amount,
+      ustPoolSize: new Int(nativeTokenFromPair(pool.assets).amount),
+      tokenPoolSize: new Int(saleAssetFromPair(pool.assets).amount),
       ustWeight: nativeTokenWeight,
       tokenWeight: saleTokenWeight
     });
@@ -57,7 +58,7 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
       return;
     }
 
-    return ustPrice * ustExchangeRate;
+    return ustPrice.mul(ustExchangeRate);
   }, [ustExchangeRate, ustPrice]);
 
   useEffect(() => {
