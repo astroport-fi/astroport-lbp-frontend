@@ -335,7 +335,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
       <div className="flex justify-between my-2">
         <dt className="opacity-60">$ Price {saleTokenInfo.symbol}</dt>
-        <dd>{ustExchangeRate && formatUSD(ustPrice.mul(ustExchangeRate))}</dd>
+        <dd>{ustPrice && ustExchangeRate && formatUSD(ustPrice.mul(ustExchangeRate))}</dd>
       </div>
 
       { priceImpact &&

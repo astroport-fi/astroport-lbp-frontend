@@ -10,7 +10,7 @@ import {
   feeForMaxNativeToken,
   postMsg
 } from '../../terra/swap';
-import { Int, StdFee, Coins, Coin } from '@terra-money/terra.js';
+import { Int, Dec, StdFee, Coins, Coin } from '@terra-money/terra.js';
 import terraClient from '../../terra/client';
 
 // Simulation is normally debounced
@@ -63,12 +63,24 @@ describe('SwapCard', () => {
 
   const ustExchangeRate = 0.99;
 
+  function renderCard() {
+    render(
+      <SwapCard
+        pair={pair}
+        saleTokenInfo={saleTokenInfo}
+        ustExchangeRate={ustExchangeRate}
+        walletAddress="terra42"
+        ustPrice={new Dec(1)}
+      />
+    );
+  }
+
   it('runs simulation and populates "to" field with simulated amount received', async () => {
     getSimulation.mockResolvedValue({
       return_amount: '210000000'
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     const fromInput = screen.getByLabelText('From');
 
@@ -112,7 +124,7 @@ describe('SwapCard', () => {
       offer_amount: '42000000'
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     const toInput = screen.getByLabelText('To (estimated)');
 
@@ -149,7 +161,7 @@ describe('SwapCard', () => {
       }
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     // First enter a from value (UST -> FOO)
     const fromInput = screen.getByLabelText('From');
@@ -207,7 +219,7 @@ describe('SwapCard', () => {
       }
     });
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     // First enter a to value (UST <- FOO)
     const fromInput = screen.getByLabelText('To (estimated)');
@@ -273,7 +285,7 @@ describe('SwapCard', () => {
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     // Initial balances
     expect(await screen.findByText('Balance: 2')).toBeInTheDocument();
@@ -337,7 +349,7 @@ describe('SwapCard', () => {
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
-    render(<SwapCard pair={pair} saleTokenInfo={saleTokenInfo} ustExchangeRate={ustExchangeRate} walletAddress="terra42" />);
+    renderCard();
 
     // Initial balances
     expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
@@ -401,14 +413,7 @@ describe('SwapCard', () => {
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
-    render(
-      <SwapCard
-        pair={pair}
-        saleTokenInfo={saleTokenInfo}
-        ustExchangeRate={ustExchangeRate}
-        walletAddress="terra42"
-      />
-    );
+    renderCard();
 
     // Wait for balances to load
     expect(await screen.findByText('Balance: 1,000')).toBeInTheDocument();
@@ -459,14 +464,7 @@ describe('SwapCard', () => {
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
-    render(
-      <SwapCard
-        pair={pair}
-        saleTokenInfo={saleTokenInfo}
-        ustExchangeRate={ustExchangeRate}
-        walletAddress="terra42"
-      />
-    );
+    renderCard();
 
     // Wait for balances to load
     expect(await screen.findByText('Balance: 5,000')).toBeInTheDocument();
