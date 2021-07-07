@@ -5,10 +5,11 @@ import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS, NATIVE_TOKEN_DECIMALS } from '../constants';
 import debounce from 'lodash/debounce';
-import { swapFromNativeToken, swapFromContractToken } from '../terra/swap';
+import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
+import classNames from 'classnames';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -20,6 +21,9 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   const [fromAsset, setFromAsset] = useState('native_token');
   const [toAsset, setToAsset] = useState('token');
   const [balances, setBalances] = useState({});
+  const [tx, setTx] = useState({ msg: null, fee: null });
+  const [calculatingFees, setCalculatingFees] = useState(false);
+  const [usingMaxNativeAmount, setUsingMaxNativeAmount] = useState(false);
 
   const fromUSDAmount = useMemo(() => {
     const floatFromAmount = parseFloat(fromAmount);
@@ -34,10 +38,10 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   // and sets the toAmount to the result.
   // A reverse simulation runs a reverse simulation to the given amount,
   // and sets the fromAmount to the result.
-  async function simulation(type, amount, fromAsset, toAsset) {
+  async function simulation(type, amountString, fromAsset, toAsset) {
     const assets=[fromAsset, toAsset];
 
-    let setter;
+    let setter, decAmount;
 
     if(type === 'forward') {
       setter = setToAmount;
@@ -46,7 +50,9 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       assets.reverse();
     }
 
-    if(isNaN(amount)) {
+    try {
+      decAmount = new Dec(amountString);
+    } catch {
       setter('');
       return;
     }
@@ -65,13 +71,15 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
     const simulation = await getters[type](
       pair.contract_addr,
-      Math.floor(amount * 10 ** assetDecimals[assets[0]]),
+      decAmount.mul(10 ** assetDecimals[assets[0]]).toInt(),
       requestAsset.info
     );
 
-    const simulatedAmount = parseInt(simulation[type === 'forward' ? 'return_amount' : 'offer_amount']);
+    const simulatedAmount = simulation[type === 'forward' ? 'return_amount' : 'offer_amount'];
+    const simulatedAmountDec = Dec.withPrec(simulatedAmount, assetDecimals[assets[1]]);
 
-    setter(simulatedAmount / 10 ** assetDecimals[assets[1]]);
+    // Drop insignificant zeroes
+    setter(parseFloat(simulatedAmountDec.toFixed(assetDecimals[assets[0]])).toString());
   }
 
   const pairAssets = useMemo(() => {
@@ -89,23 +97,31 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSimulation = useCallback(
-    debounce((type, amount, fromAsset, toAsset) => simulation(type, amount, fromAsset, toAsset), 200),
+    debounce((type, amountString, fromAsset, toAsset) => simulation(type, amountString, fromAsset, toAsset), 200),
     []
   );
 
   function fromAmountChanged(amount) {
+    // If the from amount changes from an input event,
+    // we're no longer using the calculated max amount
+    setUsingMaxNativeAmount(false);
+
     setFromAmount(amount);
 
-    debouncedSimulation('forward', parseFloat(amount), fromAsset, toAsset);
+    debouncedSimulation('forward', amount, fromAsset, toAsset);
   }
 
   function toAmountChanged(amount) {
     setToAmount(amount);
 
-    debouncedSimulation('reverse', parseFloat(amount), fromAsset, toAsset);
+    debouncedSimulation('reverse', amount, fromAsset, toAsset);
   }
 
   function swapFromTo() {
+    // If the assets are swapped, we're no longer using
+    // the calculated max amount
+    setUsingMaxNativeAmount(false);
+
     setFromAsset(toAsset);
     setToAsset(fromAsset);
   }
@@ -114,13 +130,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
   // we don't bother checking what the actual change was - any change implies a reversal
   function fromAssetChanged() {
     // Swap assets when running simulation because we're about to swap them
-    simulation('forward', parseFloat(fromAmount), toAsset, fromAsset);
+    simulation('forward', fromAmount, toAsset, fromAsset);
 
     swapFromTo();
   }
 
   function toAssetChanged() {
-    simulation('reverse', parseFloat(toAmount), toAsset, fromAsset);
+    simulation('reverse', toAmount, toAsset, fromAsset);
 
     swapFromTo();
   }
@@ -169,28 +185,57 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
     }
   }, []);
 
-  const swapFormSubmitted = useCallback(async function (e) {
-    e.preventDefault();
+  async function updateFeeEstimate(msg) {
+    const fee = await estimateFee(msg);
+
+    setTx({ msg, fee });
+    setCalculatingFees(false);
+  }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedUpdateFeeEstimate = useCallback(
+    debounce(msg => updateFeeEstimate(msg), 200),
+    []
+  );
+
+  useEffect(() => {
+    if(!fromAmount) {
+      setTx({ msg: null, fee: null });
+      return;
+    }
 
     const fromInfo = {
       native_token: {
-        fn: swapFromNativeToken,
+        builder: buildSwapFromNativeTokenMsg,
         decimals: 6
       },
       token: {
-        fn: swapFromContractToken,
+        builder: buildSwapFromContractTokenMsg,
         decimals: saleTokenInfo.decimals
       }
     }[fromAsset];
 
-    const intAmount = (new Dec(fromAmount)).mul(10 ** fromInfo.decimals).toInt();
+    const intAmount = (new Dec(fromAmount || 0)).mul(10 ** fromInfo.decimals).toInt();
+    const msg = fromInfo.builder({ pair, walletAddress, intAmount });
+
+    // Fetch fees unless the user selected "max" for the native amount
+    // (that logic already calculated the fee by backing it out of the wallet balance)
+
+    if(usingMaxNativeAmount) {
+      setTx({ ...tx, msg });
+    } else {
+      setCalculatingFees(true);
+
+      debouncedUpdateFeeEstimate(msg);
+    }
+  // usingMaxNativeAmount intentionally omitted
+  }, [fromAmount, fromAsset]);
+
+  const swapFormSubmitted = useCallback(async function (e) {
+    e.preventDefault();
 
     try {
-      const { txhash } = await fromInfo.fn({
-        walletAddress,
-        pair,
-        intAmount
-      });
+      const { txhash } = await postMsg(tx);
 
       refreshBalancesWhenTxMined(txhash);
 
@@ -202,7 +247,34 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
 
       alert('Error!');
     }
-  }, [saleTokenInfo, pair, walletAddress, fromAmount, fromAsset]);
+  }, [tx]);
+
+  const selectMaxFromAsset = useCallback(async function () {
+    let amount;
+
+    if(fromAsset === 'native_token') {
+      const fee = await feeForMaxNativeToken({ pair, walletAddress, intBalance: balances.native_token });
+      const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
+      const maxAmount = balances.native_token.sub(fee.amount.get(denom).amount);
+
+      setTx({ ...tx, fee });
+      setUsingMaxNativeAmount(true);
+
+      amount = maxAmount
+    } else {
+      // Since fees are paid in the native token,
+      // we can set the amount to the full balance of contract tokens
+      amount = balances.token;
+    }
+
+    const amountStr = Dec.withPrec(amount, decimals[fromAsset]).toFixed(decimals[fromAsset]);
+
+    // Update from amount state (and drop insignificant zeroes)
+    setFromAmount(parseFloat(amountStr));
+
+    // Run simulation to project received tokens if entire wallet balance were swapped
+    simulation('forward', amountStr, fromAsset, toAsset)
+  }, [fromAsset, toAsset, pair, walletAddress, balances]);
 
   const form = <form onSubmit={swapFormSubmitted}>
     <h1 className="text-lg mb-7">
@@ -220,6 +292,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       onAssetChange={fromAssetChanged}
       required={true}
       balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
+      maxClick={selectMaxFromAsset}
     />
 
     <AssetInput
@@ -235,7 +308,17 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress }) {
       balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
     />
 
-    <button type="submit" className="bg-yellow text-black py-2 px-6 rounded-lg w-full mt-12">Swap</button>
+    <button
+      type="submit"
+      className={
+        classNames(
+          "text-black py-2 px-6 rounded-lg w-full mt-12", {
+            'bg-yellow': !calculatingFees,
+            'bg-gray-400': calculatingFees
+          }
+        )
+      }
+      disabled={calculatingFees}>Swap</button>
   </form>;
 
   return (

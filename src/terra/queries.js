@@ -24,19 +24,26 @@ export async function getLBPs() {
   return pairs;
 }
 
-// Runs a simulation to purchase the other asset given
-// the specified amount of the specified asset.
-// offerAssetInfo should be an object with either
-// a 'token' or 'native_token' top-level key,
-// and then a 'contract_addr' or 'denom' child key,
-// respectively. This mirrors the contract interface.
+/**
+ * Runs a simulation to purchase the other asset given
+ * the specified amount of the specified asset.
+ * offerAssetInfo should be an object with either
+ * a 'token' or 'native_token' top-level key,
+ * and then a 'contract_addr' or 'denom' child key,
+ * respectively. This mirrors the contract interface.
+ *
+ * @param {Address} pairAddress - Pair contract address
+ * @param {Int} amount - Int amount to simulate swapping
+ * @param {object} offerAssetInfo
+ * @returns {object} - Query response
+ */
 export async function getSimulation(pairAddress, amount, offerAssetInfo) {
   const result = await terraClient.wasm.contractQuery(
     pairAddress,
     {
       simulation: {
         offer_asset: {
-          amount: String(amount),
+          amount,
           info: offerAssetInfo
         },
         block_time: Math.floor(Date.now()/1000)
@@ -47,13 +54,27 @@ export async function getSimulation(pairAddress, amount, offerAssetInfo) {
   return result;
 }
 
+/**
+ * Runs a reverse simulation to find out what
+ * the purchase amount of the other asset would be to purchase
+ * the specified amount of the specified asset.
+ * offerAssetInfo should be an object with either
+ * a 'token' or 'native_token' top-level key,
+ * and then a 'contract_addr' or 'denom' child key,
+ * respectively. This mirrors the contract interface.
+ *
+ * @param {Address} pairAddress - Pair contract address
+ * @param {Int} amount - Int amount to simulate swapping
+ * @param {object} askAssetInfo
+ * @returns {object} - Query response
+ */
 export async function getReverseSimulation(pairAddress, amount, askAssetInfo) {
   const result = await terraClient.wasm.contractQuery(
     pairAddress,
     {
       reverse_simulation: {
         ask_asset: {
-          amount: String(amount),
+          amount,
           info: askAssetInfo
         },
         block_time: Math.floor(Date.now()/1000)
@@ -68,7 +89,7 @@ export async function getReverseSimulation(pairAddress, amount, askAssetInfo) {
 export async function getWeights(pairAddress, nativeToken) {
   const { ask_weight, offer_weight } = await getSimulation(
     pairAddress,
-    0,
+    new Int(0),
     {
       native_token: {
         denom: nativeToken

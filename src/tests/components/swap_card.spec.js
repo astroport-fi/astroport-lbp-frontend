@@ -1,10 +1,16 @@
-import { render, screen, act, within } from '@testing-library/react';
+import { render, screen, act, within, waitFor } from '@testing-library/react';
 import SwapCard from '../../components/swap_card';
 import userEvent from '@testing-library/user-event';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
-import { swapFromNativeToken, swapFromContractToken } from '../../terra/swap';
-import { Int } from '@terra-money/terra.js';
+import {
+  buildSwapFromContractTokenMsg,
+  buildSwapFromNativeTokenMsg,
+  estimateFee,
+  feeForMaxNativeToken,
+  postMsg
+} from '../../terra/swap';
+import { Int, StdFee, Coins, Coin } from '@terra-money/terra.js';
 import terraClient from '../../terra/client';
 
 // Simulation is normally debounced
@@ -23,7 +29,17 @@ jest.mock('../../terra/queries', () => ({
   getTokenBalance: jest.fn()
 }));
 
-jest.mock('../../terra/swap');
+jest.mock('../../terra/swap', () => {
+  const original = jest.requireActual('../../terra/swap');
+
+  return {
+    __esModule: true,
+    ...original,
+    estimateFee: jest.fn(),
+    postMsg: jest.fn(),
+    feeForMaxNativeToken: jest.fn()
+  }
+});
 
 jest.mock('../../terra/client', () => ({
   __esModule: true,
@@ -72,7 +88,7 @@ describe('SwapCard', () => {
     // we'll run one simulation per keypress
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      4000000,
+      new Int(4000000),
       {
         native_token: {
           denom: 'uusd'
@@ -82,7 +98,7 @@ describe('SwapCard', () => {
 
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      42000000,
+      new Int(42000000),
       {
         native_token: {
           denom: 'uusd'
@@ -109,7 +125,7 @@ describe('SwapCard', () => {
 
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
-      700000,
+      new Int(700000),
       {
         token: {
           contract_addr: 'terra2'
@@ -156,7 +172,7 @@ describe('SwapCard', () => {
     // First simulation when initial "from" amount was entered
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      7000000, // 6 decimals
+      new Int(7000000), // 6 decimals
       {
         native_token: {
           denom: 'uusd'
@@ -167,7 +183,7 @@ describe('SwapCard', () => {
     // Second simulation when "from" asset was changed
     expect(getSimulation).toHaveBeenCalledWith(
       'terra1',
-      700000, // 5 decimals
+      new Int(700000), // 5 decimals
       {
         token: {
           contract_addr: 'terra2'
@@ -214,7 +230,7 @@ describe('SwapCard', () => {
     // First reverse simulation when initial "to" amount was entered
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
-      100000, // 5 decimals
+      new Int(100000), // 5 decimals
       {
         token: {
           contract_addr: 'terra2'
@@ -225,7 +241,7 @@ describe('SwapCard', () => {
     // Second reverse simulation when "to" asset was changed
     expect(getReverseSimulation).toHaveBeenCalledWith(
       'terra1',
-      1000000, // 6 decimals
+      new Int(1000000), // 6 decimals
       {
         native_token: {
           denom: 'uusd'
@@ -248,7 +264,12 @@ describe('SwapCard', () => {
     getBalance.mockResolvedValueOnce(1000000);
     getTokenBalance.mockResolvedValueOnce(5 * 1e5);
 
-    swapFromNativeToken.mockResolvedValue({ txhash: '123ABC' });
+    // Mock fee fetching
+    const fee = jest.fn();
+    estimateFee.mockResolvedValue(fee);
+
+    // Successful post
+    postMsg.mockResolvedValue({ txhash: '123ABC' });
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
@@ -274,13 +295,19 @@ describe('SwapCard', () => {
     expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
 
-    expect(swapFromNativeToken).toHaveBeenCalledTimes(1);
-    expect(swapFromNativeToken).toHaveBeenCalledWith({
+    // Estimates fee and posts message with estimated fee
+    const msg = buildSwapFromNativeTokenMsg({
       walletAddress: 'terra42',
       pair,
       intAmount: new Int(1e6)
     });
+    expect(estimateFee).toHaveBeenCalledTimes(1);
+    expect(estimateFee).toHaveBeenCalledWith(msg);
 
+    expect(postMsg).toHaveBeenCalledTimes(1);
+    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+
+    // Fetches tx info
     expect(terraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
@@ -301,7 +328,12 @@ describe('SwapCard', () => {
     getTokenBalance.mockResolvedValueOnce(5 * 1e5);
     getBalance.mockResolvedValueOnce(1e6);
 
-    swapFromContractToken.mockResolvedValue({ txhash: 'ABC123' });
+    // Mock fee fetching
+    const fee = jest.fn();
+    estimateFee.mockResolvedValue(fee);
+
+    // Successful post
+    postMsg.mockResolvedValue({ txhash: 'ABC123' });
 
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
@@ -333,14 +365,143 @@ describe('SwapCard', () => {
     expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
 
-    expect(swapFromContractToken).toHaveBeenCalledTimes(1);
-    expect(swapFromContractToken).toHaveBeenCalledWith({
+    // Estimates fee and posts message with estimated fee
+    const msg = buildSwapFromContractTokenMsg({
       walletAddress: 'terra42',
       pair,
       intAmount: new Int(5e5)
     });
+    expect(estimateFee).toHaveBeenCalledTimes(1);
+    expect(estimateFee).toHaveBeenCalledWith(msg);
 
+    expect(postMsg).toHaveBeenCalledTimes(1);
+    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+
+    // Fetches tx info
     expect(terraClient.tx.txInfo).toHaveBeenCalledWith('ABC123');
+
+    expect(alertSpy).toHaveBeenCalledWith('Success!');
+    alertSpy.mockRestore();
+  });
+
+  it('performs swap after setting from amount to balance less fees when swapping from native token', async () => {
+    getBalance.mockResolvedValue(new Int(1000 * 1e6));
+    getTokenBalance.mockResolvedValue(new Int(0));
+
+    const fee = new StdFee(200000, new Coins(
+      [new Coin('uusd', 999999)]
+    ));
+    feeForMaxNativeToken.mockResolvedValue(fee);
+
+    // Setting max from asset triggers a forward simulation
+    getSimulation.mockResolvedValue({ return_amount: '500000000' });
+
+    // Successful post
+    postMsg.mockResolvedValue({ txhash: '123ABC' });
+
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
+
+    render(
+      <SwapCard
+        pair={pair}
+        saleTokenInfo={saleTokenInfo}
+        ustExchangeRate={ustExchangeRate}
+        walletAddress="terra42"
+      />
+    );
+
+    // Wait for balances to load
+    expect(await screen.findByText('Balance: 1,000')).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Max' }));
+    });
+
+    // "From" value is properly set to value balance less fees
+    expect(screen.getByLabelText('From')).toHaveDisplayValue('999.000001');
+
+    // Perform swap
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    // Posts message with max fee
+    const msg = buildSwapFromNativeTokenMsg({
+      walletAddress: 'terra42',
+      pair,
+      intAmount: new Int(999000001)
+    });
+    expect(postMsg).toHaveBeenCalledTimes(1);
+    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+
+    // Does not estimate fee for from amount
+    // (this is calculated differently for "max" amount)
+    expect(estimateFee).not.toHaveBeenCalled();
+
+    expect(alertSpy).toHaveBeenCalledWith('Success!');
+    alertSpy.mockRestore();
+  });
+
+  it('performs swap after setting from amount to balance of contract token', async () => {
+    getBalance.mockResolvedValue(new Int(1000 * 1e6));
+    getTokenBalance.mockResolvedValue(new Int(5000 * 1e5));
+
+    const fee = new StdFee(200000, new Coins(
+      [new Coin('uusd', 30000)]
+    ));
+    estimateFee.mockResolvedValue(fee);
+
+    // Setting max from asset triggers a forward simulation
+    getSimulation.mockResolvedValue({ return_amount: '1000000000' });
+
+    // Successful post
+    postMsg.mockResolvedValue({ txhash: '123ABC' });
+
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
+
+    render(
+      <SwapCard
+        pair={pair}
+        saleTokenInfo={saleTokenInfo}
+        ustExchangeRate={ustExchangeRate}
+        walletAddress="terra42"
+      />
+    );
+
+    // Wait for balances to load
+    expect(await screen.findByText('Balance: 5,000')).toBeInTheDocument();
+
+    // Change the from asset (FOO -> UST)
+    const fromSelect = screen.getAllByLabelText('Asset')[0];
+    await act(async () => {
+      await userEvent.selectOptions(fromSelect, 'FOO');
+    });
+
+    // Use max FOO tokens
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Max' }));
+    });
+
+    // "From" value is properly set to entire token balance
+    expect(screen.getByLabelText('From')).toHaveDisplayValue('5000');
+
+    // Perform swap
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    // Posts message with max contract tokens
+    // and still estimates fee (uusd)
+    const msg = buildSwapFromContractTokenMsg({
+      walletAddress: 'terra42',
+      pair,
+      intAmount: new Int(5000 * 1e5)
+    });
+    expect(estimateFee).toHaveBeenCalledTimes(1);
+    expect(estimateFee).toHaveBeenCalledWith(msg);
+
+    expect(postMsg).toHaveBeenCalledTimes(1);
+    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
 
     expect(alertSpy).toHaveBeenCalledWith('Success!');
     alertSpy.mockRestore();

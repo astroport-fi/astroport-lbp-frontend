@@ -96,7 +96,7 @@ describe('getSimulation', () => {
 
     const simulation = await getSimulation(
       'terra1234',
-      742,
+      new Int(742),
       {
         native_token: {
           denom: 'uusd'
@@ -111,7 +111,7 @@ describe('getSimulation', () => {
       {
         simulation: {
           offer_asset: {
-            amount: '742',
+            amount: new Int(742),
             info: {
               native_token: {
                 denom: 'uusd'
@@ -145,7 +145,7 @@ describe('getReverseSimulation', () => {
 
     const simulation = await getReverseSimulation(
       'terra1234',
-      742,
+      new Int(742),
       {
         token: {
           contract_addr: 'terra456'
@@ -160,7 +160,7 @@ describe('getReverseSimulation', () => {
       {
         reverse_simulation: {
           ask_asset: {
-            amount: '742',
+            amount: new Int(742),
             info: {
               token: {
                 contract_addr: 'terra456'
@@ -194,7 +194,7 @@ describe('getWeights', () => {
       {
         simulation: {
           offer_asset: {
-            amount: '0',
+            amount: new Int(0),
             info: {
               native_token: {
                 denom: 'uusd'
