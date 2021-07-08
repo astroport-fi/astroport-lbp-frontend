@@ -381,6 +381,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
             toStep={smallestDecOfAsset(toAsset)}
             toAmountChange={toAmountChanged}
             toAssetChange={toAssetChanged}
+            onReverseAssets={() => swapFromTo()}
             error={error}
             canSubmit={!(simulating || error)}
           >
