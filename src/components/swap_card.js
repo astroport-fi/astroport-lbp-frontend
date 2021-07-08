@@ -11,8 +11,7 @@ import terraClient from '../terra/client';
 import classNames from 'classnames';
 import SwapRates from './swap_rates';
 import ConnectWalletButton from './connect_wallet_button';
-import CardOverlay from './card_overlay';
-import { transactionDetailsUrl } from '../terra/urls';
+import SwapCardOverlay from './swap_card_overlay';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -346,45 +345,6 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
     setPendingSimulation({ type: 'forward' });
   }
 
-  let overlay;
-
-  if(lastTx) {
-    // eslint-disable-next-line default-case
-    switch(lastTx.state) {
-      case 'waitingForExtension':
-        overlay = (
-          <CardOverlay className="bg-blue-gray-700">
-            <p className="text-xl">Waiting for extension...</p>
-
-            <button type="button" className="mt-4" onClick={() => setLastTx()}>Cancel</button>
-          </CardOverlay>
-        );
-        break;
-      case 'success':
-        overlay = (
-          <CardOverlay className="bg-green-500">
-            <p className="text-xl mb-2">Transaction submitted successfully</p>
-
-            <a href={transactionDetailsUrl(terraClient.config.chainID, lastTx.txhash)} target="_blank" rel="noreferrer" className="text-sm block">
-              {lastTx.txhash}
-            </a>
-
-            <button type="button" className="mt-4" onClick={resetForm}>Continue</button>
-          </CardOverlay>
-        );
-        break;
-      case 'error':
-        overlay = (
-          <CardOverlay className="bg-red-500">
-            <p className="text-xl">Error submitting transaction</p>
-
-            <button type="button" className="mt-4" onClick={() => setLastTx()}>Continue</button>
-          </CardOverlay>
-        );
-        break;
-    }
-  }
-
   const form = (
     <form onSubmit={swapFormSubmitted}>
       <AssetInput
@@ -450,7 +410,16 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   );
 
   return (
-    <Card className="w-2/5 p-6 border border-blue-gray-300" overlay={overlay}>
+    <Card className="w-2/5 p-6 border border-blue-gray-300" overlay={
+      lastTx &&
+      <SwapCardOverlay
+        txState={lastTx.state}
+        txHash={lastTx.txhash}
+        waitingDismiss={() => setLastTx()}
+        successDismiss={resetForm}
+        errorDismiss={() => setLastTx()}
+      />
+    }>
       <h1 className="text-lg mb-7">
         Swap
       </h1>
