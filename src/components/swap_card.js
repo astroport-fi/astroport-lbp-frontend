@@ -450,12 +450,10 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   );
 
   return (
-    <Card className="w-2/5 p-6 border border-blue-gray-300 relative">
+    <Card className="w-2/5 p-6 border border-blue-gray-300" overlay={overlay}>
       <h1 className="text-lg mb-7">
         Swap
       </h1>
-
-      {overlay}
 
       { walletAddress ? form : <ConnectWalletButton onConnect={onWalletConnect} className="w-full" /> }
     </Card>
