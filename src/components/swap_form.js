@@ -11,16 +11,16 @@ function SwapForm({
   fromMin,
   fromMax,
   fromStep,
-  fromAmountChange,
-  fromAssetChange,
+  onFromAmountChange,
+  onFromAssetChange,
   fromMaxClick,
   toAmount,
   toUSDAmount,
   toAsset,
   toBalance,
   toStep,
-  toAmountChange,
-  toAssetChange,
+  onToAmountChange,
+  onToAssetChange,
   error,
   canSubmit,
   onReverseAssets,
@@ -31,11 +31,11 @@ function SwapForm({
       <AssetInput
         label="From"
         amount={fromAmount}
-        onAmountChange={fromAmountChange}
+        onAmountChange={onFromAmountChange}
         usdAmount={fromUSDAmount}
         assets={assets}
         selectedAsset={fromAsset}
-        onAssetChange={fromAssetChange}
+        onAssetChange={onFromAssetChange}
         required={true}
         balanceString={fromBalance}
         maxClick={fromMaxClick}
@@ -66,11 +66,11 @@ function SwapForm({
       <AssetInput
         label="To (estimated)"
         amount={toAmount}
-        onAmountChange={toAmountChange}
+        onAmountChange={onToAmountChange}
         usdAmount={toUSDAmount}
         assets={assets}
         selectedAsset={toAsset}
-        onAssetChange={toAssetChange}
+        onAssetChange={onToAssetChange}
         balanceString={toBalance}
         step={toStep}
       />

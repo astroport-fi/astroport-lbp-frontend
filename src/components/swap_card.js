@@ -371,19 +371,19 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
             fromMin={smallestDecOfAsset(fromAsset)}
             fromMax={maxFromAmount}
             fromStep={smallestDecOfAsset(fromAsset)}
-            fromAmountChange={fromAmountChanged}
-            fromAssetChange={fromAssetChanged}
             fromMaxClick={selectMaxFromAsset}
             toAmount={toAmount}
             toUSDAmount={toUSDAmount}
             toAsset={toAsset}
             toBalance={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
             toStep={smallestDecOfAsset(toAsset)}
-            toAmountChange={toAmountChanged}
-            toAssetChange={toAssetChanged}
-            onReverseAssets={() => swapFromTo()}
             error={error}
             canSubmit={!(simulating || error)}
+            onFromAmountChange={fromAmountChanged}
+            onFromAssetChange={fromAssetChanged}
+            onToAmountChange={toAmountChanged}
+            onToAssetChange={toAssetChanged}
+            onReverseAssets={() => swapFromTo()}
           >
             {
               ustPrice && ustExchangeRate &&
