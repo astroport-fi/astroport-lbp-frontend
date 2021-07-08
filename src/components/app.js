@@ -56,6 +56,10 @@ function App() {
     fetchLBPs();
   }, []);
 
+  function walletConnected({ address }) {
+    setWalletAddress(address);
+  }
+
   if(loading) {
     // TODO: Proper spinner/loading indicator
     return <div className="m-10 text-center">Loading...</div>;
@@ -75,12 +79,12 @@ function App() {
                 walletAddress ?
                   <ConnectedWallet address={walletAddress} />
                   :
-                  <ConnectWalletButton onConnect={({ address }) => setWalletAddress(address)} />
+                  <ConnectWalletButton onConnect={walletConnected} />
               }
             </div>
         }
 
-        {currentPair && <CurrentTokenSale pair={currentPair} saleTokenInfo={saleTokenInfo} walletAddress={walletAddress} />}
+        {currentPair && <CurrentTokenSale pair={currentPair} saleTokenInfo={saleTokenInfo} walletAddress={walletAddress} onWalletConnect={walletConnected} />}
         {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs}/>}
         {previousPairs.length > 0 && <PreviousTokenSalesCard pairs={previousPairs} className="mt-2"/>}
       </div>

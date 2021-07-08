@@ -12,7 +12,7 @@ import { Int, Dec } from '@terra-money/terra.js';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
-function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
+function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress }) {
   const [nativeTokenWeight, setNativeTokenWeight] = useState();
   const [saleTokenWeight, setSaleTokenWeight] = useState();
   const [pool, setPool] = useState();
@@ -93,6 +93,7 @@ function CurrentTokenSale({ pair, saleTokenInfo, walletAddress }) {
 
       <div className="flex">
         <SwapCard
+          onWalletConnect={onWalletConnect}
           pair={pair}
           saleTokenInfo={saleTokenInfo}
           walletAddress={walletAddress}

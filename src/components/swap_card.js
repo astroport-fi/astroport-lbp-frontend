@@ -10,12 +10,13 @@ import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
 import classNames from 'classnames';
 import SwapRates from './swap_rates';
+import ConnectWalletButton from './connect_wallet_button';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
 // TODO: Error handling
 
-function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice }) {
+function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice }) {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [fromAsset, setFromAsset] = useState('native_token');
@@ -345,10 +346,6 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
   const form = (
     <form onSubmit={swapFormSubmitted}>
-      <h1 className="text-lg mb-7">
-        Swap
-      </h1>
-
       <AssetInput
         label="From"
         amount={fromAmount}
@@ -410,7 +407,11 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
   return (
     <Card className="w-2/5 p-6 border border-blue-gray-300">
-      { walletAddress ? form : 'Please connect your wallet to swap' }
+      <h1 className="text-lg mb-7">
+        Swap
+      </h1>
+
+      { walletAddress ? form : <ConnectWalletButton onConnect={onWalletConnect} className="w-full" /> }
     </Card>
   );
 }

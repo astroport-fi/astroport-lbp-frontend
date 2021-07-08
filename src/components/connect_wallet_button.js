@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Extension } from '@terra-money/terra.js';
+import classNames from 'classnames';
 
-function ConnectWalletButton({ onConnect }) {
+function ConnectWalletButton({ onConnect, className }) {
   const [connecting, setConnecting] = useState(false);
 
   function connect() {
@@ -25,7 +26,7 @@ function ConnectWalletButton({ onConnect }) {
   }
 
   return(
-    <button className="bg-yellow text-black py-2 px-6 rounded-lg" onClick={connect} disabled={connecting}>
+    <button className={classNames('bg-yellow text-black py-2 px-6 rounded-lg', className)} onClick={connect} disabled={connecting}>
       {
         // TODO: Improve connecting indicator (e.g. spinner)
         connecting ? 'Connecting...' : 'Connect Wallet'
