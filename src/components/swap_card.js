@@ -316,7 +316,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
       const maxAmount = balances.native_token.sub(fee.amount.get(denom).amount);
 
-      setTx({ ...tx, fee });
+      setTx({ fee });
       setUsingMaxNativeAmount(true);
 
       amount = maxAmount
