@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import Card from './card';
-import AssetInput from './asset_input';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS } from '../constants';
@@ -8,10 +7,10 @@ import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContrac
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
-import classNames from 'classnames';
 import SwapRates from './swap_rates';
 import ConnectWalletButton from './connect_wallet_button';
 import SwapCardOverlay from './swap_card_overlay';
+import SwapForm from './swap_form';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -345,70 +344,6 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
     setPendingSimulation({ type: 'forward' });
   }
 
-  const form = (
-    <form onSubmit={swapFormSubmitted}>
-      <AssetInput
-        label="From"
-        amount={fromAmount}
-        onAmountChange={fromAmountChanged}
-        usdAmount={fromUSDAmount}
-        symbol="UST"
-        assets={pairAssets}
-        selectedAsset={fromAsset}
-        onAssetChange={fromAssetChanged}
-        required={true}
-        balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
-        maxClick={selectMaxFromAsset}
-        max={maxFromAmount}
-        min={smallestDecOfAsset(fromAsset)}
-        step={smallestDecOfAsset(fromAsset)}
-      />
-
-      <AssetInput
-        label="To (estimated)"
-        amount={toAmount}
-        onAmountChange={toAmountChanged}
-        usdAmount={toUSDAmount}
-        symbol={saleTokenInfo.symbol}
-        className="mt-10"
-        assets={pairAssets}
-        selectedAsset={toAsset}
-        onAssetChange={toAssetChanged}
-        balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
-        step={smallestDecOfAsset(toAsset)}
-      />
-
-      {
-        ustPrice && ustExchangeRate &&
-        <SwapRates
-          pair={pair}
-          saleTokenInfo={saleTokenInfo}
-          ustPrice={ustPrice}
-          ustExchangeRate={ustExchangeRate}
-          priceImpact={priceImpact}
-        />
-      }
-
-      {
-        error &&
-        <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
-      }
-
-      <button
-        type="submit"
-        className={
-          classNames(
-            "text-black py-2 px-6 rounded-lg w-full mt-12", {
-              'bg-yellow': !(simulating || error),
-              'bg-gray-400': (simulating || error)
-            }
-          )
-        }
-        disabled={simulating || error}>Swap
-      </button>
-    </form>
-  );
-
   return (
     <Card className="w-2/5 p-6 border border-blue-gray-300" overlay={
       lastTx &&
@@ -424,7 +359,44 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
         Swap
       </h1>
 
-      { walletAddress ? form : <ConnectWalletButton onConnect={onWalletConnect} className="w-full" /> }
+      {
+        walletAddress ?
+          <SwapForm
+            onSubmit={swapFormSubmitted}
+            assets={pairAssets}
+            fromAmount={fromAmount}
+            fromUSDAmount={fromUSDAmount}
+            fromAsset={fromAsset}
+            fromBalance={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
+            fromMin={smallestDecOfAsset(fromAsset)}
+            fromMax={maxFromAmount}
+            fromStep={smallestDecOfAsset(fromAsset)}
+            fromAmountChange={fromAmountChanged}
+            fromAssetChange={fromAssetChanged}
+            fromMaxClick={selectMaxFromAsset}
+            toAmount={toAmount}
+            toUSDAmount={toUSDAmount}
+            toAsset={toAsset}
+            toBalance={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
+            toStep={smallestDecOfAsset(toAsset)}
+            toAmountChange={toAmountChanged}
+            toAssetChange={toAssetChanged}
+            error={error}
+            canSubmit={!(simulating || error)}
+          >
+            {
+              ustPrice && ustExchangeRate &&
+              <SwapRates
+                pair={pair}
+                saleTokenInfo={saleTokenInfo}
+                ustPrice={ustPrice}
+                ustExchangeRate={ustExchangeRate}
+                priceImpact={priceImpact}
+              />
+            }
+          </SwapForm> :
+          <ConnectWalletButton onConnect={onWalletConnect} className="w-full" />
+      }
     </Card>
   );
 }
