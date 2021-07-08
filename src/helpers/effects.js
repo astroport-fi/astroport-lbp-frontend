@@ -13,11 +13,3 @@ export function useRefreshingEffect(fn, timeout, deps=[]) {
   /* eslint-disable react-hooks/exhaustive-deps */
   }, deps);
 };
-
-export function useDebouncedEffect(fn, delay, deps) {
-  useEffect(() => {
-    const timeout = setTimeout(fn, delay);
-
-    return () => clearTimeout(timeout);
-  }, deps);
-};

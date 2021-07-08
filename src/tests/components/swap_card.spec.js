@@ -14,14 +14,6 @@ import {
 import { Int, Dec, StdFee, Coins, Coin } from '@terra-money/terra.js';
 import terraClient from '../../terra/client';
 
-// Simulation is normally debounced
-// This mocks the debounce function to just invoke the
-// normally debounced function immediately
-jest.mock('lodash/debounce', () => ({
-  __esModule: true,
-  default: fn => fn
-}));
-
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getSimulation: jest.fn(),
@@ -81,7 +73,12 @@ describe('SwapCard', () => {
       return_amount: '200000000' // 0.50 UST valuation
     });
 
+    getBalance.mockResolvedValue(2000 * 1e6); // Simulation does a basic balance check
+
     renderCard({ ustPrice: new Dec(0.49) });
+
+    // Wait for balance
+    await screen.findByText('Balance: 2,000');
 
     const fromInput = screen.getByLabelText('From');
     const toInput = screen.getByLabelText('To (estimated)');
@@ -122,9 +119,16 @@ describe('SwapCard', () => {
       offer_amount: '42000000'
     });
 
+    // Simulation does a basic balance check
+    getBalance.mockResolvedValue(2000 * 1e6);
+    getTokenBalance.mockResolvedValue(2000 * 1e6);
+
     renderCard({ ustPrice: new Dec(5.95) });
 
     const toInput = screen.getByLabelText('To (estimated)');
+
+    // Wait for balances
+    await screen.findByText('Balance: 2,000');
 
     await act(async () => {
       await userEvent.type(toInput, '7');
@@ -163,7 +167,13 @@ describe('SwapCard', () => {
       }
     });
 
+    getBalance.mockResolvedValue(2000 * 1e6);
+    getTokenBalance.mockResolvedValue(2000 * 1e6);
+
     renderCard({ ustPrice: new Dec(.48) });
+
+    // Wait for balances
+    await screen.findByText('Balance: 2,000');
 
     // First enter a from value (UST -> FOO)
     const fromInput = screen.getByLabelText('From');
@@ -225,7 +235,13 @@ describe('SwapCard', () => {
       }
     });
 
+    getBalance.mockResolvedValue(2000 * 1e6);
+    getTokenBalance.mockResolvedValue(2000 * 1e6);
+
     renderCard({ ustPrice: new Dec(0.50) });
+
+    // Wait for balances
+    await screen.findByText('Balance: 2,000');
 
     // First enter a to value (UST <- FOO)
     const fromInput = screen.getByLabelText('To (estimated)');

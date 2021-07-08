@@ -2,7 +2,8 @@ import './asset_input.css';
 import AutosizeInput from 'react-input-autosize';
 import nextId from 'react-id-generator';
 import { formatUSD } from '../helpers/number_formatters';
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react';
+import classNames from 'classnames';
 
 // TODO: Better display of huge numbers (currently overflows container)
 
@@ -17,11 +18,32 @@ function AssetInput({
   balanceString,
   onAmountChange,
   onAssetChange,
-  maxClick
+  maxClick,
+  max
 }) {
   const inputId = nextId();
   const selectId = nextId();
   const inputEl = useRef();
+  const [error, setError] = useState(false);
+
+  function validateInput() {
+    if(inputEl.current.input.validity.rangeOverflow) {
+      setError(`cannot be greater than ${parseFloat(max)}`);
+    } else {
+      setError(false);
+    }
+  }
+
+  function amountChanged(e) {
+    validateInput()
+
+    onAmountChange(e.target.value);
+  }
+
+  useEffect(() => {
+    validateInput();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [amount, max]);
 
   return (
     <div className={className}>
@@ -33,19 +55,20 @@ function AssetInput({
         </span>
       </div>
 
-      <div className="border border-blue-gray-300 rounded-lg py-3 px-4 flex justify-between mt-2">
+      <div className={classNames('border rounded-lg py-3 px-4 flex justify-between mt-2', { 'border-blue-gray-300': !error, 'border-red-500': error })}>
         <div className="flex items-center flex-grow cursor-text" onClick={() => inputEl.current.focus()}>
           <AutosizeInput
             id={inputId}
             type="number"
             value={amount}
-            onChange={(e) => onAmountChange(e.target.value)}
+            onChange={amountChanged}
             className="max-w-max"
             inputClassName="bg-transparent outline-none input-no-spinner"
             autoComplete="off"
             placeholder="0.000"
             ref={inputEl}
             required={required}
+            max={max}
           />
 
           <span className="text-white text-opacity-50 text-xs select-none">
@@ -69,6 +92,10 @@ function AssetInput({
           </select>
         </div>
       </div>
+
+      { error &&
+        <span className="text-red-500 text-sm">{error}</span>
+      }
     </div>
   );
 }
