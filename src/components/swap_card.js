@@ -67,6 +67,10 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     maxFromAmount = Dec.withPrec(balances[fromAsset], decimals[fromAsset]);
   }
 
+  function smallestDecOfAsset(asset) {
+    return new Dec(1).div(10 ** decimals[asset]);
+  }
+
   const pairAssets = [
     {
       type: 'native_token',
@@ -105,93 +109,86 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     setSimulating(false);
   }
 
-  // Runs either a regular/forward or reverse simulation based on the given type
-  // A forward simulation runs a regular simulation from the given amount,
+  // Runs either a regular/forward or reverse simulation based on the pendingSimulation.type
+  // A forward simulation runs a regular simulation from the fromAmount,
   // and sets the toAmount to the result.
-  // A reverse simulation runs a reverse simulation to the given amount,
+  // A reverse simulation runs a reverse simulation toAmount,
   // and sets the fromAmount to the result.
   useEffect(() => {
+    if(!pendingSimulation.type) { return; }
     setSimulating(true);
+    setError(); // Reset error state
 
     async function simulate() {
       const { type } = pendingSimulation;
-
-      setError(); // Reset error state
-
-      const assets=[fromAsset, toAsset];
-
-      let setter, decAmount, amountString;
+      let setter, decInputAmount, inputAmountString, simulationInputAsset, simulationOutputAsset, simulationFn;
 
       if(type === 'forward') {
+        simulationFn = getSimulation;
         setter = setToAmount;
-        amountString = fromAmount;
+        inputAmountString = fromAmount;
+        [simulationInputAsset, simulationOutputAsset] = [fromAsset, toAsset];
       } else {
+        simulationFn = getReverseSimulation;
         setter = setFromAmount;
-        amountString = toAmount;
-        assets.reverse();
+        inputAmountString = toAmount;
+        [simulationInputAsset, simulationOutputAsset] = [toAsset, fromAsset];
       }
 
+      const requestAsset = simulationInputAsset === 'native_token' ?
+        nativeTokenFromPair(pair.asset_infos) :
+        saleAssetFromPair(pair.asset_infos);
+
       try {
-        decAmount = new Dec(amountString);
+        decInputAmount = new Dec(inputAmountString);
       } catch {
         setter('');
         resetSimulationState();
         return;
       }
 
-      if(type === 'forward' && decAmount.greaterThan(maxFromAmount)) {
+      // Don't run simulation when from amount is out of bounds
+      if(type === 'forward' && (decInputAmount.lessThan(smallestDecOfAsset(fromAsset)) || decInputAmount.greaterThan(maxFromAmount))) {
         setter('');
         resetSimulationState();
         return;
       }
 
-      // Set other side to 0 and abort if input amount is 0
-      if(decAmount.isZero()) {
-        resetSimulationState();
-        setter('0');
-        return;
-      }
-
-      const requestAsset = assets[0] === 'native_token' ? nativeTokenFromPair(pair.asset_infos) : saleAssetFromPair(pair.asset_infos);
-
-      const getters = {
-        forward: getSimulation,
-        reverse: getReverseSimulation
-      }
-
       try {
-        const simulation = await getters[type](
+        const simulation = await simulationFn(
           pair.contract_addr,
-          decAmount.mul(10 ** decimals[assets[0]]).toInt(),
+          decInputAmount.mul(10 ** decimals[simulationInputAsset]).toInt(),
           requestAsset.info
         );
 
-        const simulatedAmount = simulation[type === 'forward' ? 'return_amount' : 'offer_amount'];
-        const simulatedAmountDec = Dec.withPrec(simulatedAmount, decimals[assets[1]]);
+        const decOutputAmount = Dec.withPrec(
+          simulation[type === 'forward' ? 'return_amount' : 'offer_amount'],
+          decimals[simulationOutputAsset]
+        );
 
-        // Drop insignificant zeroes
-        setter(parseFloat(simulatedAmountDec.toFixed(decimals[assets[0]])).toString());
+        // Set output value and drop insignificant zeroes
+        setter(parseFloat(decOutputAmount.toFixed(decimals[simulationInputAsset])).toString());
 
         // Calculate and set price impact
         let simulatedPrice;
-        if (assets[0] === 'native_token') {
-          simulatedPrice = decAmount.div(simulatedAmountDec);
+        if (simulationInputAsset === 'native_token') {
+          simulatedPrice = decInputAmount.div(decOutputAmount);
         } else {
-          simulatedPrice = simulatedAmountDec.div(decAmount);
+          simulatedPrice = decOutputAmount.div(decInputAmount);
         }
 
         setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
 
-        if(type === 'reverse' && simulatedAmountDec.greaterThan(maxFromAmount)) {
+        if(type === 'reverse' && decOutputAmount.greaterThan(maxFromAmount)) {
           setError(`Not enough ${symbols[fromAsset]}`);
         } else {
           // A successful simulation is a pre-req to building the tx
 
           let fromAmount;
           if(type === 'forward') {
-            fromAmount = decAmount;
+            fromAmount = decInputAmount;
           } else {
-            fromAmount = simulatedAmountDec;
+            fromAmount = decOutputAmount;
           }
 
           try {
@@ -356,7 +353,8 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
       maxClick={selectMaxFromAsset}
       max={maxFromAmount}
-      min={1 / 10 ** decimals[fromAsset]}
+      min={smallestDecOfAsset(fromAsset)}
+      step={smallestDecOfAsset(fromAsset)}
     />
 
     <AssetInput
@@ -370,6 +368,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       selectedAsset={toAsset}
       onAssetChange={toAssetChanged}
       balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
+      step={smallestDecOfAsset(toAsset)}
     />
 
     { ustPrice && ustExchangeRate &&

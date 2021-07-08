@@ -20,7 +20,8 @@ function AssetInput({
   onAssetChange,
   maxClick,
   min,
-  max
+  max,
+  step
 }) {
   const inputId = nextId();
   const selectId = nextId();
@@ -30,6 +31,8 @@ function AssetInput({
   function validateInput() {
     if(inputEl.current.input.validity.rangeOverflow) {
       setError(`cannot be greater than ${parseFloat(max)}`);
+    } else if(inputEl.current.input.validity.rangeUnderflow) {
+      setError(`cannot be less than ${parseFloat(min)}`);
     } else {
       setError(false);
     }
@@ -71,6 +74,7 @@ function AssetInput({
             required={required}
             max={max}
             min={min}
+            step={step}
           />
 
           <span className="text-white text-opacity-50 text-xs select-none">
