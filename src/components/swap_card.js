@@ -28,6 +28,14 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
   const [simulating, setSimulating] = useState(false);
   const [pendingSimulation, setPendingSimulation] = useState({});
 
+  function resetForm() {
+    setFromAmount('');
+    setToAmount('');
+    setPriceImpact(null);
+    setTx({ msg: null, fee: null });
+    setUsingMaxNativeAmount(false);
+  }
+
   function usdExchangeRateForAsset (asset) {
     if(asset === 'native_token') {
       return new Dec(ustExchangeRate);
@@ -298,7 +306,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
 
       refreshBalancesWhenTxMined(txhash);
 
-      // TODO: Clear form
+      resetForm();
 
       alert('Success!');
     } catch (e) {
