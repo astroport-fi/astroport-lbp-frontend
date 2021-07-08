@@ -145,6 +145,13 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
         return;
       }
 
+      // Set other side to 0 and abort if input amount is 0
+      if(decAmount.isZero()) {
+        resetSimulationState();
+        setter('0');
+        return;
+      }
+
       const requestAsset = assets[0] === 'native_token' ? nativeTokenFromPair(pair.asset_infos) : saleAssetFromPair(pair.asset_infos);
 
       const getters = {
@@ -349,6 +356,7 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
       balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
       maxClick={selectMaxFromAsset}
       max={maxFromAmount}
+      min={1 / 10 ** decimals[fromAsset]}
     />
 
     <AssetInput

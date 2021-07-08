@@ -19,6 +19,7 @@ function AssetInput({
   onAmountChange,
   onAssetChange,
   maxClick,
+  min,
   max
 }) {
   const inputId = nextId();
@@ -69,6 +70,7 @@ function AssetInput({
             ref={inputEl}
             required={required}
             max={max}
+            min={min}
           />
 
           <span className="text-white text-opacity-50 text-xs select-none">
