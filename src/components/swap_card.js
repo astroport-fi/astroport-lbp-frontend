@@ -343,68 +343,70 @@ function SwapCard({ pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPric
     setPendingSimulation({ type: 'forward' });
   }
 
-  const form = <form onSubmit={swapFormSubmitted}>
-    <h1 className="text-lg mb-7">
-      Swap
-    </h1>
+  const form = (
+    <form onSubmit={swapFormSubmitted}>
+      <h1 className="text-lg mb-7">
+        Swap
+      </h1>
 
-    <AssetInput
-      label="From"
-      amount={fromAmount}
-      onAmountChange={fromAmountChanged}
-      usdAmount={fromUSDAmount}
-      symbol="UST"
-      assets={pairAssets}
-      selectedAsset={fromAsset}
-      onAssetChange={fromAssetChanged}
-      required={true}
-      balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
-      maxClick={selectMaxFromAsset}
-      max={maxFromAmount}
-      min={smallestDecOfAsset(fromAsset)}
-      step={smallestDecOfAsset(fromAsset)}
-    />
-
-    <AssetInput
-      label="To (estimated)"
-      amount={toAmount}
-      onAmountChange={toAmountChanged}
-      usdAmount={toUSDAmount}
-      symbol={saleTokenInfo.symbol}
-      className="mt-10"
-      assets={pairAssets}
-      selectedAsset={toAsset}
-      onAssetChange={toAssetChanged}
-      balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
-      step={smallestDecOfAsset(toAsset)}
-    />
-
-    { ustPrice && ustExchangeRate &&
-      <SwapRates
-        pair={pair}
-        saleTokenInfo={saleTokenInfo}
-        ustPrice={ustPrice}
-        ustExchangeRate={ustExchangeRate}
-        priceImpact={priceImpact}
+      <AssetInput
+        label="From"
+        amount={fromAmount}
+        onAmountChange={fromAmountChanged}
+        usdAmount={fromUSDAmount}
+        symbol="UST"
+        assets={pairAssets}
+        selectedAsset={fromAsset}
+        onAssetChange={fromAssetChanged}
+        required={true}
+        balanceString={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
+        maxClick={selectMaxFromAsset}
+        max={maxFromAmount}
+        min={smallestDecOfAsset(fromAsset)}
+        step={smallestDecOfAsset(fromAsset)}
       />
-    }
 
-    { error &&
-      <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
-    }
+      <AssetInput
+        label="To (estimated)"
+        amount={toAmount}
+        onAmountChange={toAmountChanged}
+        usdAmount={toUSDAmount}
+        symbol={saleTokenInfo.symbol}
+        className="mt-10"
+        assets={pairAssets}
+        selectedAsset={toAsset}
+        onAssetChange={toAssetChanged}
+        balanceString={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
+        step={smallestDecOfAsset(toAsset)}
+      />
 
-    <button
-      type="submit"
-      className={
-        classNames(
-          "text-black py-2 px-6 rounded-lg w-full mt-12", {
-            'bg-yellow': !(simulating || error),
-            'bg-gray-400': (simulating || error)
-          }
-        )
+      { ustPrice && ustExchangeRate &&
+        <SwapRates
+          pair={pair}
+          saleTokenInfo={saleTokenInfo}
+          ustPrice={ustPrice}
+          ustExchangeRate={ustExchangeRate}
+          priceImpact={priceImpact}
+        />
       }
-      disabled={simulating || error}>Swap</button>
-  </form>;
+
+      { error &&
+        <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
+      }
+
+      <button
+        type="submit"
+        className={
+          classNames(
+            "text-black py-2 px-6 rounded-lg w-full mt-12", {
+              'bg-yellow': !(simulating || error),
+              'bg-gray-400': (simulating || error)
+            }
+          )
+        }
+        disabled={simulating || error}>Swap</button>
+    </form>
+  );
 
   return (
     <Card className="w-2/5 p-6 border border-blue-gray-300">
