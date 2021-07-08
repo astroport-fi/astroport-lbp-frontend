@@ -39,6 +39,9 @@ jest.mock('../../terra/client', () => ({
   default: {
     tx: {
       txInfo: jest.fn()
+    },
+    config: {
+      chainID: 'testnet'
     }
   }
 }));
@@ -288,7 +291,7 @@ describe('SwapCard', () => {
     );
   });
 
-  it('performs native -> token swap, alerts user on success, and updates balances', async () => {
+  it('performs native -> token swap, displays success message, and updates balances', async () => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
       return_amount: String(5 * 1e5)
@@ -309,8 +312,6 @@ describe('SwapCard', () => {
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
 
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
-
     renderCard();
 
     // Initial balances
@@ -327,6 +328,16 @@ describe('SwapCard', () => {
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+
+    const txLink = screen.getByRole('link', { name: '123ABC' });
+    expect(txLink).toBeInTheDocument();
+    expect(txLink.getAttribute('href')).toEqual('https://finder.terra.money/testnet/tx/123ABC');
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
     });
 
     // New balances
@@ -347,12 +358,9 @@ describe('SwapCard', () => {
 
     // Fetches tx info
     expect(terraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
-
-    expect(alertSpy).toHaveBeenCalledWith('Success!');
-    alertSpy.mockRestore();
   });
 
-  it('performs token -> native token swap, alerts user on success, and updates balances', async () => {
+  it('performs token -> native token swap, displays success message, and updates balances', async () => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
       return_amount: String(1e6)
@@ -372,8 +380,6 @@ describe('SwapCard', () => {
 
     // Successful post
     postMsg.mockResolvedValue({ txhash: 'ABC123' });
-
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     renderCard();
 
@@ -399,6 +405,16 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
+    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+
+    const txLink = screen.getByRole('link', { name: 'ABC123' });
+    expect(txLink).toBeInTheDocument();
+    expect(txLink.getAttribute('href')).toEqual('https://finder.terra.money/testnet/tx/ABC123');
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    });
+
     // New balances
     expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
@@ -417,9 +433,6 @@ describe('SwapCard', () => {
 
     // Fetches tx info
     expect(terraClient.tx.txInfo).toHaveBeenCalledWith('ABC123');
-
-    expect(alertSpy).toHaveBeenCalledWith('Success!');
-    alertSpy.mockRestore();
   });
 
   it('performs swap after setting from amount to balance less fees when swapping from native token', async () => {
@@ -436,8 +449,6 @@ describe('SwapCard', () => {
 
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
-
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     renderCard();
 
@@ -456,6 +467,8 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
+    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+
     // Posts message with max fee
     const msg = buildSwapFromNativeTokenMsg({
       walletAddress: 'terra42',
@@ -468,9 +481,6 @@ describe('SwapCard', () => {
     // Does not estimate fee for from amount
     // (this is calculated differently for "max" amount)
     expect(estimateFee).not.toHaveBeenCalled();
-
-    expect(alertSpy).toHaveBeenCalledWith('Success!');
-    alertSpy.mockRestore();
   });
 
   it('performs swap after setting from amount to balance of contract token', async () => {
@@ -487,8 +497,6 @@ describe('SwapCard', () => {
 
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
-
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation();
 
     renderCard();
 
@@ -514,6 +522,8 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
+    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+
     // Posts message with max contract tokens
     // and still estimates fee (uusd)
     const msg = buildSwapFromContractTokenMsg({
@@ -526,8 +536,39 @@ describe('SwapCard', () => {
 
     expect(postMsg).toHaveBeenCalledTimes(1);
     expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+  });
 
-    expect(alertSpy).toHaveBeenCalledWith('Success!');
-    alertSpy.mockRestore();
+  it('conveys error state to user if extension responds with error when sending message', async() => {
+    // Simulation is performed on input change
+    getSimulation.mockResolvedValue({
+      return_amount: String(1e6)
+    });
+
+    getBalance.mockResolvedValue(10 * 1e6);
+    getTokenBalance.mockResolvedValue(0);
+
+    // Failed post
+    postMsg.mockRejectedValue({ code: 1 });
+
+    renderCard();
+
+    // Wait for balances
+    expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.type(screen.getByLabelText('From'), '5');
+    });
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    expect(screen.queryByText('Error submitting transaction')).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    });
+
+    expect(screen.queryByText('Error submitting transaction')).not.toBeInTheDocument();
   });
 });

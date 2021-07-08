@@ -11,6 +11,8 @@ import terraClient from '../terra/client';
 import classNames from 'classnames';
 import SwapRates from './swap_rates';
 import ConnectWalletButton from './connect_wallet_button';
+import CardOverlay from './card_overlay';
+import { transactionDetailsUrl } from '../terra/urls';
 
 // TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
@@ -28,6 +30,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   const [error, setError] = useState();
   const [simulating, setSimulating] = useState(false);
   const [pendingSimulation, setPendingSimulation] = useState({});
+  const [lastTx, setLastTx] = useState();
 
   function resetForm() {
     setFromAmount('');
@@ -35,6 +38,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
     setPriceImpact(null);
     setTx({ msg: null, fee: null });
     setUsingMaxNativeAmount(false);
+    setLastTx();
   }
 
   function usdExchangeRateForAsset (asset) {
@@ -302,18 +306,16 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   async function swapFormSubmitted (e) {
     e.preventDefault();
 
+    setLastTx({ state: 'waitingForExtension' });
+
     try {
       const { txhash } = await postMsg(tx);
 
       refreshBalancesWhenTxMined(txhash);
 
-      resetForm();
-
-      alert('Success!');
-    } catch (e) {
-      console.error(e);
-
-      alert('Error!');
+      setLastTx({ state: 'success', txhash });
+    } catch {
+      setLastTx({ state: 'error' });
     }
   }
 
@@ -342,6 +344,45 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
 
     // Run simulation to project received tokens if entire wallet balance were swapped
     setPendingSimulation({ type: 'forward' });
+  }
+
+  let overlay;
+
+  if(lastTx) {
+    // eslint-disable-next-line default-case
+    switch(lastTx.state) {
+      case 'waitingForExtension':
+        overlay = (
+          <CardOverlay className="bg-blue-gray-700">
+            <p className="text-xl">Waiting for extension...</p>
+
+            <button type="button" className="mt-4" onClick={() => setLastTx()}>Cancel</button>
+          </CardOverlay>
+        );
+        break;
+      case 'success':
+        overlay = (
+          <CardOverlay className="bg-green-500">
+            <p className="text-xl mb-2">Transaction submitted successfully</p>
+
+            <a href={transactionDetailsUrl(terraClient.config.chainID, lastTx.txhash)} target="_blank" rel="noreferrer" className="text-sm block">
+              {lastTx.txhash}
+            </a>
+
+            <button type="button" className="mt-4" onClick={resetForm}>Continue</button>
+          </CardOverlay>
+        );
+        break;
+      case 'error':
+        overlay = (
+          <CardOverlay className="bg-red-500">
+            <p className="text-xl">Error submitting transaction</p>
+
+            <button type="button" className="mt-4" onClick={() => setLastTx()}>Continue</button>
+          </CardOverlay>
+        );
+        break;
+    }
   }
 
   const form = (
@@ -377,7 +418,8 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
         step={smallestDecOfAsset(toAsset)}
       />
 
-      { ustPrice && ustExchangeRate &&
+      {
+        ustPrice && ustExchangeRate &&
         <SwapRates
           pair={pair}
           saleTokenInfo={saleTokenInfo}
@@ -387,7 +429,8 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
         />
       }
 
-      { error &&
+      {
+        error &&
         <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
       }
 
@@ -401,15 +444,18 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
             }
           )
         }
-        disabled={simulating || error}>Swap</button>
+        disabled={simulating || error}>Swap
+      </button>
     </form>
   );
 
   return (
-    <Card className="w-2/5 p-6 border border-blue-gray-300">
+    <Card className="w-2/5 p-6 border border-blue-gray-300 relative">
       <h1 className="text-lg mb-7">
         Swap
       </h1>
+
+      {overlay}
 
       { walletAddress ? form : <ConnectWalletButton onConnect={onWalletConnect} className="w-full" /> }
     </Card>
