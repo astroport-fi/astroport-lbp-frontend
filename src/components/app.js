@@ -74,7 +74,7 @@ function App() {
         {
           currentPair &&
             <div className="flex justify-between items-center">
-              <h1 className="text-lg">
+              <h1 className="text-2xl font-bold">
                 {saleTokenInfo.name} Token Sale
               </h1>
 
