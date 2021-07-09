@@ -81,7 +81,7 @@ function SwapForm({
         type="submit"
         className={
           classNames(
-            "text-black py-2 px-6 rounded-lg w-full mt-12", {
+            "text-black py-3 px-6 rounded-lg w-full mt-12", {
               'bg-yellow': canSubmit,
               'bg-gray-400': !canSubmit
             }

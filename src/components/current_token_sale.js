@@ -106,7 +106,7 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
       {
         pair.description &&
         <Card className="my-8 px-6 pb-6">
-          <h2 className="font-bold text-lg mb-4 py-4 border-b border-blue-gray-400">About</h2>
+          <h2 className="text-xl font-bold mb-4 py-4 border-b border-blue-gray-400">About</h2>
 
           <p>
             {pair.description}

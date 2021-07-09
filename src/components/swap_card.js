@@ -345,7 +345,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   }
 
   return (
-    <Card className="w-2/5 p-6 border border-blue-gray-300" overlay={
+    <Card className="w-2/5 p-6 pb-8 border border-blue-gray-300" overlay={
       lastTx &&
       <SwapCardOverlay
         txState={lastTx.state}
@@ -355,7 +355,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
         errorDismiss={() => setLastTx()}
       />
     }>
-      <h1 className="text-lg mb-7">
+      <h1 className="text-xl font-bold mb-7">
         Swap
       </h1>
 
