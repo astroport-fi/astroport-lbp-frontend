@@ -39,7 +39,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, successDismiss, erro
   }
 
   return (
-    <CardOverlay className={classNames('transition-colors duration-300 ease-out', bgColor)}>
+    <CardOverlay className={classNames('backdrop-filter backdrop-blur-sm transition-colors duration-300 ease-out', bgColor)}>
       {content}
     </CardOverlay>
   );
