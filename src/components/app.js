@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ScheduledTokenSalesCard from './scheduled_token_sales_card';
 import PreviousTokenSalesCard from './previous_token_sales_card';
 import CurrentTokenSale from './current_token_sale';
-import { getLBPs, getTokenInfo } from '../terra/queries';
+import { getLBPs, getPairInfo, getTokenInfo } from '../terra/queries';
 import { saleAssetFromPair } from '../helpers/asset_pairs';
 import ConnectWalletButton from './connect_wallet_button';
 import ConnectedWallet from './connected_wallet';
@@ -32,11 +32,14 @@ function App() {
           (lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime
         );
 
-        setCurrentPair(currentPair);
-
         // If there's an ongoing sale,
-        // fetch the sale token info (name, symbol, decimals, etc.)
+        // fetch the detailed info for the pair
+        // and the sale token info (name, symbol, decimals, etc.)
         if(currentPair) {
+          setCurrentPair(
+            await getPairInfo(currentPair.contract_addr)
+          );
+
           const saleTokenAddress = saleAssetFromPair(currentPair.asset_infos).info.token.contract_addr;
 
           setSaleTokenInfo(

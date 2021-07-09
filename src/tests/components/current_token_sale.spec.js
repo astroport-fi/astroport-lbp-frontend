@@ -48,7 +48,8 @@ describe('CurrentTokenSale', () => {
     const pair = buildPair({
       contractAddr: 'terra1',
       tokenContractAddr: 'terra123',
-      endTime: Math.floor((new Date(2021, 5, 18, 11, 10)).getTime() / 1000)
+      endTime: Math.floor((new Date(2021, 5, 18, 11, 10)).getTime() / 1000),
+      description: 'A brand new token for sale!'
     });
 
     const saleTokenInfo = {
@@ -66,6 +67,7 @@ describe('CurrentTokenSale', () => {
     const coinsRemainingCard = (await screen.findByText('Coins Remaining')).closest('div');
     const timeRemainingCard = (await screen.findByText('Time Remaining')).closest('div');
     const currentWeightCard = (await screen.findByText('Current Weight')).closest('div');
+    const aboutCard = (await screen.findByText('About')).closest('div');
 
     // ((500000000000 / 5) / (42000000123456 / 95)) = 2.261904755 * $0.99 = $2.239285714
     expect(within(priceCard).getByText('$2.24')).toBeInTheDocument();
@@ -76,6 +78,8 @@ describe('CurrentTokenSale', () => {
     expect(within(timeRemainingCard).getByText('2d : 3h : 10m')).toBeInTheDocument();
 
     expect(within(currentWeightCard).getByText('5 : 95')).toBeInTheDocument();
+
+    expect(within(aboutCard).getByText('A brand new token for sale!')).toBeInTheDocument();
 
     expect(getWeights).toHaveBeenCalledWith('terra1', 'uusd');
     expect(getPool).toHaveBeenCalledWith('terra1');

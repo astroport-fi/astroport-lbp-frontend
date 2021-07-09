@@ -41,7 +41,8 @@ export function buildPair({
   liquidityTokenAddr = 'terra-pair-liquidity-token-addr',
   ownerAddr = 'terra-pair-owner-addr',
   startTime,
-  endTime
+  endTime,
+  description = null
 } = {}) {
   if(nativeTokenInfo === undefined) {
     nativeTokenInfo = buildPairAssetInfo({ nativeToken })
@@ -76,6 +77,7 @@ export function buildPair({
     start_time: startTime,
     end_time: endTime,
     liquidity_token: liquidityTokenAddr,
-    owner: ownerAddr
+    owner: ownerAddr,
+    description
   };
 }

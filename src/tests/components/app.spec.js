@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import App from '../../components/app';
-import { getLBPs, getTokenInfo } from '../../terra/queries';
+import { getLBPs, getTokenInfo, getPairInfo } from '../../terra/queries';
 import { Extension } from '@terra-money/terra.js';
 import { mockSuccessfullyConnectedExtension } from '../test_helpers/terra-js_mocks';
 import userEvent from "@testing-library/user-event";
@@ -11,7 +11,8 @@ jest.mock('@terra-money/terra.js');
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getLBPs: jest.fn(),
-  getTokenInfo: jest.fn()
+  getTokenInfo: jest.fn(),
+  getPairInfo: jest.fn()
 }));
 
 // Simple stub for CurrentTokenSale component,
@@ -34,6 +35,13 @@ describe('App', () => {
       }
     )
 
+    const currentPair = buildPair({
+      startTime: Math.floor(Date.UTC(2021, 5, 8, 12)/1000),
+      endTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
+      tokenContractAddr: 'terra3',
+      contractAddr: 'terra-pair-addr'
+    });
+
     getLBPs.mockResolvedValue([
       buildPair({
         startTime: Math.floor(Date.UTC(2021, 0, 1, 12)/1000),
@@ -45,12 +53,10 @@ describe('App', () => {
         endTime: Math.floor(Date.UTC(2021, 5, 14, 12)/1000),
         tokenContractAddr: 'terra2'
       }),
-      buildPair({
-        startTime: Math.floor(Date.UTC(2021, 5, 8, 12)/1000),
-        endTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
-        tokenContractAddr: 'terra3'
-      })
+      currentPair
     ]);
+
+    getPairInfo.mockResolvedValue(currentPair);
 
     getTokenInfo.mockImplementation(address => (
       {
@@ -92,19 +98,27 @@ describe('App', () => {
     expect(within(previousCard).queryByText('Bar')).toBeNull();
     expect(within(previousCard).queryByText('Baz')).toBeNull();
 
+    // It should have fetched info for the current sale
+    expect(getPairInfo).toHaveBeenCalledTimes(1);
+    expect(getPairInfo).toHaveBeenCalledWith('terra-pair-addr');
+
     dateNowSpy.mockRestore();
   });
 
   it('displays partial wallet address after successful browser extension connection', async () => {
     mockSuccessfullyConnectedExtension(Extension, { address: 'terra1234567890' });
 
+    const currentPair = buildPair({
+      startTime: Math.floor(Date.now()/1000) - 60*60*24, // 1 day ago
+      endTime: Math.floor(Date.now()/1000) + 60*60*24, // 1 day from now
+      tokenContractAddr: 'terra3'
+    });
+
     getLBPs.mockResolvedValue([
-      buildPair({
-        startTime: Math.floor(Date.now()/1000) - 60*60*24, // 1 day ago
-        endTime: Math.floor(Date.now()/1000) + 60*60*24, // 1 day from now
-        tokenContractAddr: 'terra3'
-      })
+      currentPair
     ]);
+
+    getPairInfo.mockResolvedValue(currentPair);
 
     getTokenInfo.mockResolvedValue({
       name: 'Foo'

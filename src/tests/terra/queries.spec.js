@@ -8,8 +8,10 @@ import {
   getWeights,
   getPool,
   getBalance,
-  getTokenBalance
+  getTokenBalance,
+  getPairInfo
 } from '../../terra/queries';
+import { buildPair } from '../test_helpers/factories';
 
 jest.mock('../../terra/client', () => ({
   __esModule: true,
@@ -289,6 +291,23 @@ describe('getTokenBalance', () => {
         balance: {
           address: 'terra-wallet-addr'
         }
+      }
+    );
+  });
+});
+
+describe('getPairInfo', () => {
+  it('queries pair contract for info', async () => {
+    const pair = buildPair({ contractAddr: 'terra-pair-addr' });
+
+    terraClient.wasm.contractQuery.mockResolvedValue(pair);
+
+    expect(await getPairInfo('terra-pair-addr')).toEqual(pair);
+
+    expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
+      'terra-pair-addr',
+      {
+        pair: {}
       }
     );
   });

@@ -130,3 +130,14 @@ export async function getTokenBalance(tokenAddress, walletAddress) {
 
   return new Int(response.balance);
 }
+
+export async function getPairInfo(pairAddress) {
+  const response = await terraClient.wasm.contractQuery(
+    pairAddress,
+    {
+      pair: {}
+    }
+  );
+
+  return response;
+}

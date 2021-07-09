@@ -9,6 +9,7 @@ import { useRefreshingEffect } from '../helpers/effects';
 import { durationString } from '../helpers/time_formatters';
 import SwapCard from './swap_card';
 import { Int, Dec } from '@terra-money/terra.js';
+import Card from './card';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -101,6 +102,17 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
           ustPrice={ustPrice}
         />
       </div>
+
+      {
+        pair.description &&
+        <Card className="my-6 px-6 pb-6">
+          <h2 className="font-bold text-lg mb-4 py-4 border-b border-blue-gray-400">About</h2>
+
+          <p>
+            {pair.description}
+          </p>
+        </Card>
+      }
     </>
   );
 }
