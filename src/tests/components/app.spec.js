@@ -1,11 +1,11 @@
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, act } from '@testing-library/react';
 import App from '../../components/app';
 import { getLBPs, getTokenInfo, getPairInfo } from '../../terra/queries';
-import { Extension } from '@terra-money/terra.js';
-import { mockSuccessfullyConnectedExtension } from '../test_helpers/terra-js_mocks';
 import userEvent from "@testing-library/user-event";
 import { buildPair } from '../test_helpers/factories';
+import { connectExtension } from '../../terra/extension';
 
+jest.mock('../../terra/extension');
 jest.mock('@terra-money/terra.js');
 
 jest.mock('../../terra/queries', () => ({
@@ -106,13 +106,9 @@ describe('App', () => {
   });
 
   it('displays partial wallet address after successful browser extension connection', async () => {
-    mockSuccessfullyConnectedExtension(Extension, { address: 'terra1234567890' });
+    connectExtension.mockResolvedValue({ address: 'terra1234567890' });
 
-    const currentPair = buildPair({
-      startTime: Math.floor(Date.now()/1000) - 60*60*24, // 1 day ago
-      endTime: Math.floor(Date.now()/1000) + 60*60*24, // 1 day from now
-      tokenContractAddr: 'terra3'
-    });
+    const currentPair = buildPair();
 
     getLBPs.mockResolvedValue([
       currentPair
@@ -132,8 +128,40 @@ describe('App', () => {
     // Wallet address should not yet be displayed
     expect(screen.queryByText('567890')).toBeNull();
 
-    userEvent.click(screen.getByText('Connect Wallet'));
+    await act(async () => {
+      await userEvent.click(screen.getByText('Connect Wallet'));
+    })
 
     expect(screen.getByText('terra1...567890')).toBeInTheDocument();
+  });
+
+  it('automatically reconnects extension if it was connected previously', async () => {
+    const getItemSpy = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    getItemSpy.mockImplementation((key) => {
+      return {
+        terraStationExtensionPreviouslyConnected: true
+      }[key]
+    });
+
+    connectExtension.mockResolvedValue({ address: 'terra1234567890' });
+
+    const currentPair = buildPair();
+
+    getLBPs.mockResolvedValue([
+      currentPair
+    ]);
+
+    getPairInfo.mockResolvedValue(currentPair);
+
+    getTokenInfo.mockResolvedValue({
+      name: 'Foo'
+    });
+
+    render(<App />);
+
+    expect(await screen.findByText('terra1...567890')).toBeInTheDocument();
+
+    expect(getItemSpy).toHaveBeenCalledTimes(1);
+    expect(getItemSpy).toHaveBeenCalledWith('terraStationExtensionPreviouslyConnected');
   });
 });

@@ -30,6 +30,7 @@ export function buildPairAssetInfo({
 // Can provide full nativeTokenInfo/tokenContractInfo objects
 // (e.g. via buildPairAssetInfo), or one will be built from
 // nativeToken/tokenContractAddr, both of which are optional with defaults
+// By default returns a current pair (starts now and ends 3 days later)
 export function buildPair({
   nativeTokenInfo,
   nativeToken = 'uusd',

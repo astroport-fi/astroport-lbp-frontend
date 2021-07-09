@@ -1,29 +1,26 @@
-import { useState } from 'react';
-import { Extension } from '@terra-money/terra.js';
+import { useState, useCallback } from 'react';
 import classNames from 'classnames';
+import { connectExtension, EXTENSION_UNAVAILABLE } from '../terra/extension';
 
 function ConnectWalletButton({ onConnect, className }) {
   const [connecting, setConnecting] = useState(false);
 
-  function connect() {
-    const extension = new Extension();
+  const connect = useCallback(async() => {
+    setConnecting(true);
 
-    if(extension.isAvailable) {
-      setConnecting(true);
+    try {
+      const wallet = await connectExtension()
 
-      extension.once('onConnect', (wallet) => {
-        setConnecting(false);
+      setConnecting(false);
+      onConnect(wallet);
+    } catch({ reason }) {
+      setConnecting(false);
 
-        onConnect(wallet);
-      });
-
-      extension.connect();
-
-      // TODO: Time out at some point
-    } else {
-      window.open('https://terra.money/extension');
+      if(reason === EXTENSION_UNAVAILABLE ) {
+        window.open('https://terra.money/extension');
+      }
     }
-  }
+  }, [onConnect]);
 
   return(
     <button className={classNames('bg-yellow text-black py-2 px-6 rounded-lg', className)} onClick={connect} disabled={connecting}>

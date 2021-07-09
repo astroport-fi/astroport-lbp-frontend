@@ -1,40 +1,52 @@
 import ConnectWalletButton from '../../components/connect_wallet_button';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Extension } from '@terra-money/terra.js';
-import { mockSuccessfullyConnectedExtension } from '../test_helpers/terra-js_mocks';
+import { connectExtension, EXTENSION_UNAVAILABLE } from '../../terra/extension';
 
-jest.mock('@terra-money/terra.js');
+jest.mock('../../terra/extension', () => {
+  const original = jest.requireActual('../../terra/extension');
+
+  return {
+    __esModule: true,
+    ...original,
+    connectExtension: jest.fn()
+  }
+});
 
 describe('ConnectWalletButton', () => {
-  it('opens extension download URL when extension is not available', () => {
-    Extension.mockImplementation(() => {
-      return {
-        isAvailable: false
-      }
-    });
+  it('opens extension download URL when extension is not available', async () => {
+    connectExtension.mockRejectedValue({ reason: EXTENSION_UNAVAILABLE })
 
     const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation();
 
     render(<ConnectWalletButton />);
 
-    userEvent.click(screen.getByText('Connect Wallet'));
+    await act(async () => {
+      await userEvent.click(screen.getByText('Connect Wallet'));
+    })
 
     expect(windowOpenSpy).toHaveBeenCalledWith('https://terra.money/extension');
+    expect(connectExtension).toHaveBeenCalledTimes(1);
+
     windowOpenSpy.mockRestore();
   });
 
-  it('displays connecting indicator while connecting and then passes wallet/payload to onConnect function when connected', () => {
+  it('displays connecting indicator while connecting' +
+    'and then passes wallet/payload to onConnect function when connected', async () => {
     const wallet = jest.fn();
 
-    mockSuccessfullyConnectedExtension(Extension, wallet);
+    connectExtension.mockResolvedValue(wallet);
 
     const onConnectMock = jest.fn();
 
     render(<ConnectWalletButton onConnect={onConnectMock} />);
 
-    userEvent.click(screen.getByText('Connect Wallet'));
+    await act(async () => {
+      await userEvent.click(screen.getByText('Connect Wallet'));
+    })
 
+    expect(connectExtension).toHaveBeenCalledTimes(1);
+    expect(onConnectMock).toHaveBeenCalledTimes(1);
     expect(onConnectMock).toHaveBeenCalledWith(wallet);
   });
 });

@@ -6,6 +6,9 @@ import { getLBPs, getPairInfo, getTokenInfo } from '../terra/queries';
 import { saleAssetFromPair } from '../helpers/asset_pairs';
 import ConnectWalletButton from './connect_wallet_button';
 import ConnectedWallet from './connected_wallet';
+import { connectExtension } from '../terra/extension';
+
+const EXTENSION_LOCAL_STORAGE_KEY = 'terraStationExtensionPreviouslyConnected';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -15,6 +18,18 @@ function App() {
   const [currentPair, setCurrentPair] = useState();
   const [saleTokenInfo, setSaleTokenInfo] = useState();
   const [walletAddress, setWalletAddress] = useState();
+
+  // Automatically reconnect extension if it was connected before
+  // Wait a beat because the extension isn't always ready immediately
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if(window.localStorage.getItem(EXTENSION_LOCAL_STORAGE_KEY)) {
+        connectExtension().then(({ address }) => setWalletAddress(address));
+      }
+    }, 10);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const fetchLBPs = async () => {
@@ -61,6 +76,7 @@ function App() {
 
   function walletConnected({ address }) {
     setWalletAddress(address);
+    window.localStorage.setItem(EXTENSION_LOCAL_STORAGE_KEY, true);
   }
 
   if(loading) {
