@@ -87,8 +87,8 @@ function App() {
 
   if(loading) {
     return(
-      <div className="m-10 text-center">
-        <LoadingIndicator className="w-20 h-20 inline" />
+      <div className="w-screen h-screen flex items-center justify-center">
+        <LoadingIndicator className="w-20 h-20" />
       </div>
     );
   } else if(errorLoadingData) {
