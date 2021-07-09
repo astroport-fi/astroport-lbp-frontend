@@ -3,9 +3,10 @@ import { saleAssetFromPair } from '../helpers/asset_pairs';
 import CW20TokenName from './cw20_token_name';
 import { timeAndDateString } from '../helpers/time_formatters';
 
-function ScheduledTokenSalesCard({ pairs }) {
+function ScheduledTokenSalesCard({ pairs, className }) {
   return(
     <ListCard
+      className={className}
       title="Scheduled Token Sales"
       headings={['Asset', 'Starting Date/Time']}
       rows={

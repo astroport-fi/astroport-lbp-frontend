@@ -3,10 +3,10 @@ import { saleAssetFromPair } from '../helpers/asset_pairs';
 import CW20TokenName from './cw20_token_name';
 import { dateString } from '../helpers/time_formatters';
 
-function PreviousTokenSalesCard({ pairs }) {
+function PreviousTokenSalesCard({ pairs, className }) {
   return(
     <ListCard
-      className="mt-8"
+      className={className}
       title="Previous Token Sales"
       headings={['Asset', 'Period']}
       rows={

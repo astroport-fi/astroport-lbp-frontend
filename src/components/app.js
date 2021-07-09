@@ -88,8 +88,8 @@ function App() {
         }
 
         {currentPair && <CurrentTokenSale pair={currentPair} saleTokenInfo={saleTokenInfo} walletAddress={walletAddress} onWalletConnect={walletConnected} />}
-        {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs}/>}
-        {previousPairs.length > 0 && <PreviousTokenSalesCard pairs={previousPairs} className="mt-2"/>}
+        {scheduledPairs.length > 0 && <ScheduledTokenSalesCard pairs={scheduledPairs} className="my-8" />}
+        {previousPairs.length > 0 && <PreviousTokenSalesCard pairs={previousPairs} className="my-8" />}
       </div>
     );
   }
