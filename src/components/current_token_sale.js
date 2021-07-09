@@ -10,6 +10,7 @@ import { durationString } from '../helpers/time_formatters';
 import SwapCard from './swap_card';
 import { Int, Dec } from '@terra-money/terra.js';
 import Card from './card';
+import CurrentWeightCard from './current_weight_card';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -91,7 +92,13 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
         <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice === undefined} />
         <InfoCard label="Coins Remaining" value={pool && formatTokenAmount(saleAssetFromPair(pool.assets).amount, saleTokenInfo.decimals)} loading={pool === undefined} />
         <InfoCard label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
-        <InfoCard label="Current Weight" value={`${Math.round(nativeTokenWeight)} : ${Math.round(saleTokenWeight)}`} loading={nativeTokenWeight === undefined} />
+        <CurrentWeightCard
+          loading={nativeTokenWeight === undefined}
+          pair={pair}
+          saleTokenInfo={saleTokenInfo}
+          currentNativeTokenWeight={nativeTokenWeight}
+          currentSaleTokenWeight={saleTokenWeight}
+        />
       </div>
 
       <div className="flex my-8">

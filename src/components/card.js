@@ -1,8 +1,8 @@
 import classNames from 'classnames';
 
-function Card({ children, overlay, className }) {
+function Card({ children, overlay, className, ...rest }) {
   return(
-    <div className={classNames('bg-blue-gray-700 rounded-2xl', className, { 'relative': overlay })}>
+    <div className={classNames('bg-blue-gray-700 rounded-2xl', className, { 'relative': overlay })} { ...rest }>
       {overlay}
 
       {children}
