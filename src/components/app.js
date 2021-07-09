@@ -79,6 +79,11 @@ function App() {
     window.localStorage.setItem(EXTENSION_LOCAL_STORAGE_KEY, true);
   }
 
+  function disconnectWallet() {
+    setWalletAddress();
+    window.localStorage.removeItem(EXTENSION_LOCAL_STORAGE_KEY);
+  }
+
   if(loading) {
     // TODO: Proper spinner/loading indicator
     return <div className="m-10 text-center">Loading...</div>;
@@ -96,7 +101,7 @@ function App() {
 
               {
                 walletAddress ?
-                  <ConnectedWallet address={walletAddress} />
+                  <ConnectedWallet address={walletAddress} onDisconnect={disconnectWallet} />
                   :
                   <ConnectWalletButton onConnect={walletConnected} />
               }

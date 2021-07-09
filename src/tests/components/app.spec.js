@@ -164,4 +164,44 @@ describe('App', () => {
     expect(getItemSpy).toHaveBeenCalledTimes(1);
     expect(getItemSpy).toHaveBeenCalledWith('terraStationExtensionPreviouslyConnected');
   });
+
+  it('disconnects wallet', async () => {
+    const getItemSpy = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    const removeItemSpy = jest.spyOn(window.localStorage.__proto__, 'removeItem');
+    getItemSpy.mockImplementation((key) => {
+      return {
+        terraStationExtensionPreviouslyConnected: true
+      }[key]
+    });
+
+    connectExtension.mockResolvedValue({ address: 'terra1234567890' });
+
+    const currentPair = buildPair();
+
+    getLBPs.mockResolvedValue([
+      currentPair
+    ]);
+
+    getPairInfo.mockResolvedValue(currentPair);
+
+    getTokenInfo.mockResolvedValue({
+      name: 'Foo'
+    });
+
+    render(<App />);
+
+    expect(await screen.findByText('terra1...567890')).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Disconnect wallet' }));
+    })
+
+    expect(screen.queryByText('terra1...567890')).not.toBeInTheDocument();
+
+    expect(getItemSpy).toHaveBeenCalledTimes(1);
+    expect(getItemSpy).toHaveBeenCalledWith('terraStationExtensionPreviouslyConnected');
+
+    expect(removeItemSpy).toHaveBeenCalledTimes(1);
+    expect(removeItemSpy).toHaveBeenCalledWith('terraStationExtensionPreviouslyConnected');
+  });
 });
