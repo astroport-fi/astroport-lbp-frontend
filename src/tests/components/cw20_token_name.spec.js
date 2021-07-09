@@ -16,7 +16,7 @@ describe('CW20TokenName', () => {
     });
 
     const { container } = render(<CW20TokenName address="terra42" />);
-    expect(container.textContent).toEqual('Loading...');
+    expect(container.innerHTML).toMatch(/loading-indicator\.svg/);
 
     expect(await screen.findByText('Foo')).toBeInTheDocument();
     expect(getTokenInfo).toHaveBeenCalledWith('terra42');

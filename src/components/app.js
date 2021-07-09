@@ -7,6 +7,7 @@ import { saleAssetFromPair } from '../helpers/asset_pairs';
 import ConnectWalletButton from './connect_wallet_button';
 import ConnectedWallet from './connected_wallet';
 import { connectExtension } from '../terra/extension';
+import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
 
 const EXTENSION_LOCAL_STORAGE_KEY = 'terraStationExtensionPreviouslyConnected';
 
@@ -85,8 +86,11 @@ function App() {
   }
 
   if(loading) {
-    // TODO: Proper spinner/loading indicator
-    return <div className="m-10 text-center">Loading...</div>;
+    return(
+      <div className="m-10 text-center">
+        <LoadingIndicator className="w-20 h-20 inline" />
+      </div>
+    );
   } else if(errorLoadingData) {
     return <div className="m-10 text-center text-red-500">Error connecting to node</div>;
   } else {
