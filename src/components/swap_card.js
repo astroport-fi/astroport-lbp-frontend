@@ -298,8 +298,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
       // Not on chain yet, try again in 5s
       setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [updateBalances]);
 
   async function swapFormSubmitted (e) {
     e.preventDefault();
