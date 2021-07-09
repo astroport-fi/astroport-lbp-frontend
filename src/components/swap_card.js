@@ -12,7 +12,6 @@ import ConnectWalletButton from './connect_wallet_button';
 import SwapCardOverlay from './swap_card_overlay';
 import SwapForm from './swap_form';
 
-// TODO: Dim/disable interface and display connect to wallet button if not connected
 // TODO: Reject input with too many decimals
 // TODO: Error handling
 
