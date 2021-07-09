@@ -16,7 +16,7 @@ import SwapForm from './swap_form';
 // TODO: Reject input with too many decimals
 // TODO: Error handling
 
-function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice }) {
+function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice, onSwapTxMined }) {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [fromAsset, setFromAsset] = useState('native_token');
@@ -293,12 +293,12 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
       await terraClient.tx.txInfo(txhash);
 
       updateBalances();
-      // TODO: Update rest of UI
+      onSwapTxMined();
     } catch {
       // Not on chain yet, try again in 5s
       setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
     }
-  }, [updateBalances]);
+  }, [updateBalances, onSwapTxMined]);
 
   async function swapFormSubmitted (e) {
     e.preventDefault();

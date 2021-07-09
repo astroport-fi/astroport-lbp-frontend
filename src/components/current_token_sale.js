@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import InfoCard from './info_card';
 import { getWeights, getPool } from '../terra/queries';
@@ -20,7 +20,7 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
   const [ustExchangeRate, setUSTExchangeRate] = useState();
   const [secondsRemaining, setSecondsRemaining] = useState();
 
-  useRefreshingEffect(async () => {
+  const refreshPairInfo = useCallback(async () => {
     const [[nativeTokenWeight, saleTokenWeight], pool] = await Promise.all([
       getWeights(
         pair.contract_addr,
@@ -32,7 +32,9 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
     setNativeTokenWeight(new Dec(nativeTokenWeight));
     setSaleTokenWeight(new Dec(saleTokenWeight));
     setPool(pool);
-  }, REFRESH_INTERVAL, [pair]);
+  }, [pair]);
+
+  useRefreshingEffect(refreshPairInfo, REFRESH_INTERVAL, [refreshPairInfo]);
 
   useRefreshingEffect(async() => {
     const exchangeRate = await fetchUSTExchangeRate();
@@ -100,6 +102,7 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
           walletAddress={walletAddress}
           ustExchangeRate={ustExchangeRate}
           ustPrice={ustPrice}
+          onSwapTxMined={() => refreshPairInfo()}
         />
       </div>
 

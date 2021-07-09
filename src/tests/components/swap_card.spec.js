@@ -59,6 +59,12 @@ describe('SwapCard', () => {
 
   const ustExchangeRate = 0.99;
 
+  let onSwapTxMined;
+
+  beforeEach(() => {
+    onSwapTxMined = jest.fn();
+  });
+
   function renderCard({ ustPrice } = {}) {
     render(
       <SwapCard
@@ -67,6 +73,7 @@ describe('SwapCard', () => {
         ustExchangeRate={ustExchangeRate}
         walletAddress="terra42"
         ustPrice={ustPrice || new Dec(1)}
+        onSwapTxMined={onSwapTxMined}
       />
     );
   }
@@ -358,6 +365,9 @@ describe('SwapCard', () => {
 
     // Fetches tx info
     expect(terraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
+
+    // Invokes callback
+    expect(onSwapTxMined).toHaveBeenCalledTimes(1);
   });
 
   it('performs token -> native token swap, displays success message, and updates balances', async () => {
@@ -538,7 +548,7 @@ describe('SwapCard', () => {
     expect(postMsg).toHaveBeenCalledWith({ msg, fee });
   });
 
-  it('conveys error state to user if extension responds with error when sending message', async() => {
+  it('conveys error state to user and does not invoke onSwapTxMined callback if extension responds with error when sending message', async() => {
     // Simulation is performed on input change
     getSimulation.mockResolvedValue({
       return_amount: String(1e6)
@@ -570,5 +580,8 @@ describe('SwapCard', () => {
     });
 
     expect(screen.queryByText('Error submitting transaction')).not.toBeInTheDocument();
+
+    // Does not invoke callback
+    expect(onSwapTxMined).not.toHaveBeenCalled();
   });
 });
