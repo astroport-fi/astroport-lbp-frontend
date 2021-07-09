@@ -27,6 +27,8 @@ function AssetInput({
   const selectId = nextId();
   const inputEl = useRef();
   const [error, setError] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [borderColorClass, setBorderColorClass] = useState('border-blue-gray-300');
 
   function validateInput() {
     if(inputEl.current.input.validity.rangeOverflow) {
@@ -49,6 +51,16 @@ function AssetInput({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [amount, max]);
 
+  useEffect(() => {
+    if(error) {
+      setBorderColorClass('border-red-500');
+    } else if(focused) {
+      setBorderColorClass('border-white');
+    } else {
+      setBorderColorClass('border-blue-gray-300');
+    }
+  }, [error, focused]);
+
   return (
     <div className={className}>
       <div className="flex justify-between text-sm text-white text-opacity-60">
@@ -59,7 +71,7 @@ function AssetInput({
         </span>
       </div>
 
-      <div className={classNames('border rounded-lg py-3 px-4 flex justify-between mt-2', { 'border-blue-gray-300': !error, 'border-red-500': error })}>
+      <div className={classNames('transition-colors border rounded-lg py-3 px-4 flex justify-between mt-2', borderColorClass)}>
         <div className="flex items-center flex-grow cursor-text" onClick={() => inputEl.current.focus()}>
           <AutosizeInput
             id={inputId}
@@ -75,6 +87,8 @@ function AssetInput({
             max={max}
             min={min}
             step={step}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
           />
 
           <span className="text-white text-opacity-50 text-xs select-none">
@@ -84,7 +98,7 @@ function AssetInput({
 
         {
           maxClick &&
-          <button type="button" className="text-yellow text-xs uppercase mr-3" onClick={maxClick}>
+          <button type="button" className="text-yellow text-xs uppercase mr-3 outline-none" onClick={maxClick}>
             Max
           </button>
         }

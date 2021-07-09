@@ -54,7 +54,7 @@ function SwapForm({
         <button type="button" className="absolute right-8" onClick={onReverseAssets}>
           <span className="sr-only">Reverse assets</span>
 
-          <ReverseArrows className="h-5 w-5 opacity-60" />
+          <ReverseArrows className="h-5 w-5 opacity-60 hover:opacity-100 transition-opacity" />
         </button>
       </div>
 
@@ -81,7 +81,7 @@ function SwapForm({
         type="submit"
         className={
           classNames(
-            "text-black py-3 px-6 rounded-lg w-full mt-12", {
+            "text-black py-3 px-6 rounded-lg w-full mt-12 transition hover:animate-pulse", {
               'bg-yellow': canSubmit,
               'bg-gray-400': !canSubmit
             }
