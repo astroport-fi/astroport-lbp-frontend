@@ -15,7 +15,7 @@ function Popover({ children }) {
       </div>
 
       {/* Popover wrapper, right-aligned (only current needed use-case) */}
-      <div className={classNames('absolute bg-blue-gray-700 bg-opacity-80 mt-4 p-2 rounded-lg shadow min-w-full right-0', bgOpacityClass, commonClasses)}>
+      <div className={classNames('absolute bg-blue-gray-700 mt-4 p-2 rounded-lg shadow-lg min-w-full right-0', bgOpacityClass, commonClasses)}>
         {children}
       </div>
     </>
