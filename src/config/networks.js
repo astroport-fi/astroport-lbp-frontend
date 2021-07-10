@@ -20,7 +20,7 @@ export const networks = {
     allowedPairContracts: [
       'terra1ttz2s465khrrmv2ck2ct4v9cqhx4f3h7kgqmrq', // FOO
       'terra1jeaz8ulv78cze40dxm8rd8tcj077f2unlypzx9', // TESTA
-      'terra1mw29javp5k2k7wxyk29cyyfv6nxlhvt83l7ak9'  // TESTB
+      'terra109mvhus4fl50mh4c84cuk4ul3lcpuk2cwhdf6d'  // TESTC
     ]
   },
   ...envNetworks
