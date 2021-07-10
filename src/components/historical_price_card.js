@@ -177,7 +177,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
               tickCount: 12
             }}
             yAxis={{
-              tickFormat: formatNumber,
+              tickFormat: (v) => formatNumber(v, { minimumFractionDigits: 2 }),
               tickCount: 10
             }}
           >
