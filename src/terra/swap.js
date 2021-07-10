@@ -1,6 +1,7 @@
 import { Extension, MsgExecuteContract, StdTx, StdFee, Int, Coin, Coins } from '@terra-money/terra.js';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import terraClient from './client';
+import { getBalance, getTokenBalance } from './queries';
 
 /**
  * Terra account address
@@ -154,4 +155,37 @@ export async function feeForMaxNativeToken({ pair, walletAddress, intBalance }) 
 
   // Return combined gas and tax fee for denom
   return new StdFee(fee.gas, fee.amount.add(taxCoin));
+}
+
+/**
+ * Ensures specified wallet has enough balance to complete given transaction
+ *
+ * @param {Address} walletAddress
+ * @param {Object} tx
+ * @param {MsgExecuteContract} tx.msg
+ * @param {StdFee} tx.fee
+ * @returns {Promise<boolean>}
+ */
+export async function sufficientBalance(walletAddress, tx) {
+  const coins = tx.fee.amount.add(tx.msg.coins);
+
+  // Check native token balance(s)
+  for(const coin of coins.toArray()) {
+    const balance = await getBalance(coin.denom, walletAddress);
+
+    if(balance.lessThan(coin.amount)) {
+      return false;
+    }
+  }
+
+  // Check contract token balance(s) if sending
+  if(tx.msg.execute_msg.send) {
+    const balance = await getTokenBalance(tx.msg.contract, walletAddress);
+
+    if(balance.lessThan(tx.msg.execute_msg.send.amount)) {
+      return false;
+    }
+  }
+
+  return true;
 }

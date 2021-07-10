@@ -9,7 +9,8 @@ import {
   buildSwapFromNativeTokenMsg,
   estimateFee,
   feeForMaxNativeToken,
-  postMsg
+  postMsg,
+  sufficientBalance
 } from '../../terra/swap';
 import { Int, Dec, StdFee, Coins, Coin } from '@terra-money/terra.js';
 import terraClient from '../../terra/client';
@@ -30,7 +31,8 @@ jest.mock('../../terra/swap', () => {
     ...original,
     estimateFee: jest.fn(),
     postMsg: jest.fn(),
-    feeForMaxNativeToken: jest.fn()
+    feeForMaxNativeToken: jest.fn(),
+    sufficientBalance: jest.fn()
   }
 });
 
@@ -319,6 +321,9 @@ describe('SwapCard', () => {
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
 
+    // Stub out balance check
+    sufficientBalance.mockResolvedValue(true);
+
     renderCard();
 
     // Initial balances
@@ -391,6 +396,9 @@ describe('SwapCard', () => {
     // Successful post
     postMsg.mockResolvedValue({ txhash: 'ABC123' });
 
+    // Stub out balance check
+    sufficientBalance.mockResolvedValue(true);
+
     renderCard();
 
     // Initial balances
@@ -460,6 +468,9 @@ describe('SwapCard', () => {
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
 
+    // Stub out balance check
+    sufficientBalance.mockResolvedValue(true);
+
     renderCard();
 
     // Wait for balances to load
@@ -507,6 +518,9 @@ describe('SwapCard', () => {
 
     // Successful post
     postMsg.mockResolvedValue({ txhash: '123ABC' });
+
+    // Stub out balance check
+    sufficientBalance.mockResolvedValue(true);
 
     renderCard();
 
@@ -556,6 +570,7 @@ describe('SwapCard', () => {
 
     getBalance.mockResolvedValue(10 * 1e6);
     getTokenBalance.mockResolvedValue(0);
+    sufficientBalance.mockResolvedValue(true);
 
     // Failed post
     postMsg.mockRejectedValue({ code: 1 });

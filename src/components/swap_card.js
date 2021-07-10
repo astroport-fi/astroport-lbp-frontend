@@ -4,7 +4,7 @@ import Card from './card';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_SYMBOLS } from '../constants';
-import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg } from '../terra/swap';
+import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg, sufficientBalance } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import terraClient from '../terra/client';
@@ -14,7 +14,6 @@ import SwapForm from './swap_form';
 import classNames from 'classnames';
 
 // TODO: Reject input with too many decimals
-// TODO: Error handling
 
 function SwapCard({
   pair,
@@ -310,16 +309,21 @@ function SwapCard({
   async function swapFormSubmitted (e) {
     e.preventDefault();
 
-    setLastTx({ state: 'waitingForExtension' });
+    // Perform final balance check
+    if(await sufficientBalance(walletAddress, tx)) {
+      setLastTx({ state: 'waitingForExtension' });
 
-    try {
-      const { txhash } = await postMsg(tx);
+      try {
+        const { txhash } = await postMsg(tx);
 
-      refreshBalancesWhenTxMined(txhash);
+        refreshBalancesWhenTxMined(txhash);
 
-      setLastTx({ state: 'success', txhash });
-    } catch {
-      setLastTx({ state: 'error' });
+        setLastTx({ state: 'success', txhash });
+      } catch {
+        setLastTx({ state: 'error' });
+      }
+    } else {
+      setError('Insufficient balance to complete transaction with fees');
     }
   }
 

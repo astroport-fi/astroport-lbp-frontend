@@ -3,11 +3,13 @@ import {
   buildSwapFromContractTokenMsg,
   postMsg,
   estimateFee,
-  feeForMaxNativeToken
+  feeForMaxNativeToken,
+  sufficientBalance
 } from '../../terra/swap';
 import terraClient from '../../terra/client';
 import { buildPair } from '../test_helpers/factories';
 import { Extension, MsgExecuteContract, StdFee, StdTx, Int, Dec, Coins, Coin } from '@terra-money/terra.js';
+import { getBalance, getTokenBalance } from '../../terra/queries';
 
 jest.mock('@terra-money/terra.js', () => {
   const original = jest.requireActual('@terra-money/terra.js');
@@ -30,6 +32,12 @@ jest.mock('../../terra/client', () => ({
       taxCap: jest.fn()
     }
   }
+}));
+
+jest.mock('../../terra/queries', () => ({
+  __esModule: true,
+  getBalance: jest.fn(),
+  getTokenBalance: jest.fn()
 }));
 
 describe('estimateFee', () => {
@@ -252,5 +260,97 @@ describe('feeForMaxNativeToken', () => {
     // Returned fee includes original gas amount and fee,
     // plus tax cap
     expect(fee).toEqual(new StdFee(200000, new Coins([new Coin('uusd', 30000 + 1000000)])));
+  });
+});
+
+describe('sufficientBalance', () => {
+  describe('native -> contract token swap', () => {
+    let msg, fee, tx;
+
+    beforeEach(() => {
+      // Stubbed out native -> contract swap message
+      msg = {
+        coins: new Coins([new Coin('uusd', 123456)]),
+        execute_msg: {
+          swap: {}
+        }
+      }
+
+      fee = new StdFee(42, new Coins([new Coin('uusd', 1000000)]));
+
+      tx = { msg, fee };
+    });
+
+    it('returns true when balance is sufficient', async () => {
+      getBalance.mockResolvedValue(new Int(1123456));
+
+      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(true);
+
+      expect(getBalance).toHaveBeenCalledTimes(1);
+      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+    });
+
+    it('returns false when balance is insufficient', async () => {
+      getBalance.mockResolvedValue(new Int(1123455));
+
+      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+
+      expect(getBalance).toHaveBeenCalledTimes(1);
+      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+    });
+  });
+
+  describe('contract -> native token swap', () => {
+    let msg, fee, tx;
+
+    beforeEach(() => {
+      // Stubbed out contract -> native swap message
+      msg = {
+        coins: new Coins([]),
+        contract: 'terra-token-addr',
+        execute_msg: {
+          send: {
+            amount: new Int(123456)
+          }
+        }
+      }
+
+      fee = new StdFee(42, new Coins([new Coin('uusd', 1000000)]));
+
+      tx = { msg, fee };
+    });
+
+    it('returns true when balances are sufficient', async () => {
+      getBalance.mockResolvedValue(new Int(1000000));
+      getTokenBalance.mockResolvedValue(new Int(123456));
+
+      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(true);
+
+      expect(getBalance).toHaveBeenCalledTimes(1);
+      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+
+      expect(getTokenBalance).toHaveBeenCalledTimes(1);
+      expect(getTokenBalance).toHaveBeenCalledWith('terra-token-addr', 'terra-wallet-addr');
+    });
+
+    it('returns false when native balance is insufficient', async () => {
+      getBalance.mockResolvedValue(new Int(1000000-1));
+      getTokenBalance.mockResolvedValue(new Int(123456));
+
+      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+
+      expect(getBalance).toHaveBeenCalledTimes(1);
+      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+    });
+
+    it('returns false when contract token balance is insufficient', async () => {
+      getBalance.mockResolvedValue(new Int(1000000));
+      getTokenBalance.mockResolvedValue(new Int(123455));
+
+      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+
+      expect(getTokenBalance).toHaveBeenCalledTimes(1);
+      expect(getTokenBalance).toHaveBeenCalledWith('terra-token-addr', 'terra-wallet-addr');
+    });
   });
 });
