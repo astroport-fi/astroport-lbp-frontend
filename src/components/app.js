@@ -25,9 +25,16 @@ function App() {
   // Automatically reconnect extension if it was connected before
   // Wait a beat because the extension isn't always ready immediately
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       if(window.localStorage.getItem(EXTENSION_LOCAL_STORAGE_KEY)) {
-        connectExtension().then(({ address }) => setWalletAddress(address));
+        try {
+          const { address } = await connectExtension();
+          setWalletAddress(address);
+        } catch {
+          // If we fail to reconnect to the extension,
+          // don't try to reconnect again automatically in the future
+          window.localStorage.removeItem(EXTENSION_LOCAL_STORAGE_KEY);
+        }
       }
     }, 10);
 
