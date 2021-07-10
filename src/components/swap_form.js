@@ -81,9 +81,9 @@ function SwapForm({
         type="submit"
         className={
           classNames(
-            "text-black py-3 px-6 rounded-lg w-full mt-12 transition hover:animate-pulse", {
-              'bg-yellow': canSubmit,
-              'bg-gray-400': !canSubmit
+            "text-black py-3 px-6 rounded-lg w-full mt-12 transition", {
+              'bg-yellow hover:animate-pulse': canSubmit,
+              'bg-gray-400 cursor-not-allowed': !canSubmit
             }
           )
         }
