@@ -11,6 +11,7 @@ import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 import { useRefreshingEffect } from '../helpers/effects';
 import { timeString } from '../helpers/time_formatters';
 import OptionsGroup from './historical_price_card/options_group';
+import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
 
 // TODO: Update to actual graphql endpoint
 const apolloClient = new ApolloClient({
@@ -61,8 +62,11 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const [data, setData] = useState();
   const [interval, setInterval] = useState(INTERVALS[INTERVALS.length-1].minutes);
   const [scale, setScale] = useState('linear');
+  const [fetchingNewData, setFetchingNewData] = useState();
 
-  useRefreshingEffect(() => {
+  useRefreshingEffect((isRefreshing) => {
+    setFetchingNewData(!isRefreshing);
+
     const fetchData = async() => {
       const { data } = await apolloClient.query({
         fetchPolicy: 'no-cache',
@@ -77,6 +81,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
       });
 
       setData(data.asset.prices.history);
+      setFetchingNewData(false);
     }
 
     fetchData();
@@ -152,7 +157,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
         </defs>
       </svg>
 
-      <div ref={chartWrapperRef} className="flex-grow">
+      <div ref={chartWrapperRef} className={classNames('flex-grow transition-opacity flex items-center', { 'opacity-50': fetchingNewData })}>
         {
           chartSVGWidth && chartSVGHeight && data &&
           <Chart
@@ -177,6 +182,10 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
               interpolation={'natural'}
             />
           </Chart>
+        }
+
+        {
+          !data && <LoadingIndicator className="w-12 h-12 mx-auto" />
         }
       </div>
     </Card>

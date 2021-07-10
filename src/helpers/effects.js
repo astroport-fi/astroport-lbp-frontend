@@ -6,7 +6,8 @@ export function useRefreshingEffect(fn, timeout, deps=[]) {
     fn();
 
     // And then every specified ms
-    const interval = setInterval(fn, timeout);
+    // passing true to the function for refresh-specific logic
+    const interval = setInterval(fn, timeout, true);
 
     return () => clearInterval(interval);
 
