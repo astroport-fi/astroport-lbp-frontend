@@ -88,21 +88,21 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-8 my-8">
-        <InfoCard label="Price" value={formatUSD(usdPrice)} loading={usdPrice === undefined} />
-        <InfoCard label="Coins Remaining" value={pool && formatTokenAmount(saleAssetFromPair(pool.assets).amount, saleTokenInfo.decimals)} loading={pool === undefined} />
-        <InfoCard label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
+      <div className="grid grid-cols-12 gap-8 my-8">
+        <InfoCard className="col-span-3" label="Price" value={formatUSD(usdPrice)} loading={usdPrice === undefined} />
+        <InfoCard className="col-span-3" label="Coins Remaining" value={pool && formatTokenAmount(saleAssetFromPair(pool.assets).amount, saleTokenInfo.decimals)} loading={pool === undefined} />
+        <InfoCard className="col-span-3" label="Time Remaining" value={durationString(secondsRemaining)} loading={secondsRemaining === undefined} />
         <CurrentWeightCard
+          className="col-span-3"
           loading={nativeTokenWeight === undefined}
           pair={pair}
           saleTokenInfo={saleTokenInfo}
           currentNativeTokenWeight={nativeTokenWeight}
           currentSaleTokenWeight={saleTokenWeight}
         />
-      </div>
 
-      <div className="flex my-8">
         <SwapCard
+          className="col-span-5"
           onWalletConnect={onWalletConnect}
           pair={pair}
           saleTokenInfo={saleTokenInfo}

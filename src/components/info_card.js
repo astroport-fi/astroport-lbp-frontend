@@ -5,12 +5,12 @@ import { ReactComponent as InfoIcon } from '../assets/images/info.svg';
 import classNames from 'classnames';
 import Popover from './info_card/popover';
 
-function InfoCard({ label, value, loading, moreInfo }) {
+function InfoCard({ label, value, loading, moreInfo, className }) {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
 
   return (
     <Card
-      className={classNames('relative', {'cursor-pointer': moreInfo})}
+      className={classNames('relative', { 'cursor-pointer': moreInfo }, className)}
       onMouseEnter={() => setShowMoreInfo(true)}
       onMouseLeave={() => setShowMoreInfo(false)}
     >

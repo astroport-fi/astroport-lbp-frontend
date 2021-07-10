@@ -1,7 +1,7 @@
 import InfoCard from './info_card';
 import MoreInfo from './current_weight_card/more_info';
 
-function CurrentWeightCard({ loading, pair, saleTokenInfo, currentNativeTokenWeight, currentSaleTokenWeight }) {
+function CurrentWeightCard({ loading, pair, saleTokenInfo, currentNativeTokenWeight, currentSaleTokenWeight, ...rest }) {
   return (
     <InfoCard
       label="Current Weight"
@@ -10,6 +10,7 @@ function CurrentWeightCard({ loading, pair, saleTokenInfo, currentNativeTokenWei
       moreInfo={
         <MoreInfo pair={pair} saleTokenInfo={saleTokenInfo} />
       }
+      { ...rest }
     />
   );
 }

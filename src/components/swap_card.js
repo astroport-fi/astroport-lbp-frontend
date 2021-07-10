@@ -11,11 +11,21 @@ import SwapRates from './swap_rates';
 import ConnectWalletButton from './connect_wallet_button';
 import SwapCardOverlay from './swap_card_overlay';
 import SwapForm from './swap_form';
+import classNames from 'classnames';
 
 // TODO: Reject input with too many decimals
 // TODO: Error handling
 
-function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walletAddress, ustPrice, onSwapTxMined }) {
+function SwapCard({
+  onWalletConnect,
+  pair,
+  saleTokenInfo,
+  ustExchangeRate,
+  walletAddress,
+  ustPrice,
+  onSwapTxMined,
+  className
+}) {
   const [fromAmount, setFromAmount] = useState('');
   const [toAmount, setToAmount] = useState('');
   const [fromAsset, setFromAsset] = useState('native_token');
@@ -343,7 +353,7 @@ function SwapCard({ onWalletConnect, pair, saleTokenInfo, ustExchangeRate, walle
   }
 
   return (
-    <Card className="w-2/5 p-6 pb-8 border border-blue-gray-300" overlay={
+    <Card className={classNames('p-6 pb-8 border border-blue-gray-300', className)} overlay={
       lastTx &&
       <SwapCardOverlay
         txState={lastTx.state}
