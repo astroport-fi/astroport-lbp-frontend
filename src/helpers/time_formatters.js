@@ -1,3 +1,12 @@
+export function timeString(timeMs) {
+  const date = new Date(timeMs);
+
+  return date.toLocaleString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
 export function dateString(date) {
   return date.toLocaleString(undefined, {
     year: 'numeric',

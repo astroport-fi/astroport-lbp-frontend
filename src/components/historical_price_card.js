@@ -6,7 +6,29 @@ import Chart from './chart';
 import { VictoryArea } from 'victory';
 import useMeasure from 'react-use-measure';
 import { useState, useEffect } from 'react';
-import { formatUSD } from '../helpers/number_formatters';
+import { formatNumber, formatUSD } from '../helpers/number_formatters';
+import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
+import { useRefreshingEffect } from '../helpers/effects';
+import { timeString } from '../helpers/time_formatters';
+
+// TODO: Update to actual graphql endpoint
+const apolloClient = new ApolloClient({
+  uri: 'https://graph.mirror.finance/graphql',
+  cache: new InMemoryCache()
+});
+
+const PRICE_QUERY = gql`
+  query PriceHistory($contractAddress: String!, $from: Float!, $to: Float!, $interval: Float!) {
+    asset(token: $contractAddress) {
+      prices {
+        history(from: $from, to: $to, interval: $interval) {
+          timestamp
+          price
+        }
+      }
+    }
+  }
+`;
 
 function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }) {
   const nativeTokenAssetInfo = nativeTokenFromPair(pair.asset_infos);
@@ -14,6 +36,27 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const [chartWrapperRef, chartWrapperBounds] = useMeasure();
   const [chartSVGWidth, setChartSVGWidth] = useState();
   const [chartSVGHeight, setChartSVGHeight] = useState();
+  const [data, setData] = useState();
+
+  useRefreshingEffect(() => {
+    const fetchData = async() => {
+      const { data } = await apolloClient.query({
+        fetchPolicy: 'no-cache',
+        query: PRICE_QUERY,
+        variables: {
+          // TODO: Replace with actual contract address
+          contractAddress: 'terra15gwkyepfc6xgca5t5zefzwy42uts8l2m4g40k6', // pair.contract_addr
+          from: Date.now() - 60 * 60 * 1000,
+          to: Date.now(),
+          interval: 1 // Minute
+        }
+      });
+
+      setData(data.asset.prices.history);
+    }
+
+    fetchData();
+  }, 60_000, [pair]);
 
   // Match aspect ratio of container (which grows to fill the card)
   useEffect(() => {
@@ -25,17 +68,6 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
       setChartSVGHeight(chartWrapperBounds.height);
     }
   }, [chartWrapperBounds.width, chartWrapperBounds.height]);
-
-  const data = [
-    { x: 3, y: 5.05 },
-    { x: 6, y: 4.95 },
-    { x: 9, y: 4.85 },
-    { x: 12, y: 4.95 },
-    { x: 15, y: 4.82 },
-    { x: 18, y: 4.9 },
-    { x: 21, y: 4.82 },
-    { x: 24, y: 4.8 }
-  ];
 
   const areaDataStyle = {
     stroke: '#4E6EFF',
@@ -72,14 +104,27 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
 
       <div ref={chartWrapperRef} className="flex-grow">
         {
-          chartSVGWidth && chartSVGHeight &&
+          chartSVGWidth && chartSVGHeight && data &&
           <Chart
             width={chartSVGWidth}
             height={chartSVGHeight}
             padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
-            minDomain={4.7}
+            xAxis={{
+              tickFormat: timeString,
+              tickCount: 10
+            }}
+            yAxis={{
+              tickFormat: formatNumber,
+              tickCount: 10
+            }}
           >
-            <VictoryArea data={data} style={{ data: areaDataStyle }} interpolation={'natural'} />
+            <VictoryArea
+              data={data}
+              x="timestamp"
+              y="price"
+              style={{data: areaDataStyle}}
+              interpolation={'natural'}
+            />
           </Chart>
         }
       </div>
