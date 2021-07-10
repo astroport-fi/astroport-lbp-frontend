@@ -51,6 +51,7 @@ function Chart({ xAxis, yAxis, children, ...rest }) {
     <VictoryChart theme={theme} { ...rest }>
       <VictoryAxis
         independentAxis
+        gridComponent={<LineSegment y2={10} />}
         { ...xAxis }
       />
 
