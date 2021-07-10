@@ -1,5 +1,5 @@
 import InfoCard from './info_card';
-import MoreInfo from './current_weight_card/more_info';
+import WeightsCart from './current_weight_card/weights_chart';
 
 function CurrentWeightCard({ loading, pair, saleTokenInfo, currentNativeTokenWeight, currentSaleTokenWeight, ...rest }) {
   return (
@@ -8,7 +8,7 @@ function CurrentWeightCard({ loading, pair, saleTokenInfo, currentNativeTokenWei
       value={`${Math.round(currentNativeTokenWeight)} : ${Math.round(currentSaleTokenWeight)}`}
       loading={loading}
       moreInfo={
-        <MoreInfo pair={pair} saleTokenInfo={saleTokenInfo} />
+        <WeightsCart pair={pair} saleTokenInfo={saleTokenInfo} />
       }
       { ...rest }
     />

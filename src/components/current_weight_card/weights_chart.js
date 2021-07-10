@@ -7,7 +7,7 @@ import LegendItem from './legend_item';
 const NATIVE_TOKEN_COLOR = '#4E6EFF';
 const SALE_TOKEN_COLOR = '#F11B44';
 
-function MoreInfo({ pair, saleTokenInfo }) {
+function WeightsChart({ pair, saleTokenInfo }) {
   const nativeTokenAssetInfo = nativeTokenFromPair(pair.asset_infos);
   const saleTokenAssetInfo =  saleAssetFromPair(pair.asset_infos);
 
@@ -134,4 +134,4 @@ function MoreInfo({ pair, saleTokenInfo }) {
   );
 }
 
-export default MoreInfo;
+export default WeightsChart;
