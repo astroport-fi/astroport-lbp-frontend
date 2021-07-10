@@ -15,6 +15,11 @@ jest.mock('../../services/fetch_ust_exchange_rate', () => ({
   default: jest.fn()
 }));
 
+// Simple stub for HistoricalPriceCard component
+jest.mock('../../components/historical_price_card', () =>
+  () => (<div>Historical Pricing</div>)
+);
+
 describe('CurrentTokenSale', () => {
   it('fetches and displays data for current token sale', async () => {
     fetchUSTExchangeRate.mockResolvedValue(0.99);
