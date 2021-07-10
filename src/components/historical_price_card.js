@@ -5,7 +5,7 @@ import { nativeTokenFromPair } from '../helpers/asset_pairs';
 import Chart from './chart';
 import { VictoryArea } from 'victory';
 import useMeasure from 'react-use-measure';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatNumber, formatUSD } from '../helpers/number_formatters';
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 import { useRefreshingEffect } from '../helpers/effects';
@@ -80,7 +80,10 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
         }
       });
 
-      setData(data.asset.prices.history);
+      setData(data.asset.prices.history.map(
+        ({ timestamp, price }) => ({ timestamp, price: parseFloat(price) })
+      ));
+
       setFetchingNewData(false);
     }
 
@@ -97,6 +100,8 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
       setChartSVGHeight(chartWrapperBounds.height);
     }
   }, [chartWrapperBounds.width, chartWrapperBounds.height]);
+
+  const prices = useMemo(() => data?.map(({ price }) => price), [data]);
 
   const areaDataStyle = {
     stroke: '#4E6EFF',
@@ -165,6 +170,8 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             height={chartSVGHeight}
             padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
             scale={{ x: 'linear', y: scale }}
+            minDomain={{ y: Math.min(...prices)*0.98 }}
+            maxDomain={{ y: Math.max(...prices)*1.02 }}
             xAxis={{
               tickFormat: timeString,
               tickCount: 12
