@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import reportException from '../report_exception';
 import ScheduledTokenSalesCard from './scheduled_token_sales_card';
 import PreviousTokenSalesCard from './previous_token_sales_card';
 import CurrentTokenSale from './current_token_sale';
@@ -63,9 +64,7 @@ function App() {
           );
         }
       } catch(e) {
-        // TODO: Report error
-        // TODO: Some kind of retry behavior?
-        console.error(e);
+        reportException(e);
         setErrorLoadingData(true);
       } finally {
         setLoading(false);

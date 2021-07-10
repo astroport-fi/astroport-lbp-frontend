@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
+import reportException from '../report_exception';
 import Card from './card';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
@@ -216,8 +217,7 @@ function SwapCard({
           }
         }
       } catch (e) {
-        // TODO: Notify error reporting service?
-        console.error(e);
+        reportException(e);
 
         resetSimulationState();
 

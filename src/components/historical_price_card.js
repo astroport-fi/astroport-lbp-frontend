@@ -53,6 +53,8 @@ const INTERVALS = [
 
 const INTERVALS_TO_QUERY = 70;
 
+// TODO: Figure out why log scale y-axis is super condensed
+
 function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }) {
   const nativeTokenAssetInfo = nativeTokenFromPair(pair.asset_infos);
   const nativeSymbol = NATIVE_TOKEN_SYMBOLS[nativeTokenAssetInfo.info.native_token.denom];

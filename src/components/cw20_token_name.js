@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import reportException from '../report_exception';
 import { getTokenInfo } from '../terra/queries';
 import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
 
@@ -12,11 +13,10 @@ function CW20TokenName({ address }) {
 
         setName(tokenInfo.name);
       } catch(e) {
+        reportException(e);
+
         // Fallback to displaying the contract address
         setName(<small>{ address }</small>);
-
-        // TODO: Report error?
-        console.error(e);
       }
     };
 
