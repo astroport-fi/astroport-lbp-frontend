@@ -3,7 +3,7 @@ import reportException from '../report_exception';
 import Card from './card';
 import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from '../terra/queries';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
-import { NATIVE_TOKEN_SYMBOLS } from '../constants';
+import { NATIVE_TOKEN_DECIMALS, NATIVE_TOKEN_SYMBOLS } from '../constants';
 import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg, sufficientBalance } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
@@ -68,7 +68,7 @@ function SwapCard({
   }
 
   const decimals = {
-    native_token: 6,
+    native_token: NATIVE_TOKEN_DECIMALS,
     token: saleTokenInfo.decimals
   }
 
