@@ -30,6 +30,27 @@ const PRICE_QUERY = gql`
   }
 `;
 
+const INTERVALS = [
+  {
+    minutes: 5,
+    label: '5m'
+  },
+  {
+    minutes: 15,
+    label: '15m'
+  },
+  {
+    minutes: 60,
+    label: '1h'
+  },
+  {
+    minutes: 4 * 60,
+    label: '4h'
+  }
+]
+
+const INTERVALS_TO_QUERY = 70;
+
 function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }) {
   const nativeTokenAssetInfo = nativeTokenFromPair(pair.asset_infos);
   const nativeSymbol = NATIVE_TOKEN_SYMBOLS[nativeTokenAssetInfo.info.native_token.denom];
@@ -37,6 +58,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const [chartSVGWidth, setChartSVGWidth] = useState();
   const [chartSVGHeight, setChartSVGHeight] = useState();
   const [data, setData] = useState();
+  const [interval, setInterval] = useState(INTERVALS[INTERVALS.length-1].minutes);
 
   useRefreshingEffect(() => {
     const fetchData = async() => {
@@ -46,9 +68,9 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
         variables: {
           // TODO: Replace with actual contract address
           contractAddress: 'terra15gwkyepfc6xgca5t5zefzwy42uts8l2m4g40k6', // pair.contract_addr
-          from: Date.now() - 60 * 60 * 1000,
+          from: Date.now() - INTERVALS_TO_QUERY * interval * 60 * 1000,
           to: Date.now(),
-          interval: 1 // Minute
+          interval: interval // in minutes
         }
       });
 
@@ -56,7 +78,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
     }
 
     fetchData();
-  }, 60_000, [pair]);
+  }, 60_000, [pair, interval]);
 
   // Match aspect ratio of container (which grows to fill the card)
   useEffect(() => {
@@ -77,9 +99,26 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
 
   return (
     <Card className={classNames('p-6 flex flex-col', className)} style={style}>
-      <h2 className="text-lg font-bold">
-        {nativeSymbol} / {saleTokenInfo.symbol}
-      </h2>
+      <div className="flex justify-between">
+        <h2 className="text-lg font-bold">
+          {nativeSymbol} / {saleTokenInfo.symbol}
+        </h2>
+
+        <div className="flex bg-blue-gray-400 px-2 py-1 rounded-lg text-sm">
+          {
+            INTERVALS.map(({ minutes, label }) =>
+              <button
+                key={minutes}
+                type="button"
+                onClick={() => setInterval(minutes)}
+                className={classNames('rounded py-1 px-2', {'bg-blue-gray-700': interval === minutes})}
+              >
+                {label}
+              </button>
+            )
+          }
+        </div>
+      </div>
 
       {
         usdPrice &&
@@ -111,7 +150,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
             xAxis={{
               tickFormat: timeString,
-              tickCount: 10
+              tickCount: 12
             }}
             yAxis={{
               tickFormat: formatNumber,
