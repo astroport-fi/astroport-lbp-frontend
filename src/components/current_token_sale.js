@@ -54,9 +54,10 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
       ustPoolSize: new Int(nativeTokenFromPair(pool.assets).amount),
       tokenPoolSize: new Int(saleAssetFromPair(pool.assets).amount),
       ustWeight: nativeTokenWeight,
-      tokenWeight: saleTokenWeight
+      tokenWeight: saleTokenWeight,
+      tokenDecimals: saleTokenInfo.decimals
     });
-  }, [pool, nativeTokenWeight, saleTokenWeight]);
+  }, [pool, nativeTokenWeight, saleTokenWeight, saleTokenInfo.decimals]);
 
   const usdPrice = useMemo(() => {
     // Don't convert if ust price or exchange rate is null
