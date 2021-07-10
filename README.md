@@ -27,7 +27,8 @@ $ npm install
   file. See `.env.development.local.sample` for a template.
 - A sensible configuration for local development would be to define a `localterra` network in `src/config/environments/development.js`,
   and set `REACT_APP_DEFAULT_NETWORK` to `localterra` in `.env.development.local`.
-  
+- **Important Note**: You *must* whitelist any pairs that you want the app to care about in the `allowedPairContracts` key of each network config.
+
 ### Running the development server
 
 ```console

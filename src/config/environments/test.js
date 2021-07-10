@@ -3,7 +3,8 @@ module.exports = {
     stubnet: {
       lcdURL: '',
       chainID: '',
-      factoryContractAddress: 'terra-factoryContractAddress'
+      factoryContractAddress: 'terra-factoryContractAddress',
+      allowedPairContracts: []
     }
   }
 }

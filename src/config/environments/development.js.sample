@@ -7,7 +7,11 @@ module.exports = {
       // Set to the address of the LBP factory contract on your localterra
       factoryContractAddress: '',
 
-      gasPrices: { uusd: 0.15 }
+      gasPrices: { uusd: 0.15 },
+
+      allowedPairContracts: [
+        // List your pair contract addresses here
+      ]
     }
   }
 }

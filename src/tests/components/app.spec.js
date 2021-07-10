@@ -21,6 +21,23 @@ jest.mock('../../components/current_token_sale', () =>
   () => (<div>Current Token Info</div>)
 );
 
+jest.mock('../../config/networks.js', () => {
+  const original = jest.requireActual('../../config/networks.js');
+
+  return {
+    __esModule: true,
+    ...original,
+    defaultNetwork: {
+      ...original.defaultNetwork,
+      allowedPairContracts: [
+        'terra1-pair-addr',
+        'terra2-pair-addr',
+        'terra3-pair-addr'
+      ]
+    }
+  }
+});
+
 describe('App', () => {
   it('renders Scheduled and Previous Token Sales cards', async () => {
     const dateNowSpy = jest
@@ -39,20 +56,31 @@ describe('App', () => {
       startTime: Math.floor(Date.UTC(2021, 5, 8, 12)/1000),
       endTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
       tokenContractAddr: 'terra3',
-      contractAddr: 'terra-pair-addr'
+      contractAddr: 'terra3-pair-addr'
+    });
+
+    // This pair would be displayed as scheduled if permitted
+    const unpermittedPair = buildPair({
+      startTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
+      endTime: Math.floor(Date.UTC(2021, 5, 14, 12)/1000),
+      tokenContractAddr: 'terra4',
+      contractAddr: 'terra4-pair-addr'
     });
 
     getLBPs.mockResolvedValue([
       buildPair({
         startTime: Math.floor(Date.UTC(2021, 0, 1, 12)/1000),
         endTime: Math.floor(Date.UTC(2021, 0, 4, 12)/1000),
-        tokenContractAddr: 'terra1'
+        tokenContractAddr: 'terra1',
+        contractAddr: 'terra1-pair-addr'
       }),
       buildPair({
         startTime: Math.floor(Date.UTC(2021, 5, 10, 12)/1000),
         endTime: Math.floor(Date.UTC(2021, 5, 14, 12)/1000),
-        tokenContractAddr: 'terra2'
+        tokenContractAddr: 'terra2',
+        contractAddr: 'terra2-pair-addr'
       }),
+      unpermittedPair,
       currentPair
     ]);
 
@@ -68,6 +96,9 @@ describe('App', () => {
         },
         terra3: {
           name: 'Baz'
+        },
+        terra4: {
+          name: 'Bad'
         }
       }[address]
     ));
@@ -100,7 +131,10 @@ describe('App', () => {
 
     // It should have fetched info for the current sale
     expect(getPairInfo).toHaveBeenCalledTimes(1);
-    expect(getPairInfo).toHaveBeenCalledWith('terra-pair-addr');
+    expect(getPairInfo).toHaveBeenCalledWith('terra3-pair-addr');
+
+    // Unpermitted pair should never be displayed
+    expect(screen.queryByText('Bad')).not.toBeInTheDocument();
 
     dateNowSpy.mockRestore();
   });
@@ -108,7 +142,7 @@ describe('App', () => {
   it('displays partial wallet address after successful browser extension connection', async () => {
     connectExtension.mockResolvedValue({ address: 'terra1234567890' });
 
-    const currentPair = buildPair();
+    const currentPair = buildPair({ contractAddr: 'terra1-pair-addr' });
 
     getLBPs.mockResolvedValue([
       currentPair
@@ -145,7 +179,7 @@ describe('App', () => {
 
     connectExtension.mockResolvedValue({ address: 'terra1234567890' });
 
-    const currentPair = buildPair();
+    const currentPair = buildPair({ contractAddr: 'terra1-pair-addr' });
 
     getLBPs.mockResolvedValue([
       currentPair
@@ -176,7 +210,7 @@ describe('App', () => {
 
     connectExtension.mockResolvedValue({ address: 'terra1234567890' });
 
-    const currentPair = buildPair();
+    const currentPair = buildPair({ contractAddr: 'terra1-pair-addr'} );
 
     getLBPs.mockResolvedValue([
       currentPair

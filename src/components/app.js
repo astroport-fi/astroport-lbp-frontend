@@ -9,6 +9,7 @@ import ConnectWalletButton from './connect_wallet_button';
 import ConnectedWallet from './connected_wallet';
 import { connectExtension } from '../terra/extension';
 import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
+import { defaultNetwork } from '../config/networks';
 
 const EXTENSION_LOCAL_STORAGE_KEY = 'terraStationExtensionPreviouslyConnected';
 
@@ -36,7 +37,10 @@ function App() {
   useEffect(() => {
     const fetchLBPs = async () => {
       try {
-        const lbps = await getLBPs();
+        // We only care about permitted/whitelisted pairs
+        const lbps = (await getLBPs()).filter(
+          lbp => defaultNetwork.allowedPairContracts.includes(lbp.contract_addr)
+        );
 
         lbps.sort((a, b) => a.start_time - b.start_time);
 
