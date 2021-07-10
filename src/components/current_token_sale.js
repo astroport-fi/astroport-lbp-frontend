@@ -11,6 +11,7 @@ import SwapCard from './swap_card';
 import { Int, Dec } from '@terra-money/terra.js';
 import Card from './card';
 import CurrentWeightCard from './current_weight_card';
+import ConnectWalletButton from './connect_wallet_button';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -101,16 +102,28 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
           currentSaleTokenWeight={saleTokenWeight}
         />
 
-        <SwapCard
-          className="col-span-5"
-          onWalletConnect={onWalletConnect}
-          pair={pair}
-          saleTokenInfo={saleTokenInfo}
-          walletAddress={walletAddress}
-          ustExchangeRate={ustExchangeRate}
-          ustPrice={ustPrice}
-          onSwapTxMined={() => refreshPairInfo()}
-        />
+        {
+          walletAddress ?
+            <SwapCard
+              className="col-span-5"
+              pair={pair}
+              saleTokenInfo={saleTokenInfo}
+              walletAddress={walletAddress}
+              ustExchangeRate={ustExchangeRate}
+              ustPrice={ustPrice}
+              onSwapTxMined={() => refreshPairInfo()}
+            />
+          :
+            <Card className="p-6 border border-blue-gray-300 col-span-5 flex flex-col">
+              <h2 className="text-xl font-bold">
+                Swap
+              </h2>
+
+              <div className="flex-grow flex items-center mb-8">
+                <ConnectWalletButton onConnect={onWalletConnect} className="w-full" />
+              </div>
+            </Card>
+        }
       </div>
 
       {
