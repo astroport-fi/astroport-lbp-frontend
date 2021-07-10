@@ -10,6 +10,7 @@ import { formatNumber, formatUSD } from '../helpers/number_formatters';
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
 import { useRefreshingEffect } from '../helpers/effects';
 import { timeString } from '../helpers/time_formatters';
+import OptionsGroup from './historical_price_card/options_group';
 
 // TODO: Update to actual graphql endpoint
 const apolloClient = new ApolloClient({
@@ -59,6 +60,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const [chartSVGHeight, setChartSVGHeight] = useState();
   const [data, setData] = useState();
   const [interval, setInterval] = useState(INTERVALS[INTERVALS.length-1].minutes);
+  const [scale, setScale] = useState('linear');
 
   useRefreshingEffect(() => {
     const fetchData = async() => {
@@ -104,19 +106,28 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
           {nativeSymbol} / {saleTokenInfo.symbol}
         </h2>
 
-        <div className="flex bg-blue-gray-400 px-2 py-1 rounded-lg text-sm">
-          {
-            INTERVALS.map(({ minutes, label }) =>
-              <button
-                key={minutes}
-                type="button"
-                onClick={() => setInterval(minutes)}
-                className={classNames('rounded py-1 px-2', {'bg-blue-gray-700': interval === minutes})}
-              >
-                {label}
-              </button>
-            )
-          }
+        <div className="flex">
+          <OptionsGroup
+            options={INTERVALS.map(({minutes: value, label}) => ({ value, label }))}
+            selected={interval}
+            onOptionSelect={setInterval}
+            className="mr-4"
+          />
+
+          <OptionsGroup
+            options={[
+              {
+                value: 'linear',
+                label: 'Lin'
+              },
+              {
+                value: 'log',
+                label: 'Log'
+              }
+            ]}
+            selected={scale}
+            onOptionSelect={setScale}
+          />
         </div>
       </div>
 
@@ -148,6 +159,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             width={chartSVGWidth}
             height={chartSVGHeight}
             padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
+            scale={{ x: 'linear', y: scale }}
             xAxis={{
               tickFormat: timeString,
               tickCount: 12
