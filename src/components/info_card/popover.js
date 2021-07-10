@@ -4,8 +4,8 @@ import 'animate.css/source/fading_entrances/fadeIn.css';
 import classNames from 'classnames';
 
 function Popover({ children }) {
-  const commonClasses = ['z-50', 'animated', 'fadeIn', 'faster', 'cursor-default'];
-  const bgOpacityClass = 'bg-opacity-80';
+  const commonClasses = ['z-50', 'animated', 'fadeIn', 'faster', 'cursor-default', 'backdrop-filter', 'backdrop-blur'];
+  const bgOpacityClass = 'bg-opacity-70';
 
   return (
     <>
@@ -15,7 +15,7 @@ function Popover({ children }) {
       </div>
 
       {/* Popover wrapper, right-aligned (only current needed use-case) */}
-      <div className={classNames('absolute bg-blue-gray-700 mt-4 p-2 rounded-lg shadow-lg min-w-full right-0', bgOpacityClass, commonClasses)}>
+      <div className={classNames('absolute bg-blue-gray-700 mt-4 p-2 rounded-lg shadow-xl min-w-full right-0', bgOpacityClass, commonClasses)}>
         {children}
       </div>
     </>
