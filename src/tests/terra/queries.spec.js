@@ -1,4 +1,4 @@
-import { Coin, Coins, Int } from '@terra-money/terra.js';
+import { Coin, Coins, Int, Dec } from '@terra-money/terra.js';
 import {
   getTokenInfo,
   getLBPs,
@@ -191,7 +191,7 @@ describe('getWeights', () => {
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date(2021, 6, 14).getTime());
 
-    expect(await getWeights(terraClient, 'terra1234', 'uusd')).toEqual([9.42, 90.58]);
+    expect(await getWeights(terraClient, 'terra1234', 'uusd')).toEqual([new Dec(9.42), new Dec(90.58)]);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra1234',

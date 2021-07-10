@@ -1,4 +1,4 @@
-import { Int } from '@terra-money/terra.js';
+import { Int, Dec } from '@terra-money/terra.js';
 
 export async function getTokenInfo(terraClient, cw20ContractAddress) {
   const info = await terraClient.wasm.contractQuery(
@@ -98,8 +98,7 @@ export async function getWeights(terraClient, pairAddress, nativeToken) {
     }
   );
 
-  // TODO: Use big decimal lib?
-  return [parseFloat(offer_weight), parseFloat(ask_weight)];
+  return [new Dec(offer_weight), new Dec(ask_weight)];
 };
 
 export async function getPool(terraClient, pairAddress) {

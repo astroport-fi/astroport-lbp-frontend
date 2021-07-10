@@ -37,8 +37,8 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
       getPool(terraClient, pair.contract_addr)
     ]);
 
-    setNativeTokenWeight(new Dec(nativeTokenWeight));
-    setSaleTokenWeight(new Dec(saleTokenWeight));
+    setNativeTokenWeight(nativeTokenWeight);
+    setSaleTokenWeight(saleTokenWeight);
     setPool(pool);
   // terraClient intentionally omitted
   // eslint-disable-next-line react-hooks/exhaustive-deps
