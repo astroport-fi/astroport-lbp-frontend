@@ -56,6 +56,20 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
         </h3>
       }
 
+      <svg className="h-0">
+        <defs>
+          <linearGradient id="fillGradient"
+            x1="0%"
+            x2="0%"
+            y1="0%"
+            y2="100%"
+          >
+            <stop offset="0%" stopColor="#4e6eff" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#86a7ff" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div ref={chartWrapperRef} className="flex-grow">
         {
           chartSVGWidth && chartSVGHeight &&
@@ -65,17 +79,6 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
             minDomain={4.7}
           >
-            <defs>
-              <linearGradient id="fillGradient"
-                x1="0%"
-                x2="0%"
-                y1="0%"
-                y2="100%"
-              >
-                <stop offset="0%" stopColor="#4e6eff" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#86a7ff" stopOpacity="0" />
-              </linearGradient>
-            </defs>
             <VictoryArea data={data} style={{ data: areaDataStyle }} interpolation={'natural'} />
           </Chart>
         }
