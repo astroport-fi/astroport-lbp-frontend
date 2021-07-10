@@ -43,19 +43,12 @@ const theme = {
       tickLabels,
     },
     offsetY: 30
-  },
-  line: {
-    style: {
-      data: {
-        strokeWidth: 2
-      }
-    }
   }
 }
 
-function Chart({ xAxis, yAxis, children }) {
+function Chart({ xAxis, yAxis, children, ...rest }) {
   return (
-    <VictoryChart theme={theme} domainPadding={10} padding={{ top: 30, left: 45, right: 0, bottom: 40 }}>
+    <VictoryChart theme={theme} { ...rest }>
       <VictoryAxis
         independentAxis
         { ...xAxis }

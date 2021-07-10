@@ -77,9 +77,13 @@ function WeightsChart({ pair, saleTokenInfo }) {
           tickFormat: (v) => formatNumber(v/100, { style: 'percent' }),
           tickValues: yAxisTickValues
         }}
+        domainPadding={10}
+        padding={{ top: 30, left: 45, right: 0, bottom: 40 }}
+        width={500}
+        height={250}
       >
-        <VictoryLine data={nativeTokenData} style={{ data: { stroke: NATIVE_TOKEN_COLOR }}}/>
-        <VictoryLine data={saleTokenData}  style={{ data: { stroke: SALE_TOKEN_COLOR }}} />
+        <VictoryLine data={nativeTokenData} style={{ data: { stroke: NATIVE_TOKEN_COLOR, strokeWidth: 2 }}}/>
+        <VictoryLine data={saleTokenData}  style={{ data: { stroke: SALE_TOKEN_COLOR, strokeWidth: 2 }}} />
       </Chart>
     </div>
   );

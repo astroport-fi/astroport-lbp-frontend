@@ -12,6 +12,7 @@ import { Int, Dec } from '@terra-money/terra.js';
 import Card from './card';
 import CurrentWeightCard from './current_weight_card';
 import ConnectWalletButton from './connect_wallet_button';
+import HistoricalPriceCard from './historical_price_card';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -124,6 +125,14 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
               </div>
             </Card>
         }
+
+        <HistoricalPriceCard
+          className="col-span-7"
+          pair={pair}
+          saleTokenInfo={saleTokenInfo}
+          usdPrice={usdPrice}
+          style={{ minHeight: '500px' }}
+        />
       </div>
 
       {

@@ -15,6 +15,7 @@
     "react-id-generator": "^3.0.1",
     "react-input-autosize": "^3.0.0",
     "react-scripts": "4.0.3",
+    "react-use-measure": "^2.0.4",
     "victory": "^35.9.0",
     "web-vitals": "^1.1.2"
   },
