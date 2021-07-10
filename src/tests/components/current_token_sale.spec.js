@@ -1,5 +1,5 @@
 import CurrentTokenSale from '../../components/current_token_sale';
-import { getWeights, getPool } from '../../terra/queries';
+import { getWeights, getPool, getBalance } from '../../terra/queries';
 import fetchUSTExchangeRate from '../../services/fetch_ust_exchange_rate';
 import { render, screen, within } from '@testing-library/react';
 import { buildPair } from '../test_helpers/factories';
@@ -7,7 +7,9 @@ import { buildPair } from '../test_helpers/factories';
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
   getWeights: jest.fn(),
-  getPool: jest.fn()
+  getPool: jest.fn(),
+  getBalance: jest.fn(),
+  getTokenBalance: jest.fn()
 }));
 
 jest.mock('../../services/fetch_ust_exchange_rate', () => ({
@@ -19,6 +21,26 @@ jest.mock('../../services/fetch_ust_exchange_rate', () => ({
 jest.mock('../../components/historical_price_card', () =>
   () => (<div>Historical Pricing</div>)
 );
+
+let mockTerraClient;
+
+jest.mock('../../hooks/use_wallet', () => ({
+  __esModule: true,
+  useWallet: () => ({
+    walletAddress: 'terra-wallet-addr'
+  })
+}));
+
+jest.mock('../../hooks/use_network', () => ({
+  __esModule: true,
+  useNetwork: () => ({
+    terraClient: mockTerraClient
+  })
+}));
+
+beforeEach(() => {
+  mockTerraClient = jest.fn();
+});
 
 describe('CurrentTokenSale', () => {
   it('fetches and displays data for current token sale', async () => {
@@ -86,8 +108,8 @@ describe('CurrentTokenSale', () => {
 
     expect(within(aboutCard).getByText('A brand new token for sale!')).toBeInTheDocument();
 
-    expect(getWeights).toHaveBeenCalledWith('terra1', 'uusd');
-    expect(getPool).toHaveBeenCalledWith('terra1');
+    expect(getWeights).toHaveBeenCalledWith(mockTerraClient, 'terra1', 'uusd');
+    expect(getPool).toHaveBeenCalledWith(mockTerraClient, 'terra1');
 
     dateNowSpy.mockRestore();
   });

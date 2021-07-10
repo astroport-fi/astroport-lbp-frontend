@@ -13,6 +13,19 @@ jest.mock('../../terra/extension', () => {
   }
 });
 
+let mockConnectWallet;
+
+jest.mock('../../hooks/use_wallet', () => ({
+  __esModule: true,
+  useWallet: () => ({
+    connectWallet: mockConnectWallet
+  })
+}));
+
+beforeEach(() => {
+  mockConnectWallet = jest.fn();
+});
+
 describe('ConnectWalletButton', () => {
   it('opens extension download URL when extension is not available', async () => {
     connectExtension.mockRejectedValue({ reason: EXTENSION_UNAVAILABLE })
@@ -37,16 +50,14 @@ describe('ConnectWalletButton', () => {
 
     connectExtension.mockResolvedValue(wallet);
 
-    const onConnectMock = jest.fn();
-
-    render(<ConnectWalletButton onConnect={onConnectMock} />);
+    render(<ConnectWalletButton />);
 
     await act(async () => {
       await userEvent.click(screen.getByText('Connect Wallet'));
     })
 
     expect(connectExtension).toHaveBeenCalledTimes(1);
-    expect(onConnectMock).toHaveBeenCalledTimes(1);
-    expect(onConnectMock).toHaveBeenCalledWith(wallet);
+    expect(mockConnectWallet).toHaveBeenCalledTimes(1);
+    expect(mockConnectWallet).toHaveBeenCalledWith(wallet);
   });
 });

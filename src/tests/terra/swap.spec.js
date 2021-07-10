@@ -6,7 +6,6 @@ import {
   feeForMaxNativeToken,
   sufficientBalance
 } from '../../terra/swap';
-import terraClient from '../../terra/client';
 import { buildPair } from '../test_helpers/factories';
 import { Extension, MsgExecuteContract, StdFee, StdTx, Int, Dec, Coins, Coin } from '@terra-money/terra.js';
 import { getBalance, getTokenBalance } from '../../terra/queries';
@@ -21,9 +20,16 @@ jest.mock('@terra-money/terra.js', () => {
   }
 });
 
-jest.mock('../../terra/client', () => ({
+jest.mock('../../terra/queries', () => ({
   __esModule: true,
-  default: {
+  getBalance: jest.fn(),
+  getTokenBalance: jest.fn()
+}));
+
+let terraClient;
+
+beforeEach(() => {
+  terraClient = {
     tx: {
       estimateFee: jest.fn()
     },
@@ -32,13 +38,7 @@ jest.mock('../../terra/client', () => ({
       taxCap: jest.fn()
     }
   }
-}));
-
-jest.mock('../../terra/queries', () => ({
-  __esModule: true,
-  getBalance: jest.fn(),
-  getTokenBalance: jest.fn()
-}));
+});
 
 describe('estimateFee', () => {
   it('queries node for estimated fee for given message', () => {
@@ -47,7 +47,7 @@ describe('estimateFee', () => {
 
     terraClient.tx.estimateFee.mockReturnValue(mockPromise);
 
-    expect(estimateFee(msg)).toEqual(mockPromise);
+    expect(estimateFee(terraClient, msg)).toEqual(mockPromise);
 
     expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(new StdTx([msg], new StdFee(0), []));
   });
@@ -156,7 +156,7 @@ describe('postMsg', () => {
     'returns a promise that resolves when the transaction posts successfully', async () => {
     mockPost = successfulPostMock();
 
-    const result = await postMsg({ msg, fee });
+    const result = await postMsg(terraClient, { msg, fee });
 
     expect(result).toEqual({
       txhash: '123ABC'
@@ -176,7 +176,7 @@ describe('postMsg', () => {
 
     mockPost = failedPostMock(mockError);
 
-    return expect(postMsg({ msg, fee })).rejects.toEqual(mockError);
+    return expect(postMsg(terraClient, { msg, fee })).rejects.toEqual(mockError);
 
     // Posts msg to extension
     expect(Extension).toHaveBeenCalledTimes(1);
@@ -242,7 +242,7 @@ describe('feeForMaxNativeToken', () => {
   it('returns fee that includes gas and tax on balance (less fees)', async () => {
     const intBalance = new Int(700 * 1e6);
 
-    const fee = await feeForMaxNativeToken({ pair, walletAddress, intBalance });
+    const fee = await feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance });
 
     // Returned fee includes original gas amount and fee,
     // plus tax on the balance such that with the tax,
@@ -255,7 +255,7 @@ describe('feeForMaxNativeToken', () => {
   it('returns fee with gas and tax cap when tax would exceed cap', async () => {
     const intBalance = new Int(2000 * 1e6); // 2,000 UST
 
-    const fee = await feeForMaxNativeToken({ pair, walletAddress, intBalance });
+    const fee = await feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance });
 
     // Returned fee includes original gas amount and fee,
     // plus tax cap
@@ -284,19 +284,19 @@ describe('sufficientBalance', () => {
     it('returns true when balance is sufficient', async () => {
       getBalance.mockResolvedValue(new Int(1123456));
 
-      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(true);
+      expect(await sufficientBalance(terraClient, 'terra-wallet-addr', tx)).toEqual(true);
 
       expect(getBalance).toHaveBeenCalledTimes(1);
-      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+      expect(getBalance).toHaveBeenCalledWith(terraClient, 'uusd', 'terra-wallet-addr');
     });
 
     it('returns false when balance is insufficient', async () => {
       getBalance.mockResolvedValue(new Int(1123455));
 
-      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+      expect(await sufficientBalance(terraClient, 'terra-wallet-addr', tx)).toEqual(false);
 
       expect(getBalance).toHaveBeenCalledTimes(1);
-      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+      expect(getBalance).toHaveBeenCalledWith(terraClient, 'uusd', 'terra-wallet-addr');
     });
   });
 
@@ -324,33 +324,33 @@ describe('sufficientBalance', () => {
       getBalance.mockResolvedValue(new Int(1000000));
       getTokenBalance.mockResolvedValue(new Int(123456));
 
-      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(true);
+      expect(await sufficientBalance(terraClient, 'terra-wallet-addr', tx)).toEqual(true);
 
       expect(getBalance).toHaveBeenCalledTimes(1);
-      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+      expect(getBalance).toHaveBeenCalledWith(terraClient, 'uusd', 'terra-wallet-addr');
 
       expect(getTokenBalance).toHaveBeenCalledTimes(1);
-      expect(getTokenBalance).toHaveBeenCalledWith('terra-token-addr', 'terra-wallet-addr');
+      expect(getTokenBalance).toHaveBeenCalledWith(terraClient, 'terra-token-addr', 'terra-wallet-addr');
     });
 
     it('returns false when native balance is insufficient', async () => {
       getBalance.mockResolvedValue(new Int(1000000-1));
       getTokenBalance.mockResolvedValue(new Int(123456));
 
-      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+      expect(await sufficientBalance(terraClient, 'terra-wallet-addr', tx)).toEqual(false);
 
       expect(getBalance).toHaveBeenCalledTimes(1);
-      expect(getBalance).toHaveBeenCalledWith('uusd', 'terra-wallet-addr');
+      expect(getBalance).toHaveBeenCalledWith(terraClient, 'uusd', 'terra-wallet-addr');
     });
 
     it('returns false when contract token balance is insufficient', async () => {
       getBalance.mockResolvedValue(new Int(1000000));
       getTokenBalance.mockResolvedValue(new Int(123455));
 
-      expect(await sufficientBalance('terra-wallet-addr', tx)).toEqual(false);
+      expect(await sufficientBalance(terraClient, 'terra-wallet-addr', tx)).toEqual(false);
 
       expect(getTokenBalance).toHaveBeenCalledTimes(1);
-      expect(getTokenBalance).toHaveBeenCalledWith('terra-token-addr', 'terra-wallet-addr');
+      expect(getTokenBalance).toHaveBeenCalledWith(terraClient, 'terra-token-addr', 'terra-wallet-addr');
     });
   });
 });

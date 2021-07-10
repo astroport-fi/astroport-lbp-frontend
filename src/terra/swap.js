@@ -1,6 +1,5 @@
 import { Extension, MsgExecuteContract, StdTx, StdFee, Int, Coin, Coins } from '@terra-money/terra.js';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
-import terraClient from './client';
 import { getBalance, getTokenBalance } from './queries';
 
 /**
@@ -8,7 +7,7 @@ import { getBalance, getTokenBalance } from './queries';
  * @typedef {string} Address
  */
 
-export function estimateFee(msg) {
+export function estimateFee(terraClient, msg) {
   // Estimate the fee (gas + stability fee/tax)
   // This is very similar to what the TxAPI create method does to estimate fees:
   //    https://github.com/terra-money/terra.js/blob/b7e7c88151fe2f404437ce7de88b9fa2a03de26a/src/client/lcd/api/TxAPI.ts#L181-L185
@@ -16,7 +15,7 @@ export function estimateFee(msg) {
   return terraClient.tx.estimateFee(stdTx);
 }
 
-export function postMsg({ msg, fee }) {
+export function postMsg(terraClient, { msg, fee }) {
   const extension = new Extension();
 
   /*
@@ -58,6 +57,7 @@ export function postMsg({ msg, fee }) {
 
 /**
  * Builds message for native token -> contract token swap
+ *
  * @param pair - Asset pair from queries/getLBPs
  * @param {Address} walletAddress - User's wallet address
  * @param {Int} intAmount - Int amount to swap in smallest unit of native token
@@ -88,6 +88,7 @@ export function buildSwapFromNativeTokenMsg({ pair, walletAddress, intAmount }) 
 
 /**
  * Builds message for contract token -> native token swap
+ *
  * @param pair - Asset pair from queries/getLBPs
  * @param {Address} walletAddress - User's wallet address
  * @param {Int} intAmount - Int amount to swap in smallest unit of token
@@ -118,19 +119,20 @@ export function buildSwapFromContractTokenMsg({ pair, walletAddress, intAmount }
  * a native token -> contract token swap using the maximum possible
  * amount of native token in the wallet.
  *
+ * @param {LCDClient} terraClient
  * @param pair - Asset pair
  * @param {Address} walletAddress - Address of wallet
  * @param {Int} intBalance - Native token balance of wallet
  * @returns {StdFee} - Gas and fee (gas + stability fee/tax)
  */
-export async function feeForMaxNativeToken({ pair, walletAddress, intBalance }) {
+export async function feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance }) {
   const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
   const balanceCoin = new Coin(denom, intBalance);
   const balanceCoins = new Coins([balanceCoin]);
 
   // Estimate gas usage (use 1 as amount to ignore taxes)
   const msg = buildSwapFromNativeTokenMsg({ pair, walletAddress, intAmount: new Int(1) });
-  const fee = await estimateFee(msg);
+  const fee = await estimateFee(terraClient, msg);
 
   // NOTE: There's no stability fee for uluna,
   //       so we could stop here if we ever supported
@@ -160,18 +162,19 @@ export async function feeForMaxNativeToken({ pair, walletAddress, intBalance }) 
 /**
  * Ensures specified wallet has enough balance to complete given transaction
  *
+ * @param {LCDClient} terraClient
  * @param {Address} walletAddress
  * @param {Object} tx
  * @param {MsgExecuteContract} tx.msg
  * @param {StdFee} tx.fee
  * @returns {Promise<boolean>}
  */
-export async function sufficientBalance(walletAddress, tx) {
+export async function sufficientBalance(terraClient, walletAddress, tx) {
   const coins = tx.fee.amount.add(tx.msg.coins);
 
   // Check native token balance(s)
   for(const coin of coins.toArray()) {
-    const balance = await getBalance(coin.denom, walletAddress);
+    const balance = await getBalance(terraClient, coin.denom, walletAddress);
 
     if(balance.lessThan(coin.amount)) {
       return false;
@@ -180,7 +183,7 @@ export async function sufficientBalance(walletAddress, tx) {
 
   // Check contract token balance(s) if sending
   if(tx.msg.execute_msg.send) {
-    const balance = await getTokenBalance(tx.msg.contract, walletAddress);
+    const balance = await getTokenBalance(terraClient, tx.msg.contract, walletAddress);
 
     if(balance.lessThan(tx.msg.execute_msg.send.amount)) {
       return false;

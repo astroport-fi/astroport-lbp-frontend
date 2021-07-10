@@ -7,11 +7,12 @@ import { NATIVE_TOKEN_DECIMALS, NATIVE_TOKEN_SYMBOLS } from '../constants';
 import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg, sufficientBalance } from '../terra/swap';
 import { formatTokenAmount } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
-import terraClient from '../terra/client';
 import SwapRates from './swap_rates';
 import SwapCardOverlay from './swap_card_overlay';
 import SwapForm from './swap_form';
 import classNames from 'classnames';
+import { useNetwork } from '../hooks/use_network';
+import { useWallet } from '../hooks/use_wallet';
 
 // TODO: Reject input with too many decimals
 
@@ -19,7 +20,6 @@ function SwapCard({
   pair,
   saleTokenInfo,
   ustExchangeRate,
-  walletAddress,
   ustPrice,
   onSwapTxMined,
   className
@@ -36,6 +36,8 @@ function SwapCard({
   const [simulating, setSimulating] = useState(false);
   const [pendingSimulation, setPendingSimulation] = useState({});
   const [lastTx, setLastTx] = useState();
+  const { walletAddress } = useWallet();
+  const { terraClient } = useNetwork();
 
   function resetForm() {
     setFromAmount('');
@@ -115,7 +117,7 @@ function SwapCard({
     if(usingMaxNativeAmount) {
       return { ...tx, msg };
     } else {
-      const fee = await estimateFee(msg);
+      const fee = await estimateFee(terraClient, msg);
 
       return { msg, fee };
     }
@@ -174,6 +176,7 @@ function SwapCard({
 
       try {
         const simulation = await simulationFn(
+          terraClient,
           pair.contract_addr,
           decInputAmount.mul(10 ** decimals[simulationInputAsset]).toInt(),
           requestAsset.info
@@ -274,8 +277,8 @@ function SwapCard({
       const nativeToken = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
 
       const balances = await Promise.all([
-        getBalance(nativeToken, walletAddress),
-        getTokenBalance(saleAssetFromPair(pair.asset_infos).info.token.contract_addr, walletAddress)
+        getBalance(terraClient, nativeToken, walletAddress),
+        getTokenBalance(terraClient, saleAssetFromPair(pair.asset_infos).info.token.contract_addr, walletAddress)
       ]);
 
       setBalances({
@@ -283,6 +286,8 @@ function SwapCard({
         token: balances[1]
       });
     }
+  // terraClient intentionally omitted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [walletAddress, pair]);
 
   useEffect(() => {
@@ -304,17 +309,19 @@ function SwapCard({
       // Not on chain yet, try again in 5s
       setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
     }
+  // terraClient intentionally omitted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [updateBalances, onSwapTxMined]);
 
   async function swapFormSubmitted (e) {
     e.preventDefault();
 
     // Perform final balance check
-    if(await sufficientBalance(walletAddress, tx)) {
+    if(await sufficientBalance(terraClient, walletAddress, tx)) {
       setLastTx({ state: 'waitingForExtension' });
 
       try {
-        const { txhash } = await postMsg(tx);
+        const { txhash } = await postMsg(terraClient, tx);
 
         refreshBalancesWhenTxMined(txhash);
 
@@ -331,7 +338,7 @@ function SwapCard({
     let amount;
 
     if(fromAsset === 'native_token') {
-      const fee = await feeForMaxNativeToken({ pair, walletAddress, intBalance: balances.native_token });
+      const fee = await feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance: balances.native_token });
       const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
       const maxAmount = balances.native_token.sub(fee.amount.get(denom).amount);
 

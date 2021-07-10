@@ -13,28 +13,35 @@ import Card from './card';
 import CurrentWeightCard from './current_weight_card';
 import ConnectWalletButton from './connect_wallet_button';
 import HistoricalPriceCard from './historical_price_card';
+import { useWallet } from '../hooks/use_wallet';
+import { useNetwork } from '../hooks/use_network';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
-function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress }) {
+function CurrentTokenSale({ pair, saleTokenInfo }) {
   const [nativeTokenWeight, setNativeTokenWeight] = useState();
   const [saleTokenWeight, setSaleTokenWeight] = useState();
   const [pool, setPool] = useState();
   const [ustExchangeRate, setUSTExchangeRate] = useState();
   const [secondsRemaining, setSecondsRemaining] = useState();
+  const { walletAddress } = useWallet();
+  const { terraClient } = useNetwork();
 
   const refreshPairInfo = useCallback(async () => {
     const [[nativeTokenWeight, saleTokenWeight], pool] = await Promise.all([
       getWeights(
+        terraClient,
         pair.contract_addr,
         nativeTokenFromPair(pair.asset_infos).info.native_token.denom
       ),
-      getPool(pair.contract_addr)
+      getPool(terraClient, pair.contract_addr)
     ]);
 
     setNativeTokenWeight(new Dec(nativeTokenWeight));
     setSaleTokenWeight(new Dec(saleTokenWeight));
     setPool(pool);
+  // terraClient intentionally omitted
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pair]);
 
   useRefreshingEffect(refreshPairInfo, REFRESH_INTERVAL, [refreshPairInfo]);
@@ -110,7 +117,6 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
               className="col-span-5"
               pair={pair}
               saleTokenInfo={saleTokenInfo}
-              walletAddress={walletAddress}
               ustExchangeRate={ustExchangeRate}
               ustPrice={ustPrice}
               onSwapTxMined={() => refreshPairInfo()}
@@ -122,7 +128,7 @@ function CurrentTokenSale({ onWalletConnect, pair, saleTokenInfo, walletAddress 
               </h2>
 
               <div className="flex-grow flex items-center mb-8">
-                <ConnectWalletButton onConnect={onWalletConnect} className="w-full" />
+                <ConnectWalletButton className="w-full" />
               </div>
             </Card>
         }

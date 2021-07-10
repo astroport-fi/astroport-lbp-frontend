@@ -13,7 +13,6 @@ import {
   sufficientBalance
 } from '../../terra/swap';
 import { Int, Dec, StdFee, Coins, Coin } from '@terra-money/terra.js';
-import terraClient from '../../terra/client';
 
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
@@ -36,9 +35,24 @@ jest.mock('../../terra/swap', () => {
   }
 });
 
-jest.mock('../../terra/client', () => ({
+let mockTerraClient;
+
+jest.mock('../../hooks/use_wallet', () => ({
   __esModule: true,
-  default: {
+  useWallet: () => ({
+    walletAddress: 'terra42'
+  })
+}));
+
+jest.mock('../../hooks/use_network', () => ({
+  __esModule: true,
+  useNetwork: () => ({
+    terraClient: mockTerraClient
+  })
+}));
+
+beforeEach(() => {
+  mockTerraClient = {
     tx: {
       txInfo: jest.fn()
     },
@@ -46,7 +60,7 @@ jest.mock('../../terra/client', () => ({
       chainID: 'testnet'
     }
   }
-}));
+});
 
 describe('SwapCard', () => {
   const pair = buildPair({
@@ -73,7 +87,6 @@ describe('SwapCard', () => {
         pair={pair}
         saleTokenInfo={saleTokenInfo}
         ustExchangeRate={ustExchangeRate}
-        walletAddress="terra42"
         ustPrice={ustPrice || new Dec(1)}
         onSwapTxMined={onSwapTxMined}
       />
@@ -116,6 +129,7 @@ describe('SwapCard', () => {
     expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('2.04%');
 
     expect(getSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(1000000000),
       {
@@ -154,6 +168,7 @@ describe('SwapCard', () => {
     expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('0.84%');
 
     expect(getReverseSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(700000),
       {
@@ -165,7 +180,7 @@ describe('SwapCard', () => {
   });
 
   it('runs new simulation when from asset is changed', async () => {
-    getSimulation.mockImplementation((pairAddress, amount, offerAssetInfo) => {
+    getSimulation.mockImplementation((_, pairAddress, amount, offerAssetInfo) => {
       if(offerAssetInfo.native_token) {
         // Mocked response when offer asset is the native token
         return {
@@ -211,6 +226,7 @@ describe('SwapCard', () => {
 
     // First simulation when initial "from" amount was entered
     expect(getSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(4 * 1e6), // 6 decimals
       {
@@ -222,6 +238,7 @@ describe('SwapCard', () => {
 
     // Second simulation when "from" asset was changed
     expect(getSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(4 * 1e5), // 5 decimals
       {
@@ -233,7 +250,7 @@ describe('SwapCard', () => {
   });
 
   it('runs new reverse simulation when to asset is changed', async () => {
-    getReverseSimulation.mockImplementation((pairAddress, amount, askAssetInfo) => {
+    getReverseSimulation.mockImplementation((_, pairAddress, amount, askAssetInfo) => {
       if(askAssetInfo.native_token) {
         // Mocked response when ask asset is the native token
         return {
@@ -279,6 +296,7 @@ describe('SwapCard', () => {
 
     // First reverse simulation when initial "to" amount was entered
     expect(getReverseSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(5 * 1e5), // 5 decimals
       {
@@ -290,6 +308,7 @@ describe('SwapCard', () => {
 
     // Second reverse simulation when "to" asset was changed
     expect(getReverseSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
       'terra1',
       new Int(5 * 1e6), // 6 decimals
       {
@@ -336,7 +355,7 @@ describe('SwapCard', () => {
     });
 
     // Mock mined tx to trigger balance update
-    terraClient.tx.txInfo.mockResolvedValue({});
+    mockTerraClient.tx.txInfo.mockResolvedValue({});
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
@@ -363,13 +382,13 @@ describe('SwapCard', () => {
       intAmount: new Int(1e6)
     });
     expect(estimateFee).toHaveBeenCalledTimes(1);
-    expect(estimateFee).toHaveBeenCalledWith(msg);
+    expect(estimateFee).toHaveBeenCalledWith(mockTerraClient, msg);
 
     expect(postMsg).toHaveBeenCalledTimes(1);
-    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+    expect(postMsg).toHaveBeenCalledWith(mockTerraClient, { msg, fee });
 
     // Fetches tx info
-    expect(terraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
+    expect(mockTerraClient.tx.txInfo).toHaveBeenCalledWith('123ABC');
 
     // Invokes callback
     expect(onSwapTxMined).toHaveBeenCalledTimes(1);
@@ -417,7 +436,7 @@ describe('SwapCard', () => {
     });
 
     // Mock mined tx to trigger balance update
-    terraClient.tx.txInfo.mockResolvedValue({});
+    mockTerraClient.tx.txInfo.mockResolvedValue({});
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
@@ -444,13 +463,13 @@ describe('SwapCard', () => {
       intAmount: new Int(5e5)
     });
     expect(estimateFee).toHaveBeenCalledTimes(1);
-    expect(estimateFee).toHaveBeenCalledWith(msg);
+    expect(estimateFee).toHaveBeenCalledWith(mockTerraClient, msg);
 
     expect(postMsg).toHaveBeenCalledTimes(1);
-    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+    expect(postMsg).toHaveBeenCalledWith(mockTerraClient, { msg, fee });
 
     // Fetches tx info
-    expect(terraClient.tx.txInfo).toHaveBeenCalledWith('ABC123');
+    expect(mockTerraClient.tx.txInfo).toHaveBeenCalledWith('ABC123');
   });
 
   it('performs swap after setting from amount to balance less fees when swapping from native token', async () => {
@@ -497,7 +516,7 @@ describe('SwapCard', () => {
       intAmount: new Int(999000001)
     });
     expect(postMsg).toHaveBeenCalledTimes(1);
-    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+    expect(postMsg).toHaveBeenCalledWith(mockTerraClient, { msg, fee });
 
     // Does not estimate fee for from amount
     // (this is calculated differently for "max" amount)
@@ -556,10 +575,10 @@ describe('SwapCard', () => {
       intAmount: new Int(5000 * 1e5)
     });
     expect(estimateFee).toHaveBeenCalledTimes(1);
-    expect(estimateFee).toHaveBeenCalledWith(msg);
+    expect(estimateFee).toHaveBeenCalledWith(mockTerraClient, msg);
 
     expect(postMsg).toHaveBeenCalledTimes(1);
-    expect(postMsg).toHaveBeenCalledWith({ msg, fee });
+    expect(postMsg).toHaveBeenCalledWith(mockTerraClient, { msg, fee });
   });
 
   it('conveys error state to user and does not invoke onSwapTxMined callback if extension responds with error when sending message', async() => {

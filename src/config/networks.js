@@ -5,7 +5,7 @@ if(process.env.NODE_ENV !== 'production') {
   envNetworks = envConfig.networks;
 }
 
-const networks = {
+export const networks = {
   mainnet: {
     lcdURL: 'https://lcd.terra.dev',
     chainID: 'columbus-4',

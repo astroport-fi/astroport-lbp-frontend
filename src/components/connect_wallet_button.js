@@ -2,9 +2,11 @@ import { useState, useCallback } from 'react';
 import classNames from 'classnames';
 import { connectExtension, EXTENSION_UNAVAILABLE } from '../terra/extension';
 import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
+import { useWallet } from '../hooks/use_wallet';
 
-function ConnectWalletButton({ onConnect, className }) {
+function ConnectWalletButton({ className }) {
   const [connecting, setConnecting] = useState(false);
+  const { connectWallet } = useWallet();
 
   const connect = useCallback(async() => {
     setConnecting(true);
@@ -13,7 +15,7 @@ function ConnectWalletButton({ onConnect, className }) {
       const wallet = await connectExtension()
 
       setConnecting(false);
-      onConnect(wallet);
+      connectWallet(wallet);
     } catch({ reason }) {
       setConnecting(false);
 
@@ -21,7 +23,7 @@ function ConnectWalletButton({ onConnect, className }) {
         window.open('https://terra.money/extension');
       }
     }
-  }, [onConnect]);
+  }, [connectWallet]);
 
   return(
     <button className={classNames('bg-yellow text-black py-2 px-6 rounded-lg flex justify-center', className)} onClick={connect} disabled={connecting}>

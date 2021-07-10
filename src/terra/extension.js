@@ -10,8 +10,10 @@ export function connectExtension() {
     if(extension.isAvailable) {
       extension.connect();
 
-      extension.once('onConnect', (wallet) => {
-        resolve(wallet);
+      extension.once('onConnect', async (wallet) => {
+        const { payload: info } = await extension.request('info');
+
+        resolve({ ...wallet, ...info });
       });
     } else {
       reject({ reason: EXTENSION_UNAVAILABLE });

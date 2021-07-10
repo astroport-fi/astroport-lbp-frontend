@@ -86,7 +86,7 @@ describe('App', () => {
 
     getPairInfo.mockResolvedValue(currentPair);
 
-    getTokenInfo.mockImplementation(address => (
+    getTokenInfo.mockImplementation((_, address) => (
       {
         terra1: {
           name: 'Foo'
@@ -131,7 +131,7 @@ describe('App', () => {
 
     // It should have fetched info for the current sale
     expect(getPairInfo).toHaveBeenCalledTimes(1);
-    expect(getPairInfo).toHaveBeenCalledWith('terra3-pair-addr');
+    expect(getPairInfo).toHaveBeenCalledWith(expect.anything(), 'terra3-pair-addr');
 
     // Unpermitted pair should never be displayed
     expect(screen.queryByText('Bad')).not.toBeInTheDocument();

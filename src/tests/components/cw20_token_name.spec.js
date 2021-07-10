@@ -10,6 +10,15 @@ jest.mock('../../terra/queries', () => ({
 
 jest.mock('../../report_exception');
 
+const mockTerraClient = jest.fn();
+
+jest.mock('../../hooks/use_network', () => ({
+  __esModule: true,
+  useNetwork: () => ({
+    terraClient: mockTerraClient
+  })
+}));
+
 describe('CW20TokenName', () => {
   it('displays Loading indicator while fetching the given token name, then displays the name', async () => {
     getTokenInfo.mockResolvedValue({
@@ -22,7 +31,7 @@ describe('CW20TokenName', () => {
     expect(container.innerHTML).toMatch(/loading-indicator\.svg/);
 
     expect(await screen.findByText('Foo')).toBeInTheDocument();
-    expect(getTokenInfo).toHaveBeenCalledWith('terra42');
+    expect(getTokenInfo).toHaveBeenCalledWith(mockTerraClient, 'terra42');
   });
 
   it('displays contract address and reports error when unable to resolve token name', async () => {

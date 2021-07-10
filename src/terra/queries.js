@@ -1,8 +1,6 @@
 import { Int } from '@terra-money/terra.js';
-import terraClient from '../terra/client';
-import { defaultNetwork } from '../config/networks';
 
-export async function getTokenInfo(cw20ContractAddress) {
+export async function getTokenInfo(terraClient, cw20ContractAddress) {
   const info = await terraClient.wasm.contractQuery(
     cw20ContractAddress,
     {
@@ -13,9 +11,9 @@ export async function getTokenInfo(cw20ContractAddress) {
   return info;
 };
 
-export async function getLBPs() {
+export async function getLBPs(terraClient, factoryContractAddress) {
   const { pairs } = await terraClient.wasm.contractQuery(
-    defaultNetwork.factoryContractAddress,
+    factoryContractAddress,
     {
       pairs: {}
     }
@@ -32,12 +30,13 @@ export async function getLBPs() {
  * and then a 'contract_addr' or 'denom' child key,
  * respectively. This mirrors the contract interface.
  *
+ * @param {LCDClient} terraClient
  * @param {Address} pairAddress - Pair contract address
  * @param {Int} amount - Int amount to simulate swapping
  * @param {object} offerAssetInfo
  * @returns {object} - Query response
  */
-export async function getSimulation(pairAddress, amount, offerAssetInfo) {
+export async function getSimulation(terraClient, pairAddress, amount, offerAssetInfo) {
   const result = await terraClient.wasm.contractQuery(
     pairAddress,
     {
@@ -63,12 +62,13 @@ export async function getSimulation(pairAddress, amount, offerAssetInfo) {
  * and then a 'contract_addr' or 'denom' child key,
  * respectively. This mirrors the contract interface.
  *
+ * @param {LCDClient} terraClient
  * @param {Address} pairAddress - Pair contract address
  * @param {Int} amount - Int amount to simulate swapping
  * @param {object} askAssetInfo
  * @returns {object} - Query response
  */
-export async function getReverseSimulation(pairAddress, amount, askAssetInfo) {
+export async function getReverseSimulation(terraClient, pairAddress, amount, askAssetInfo) {
   const result = await terraClient.wasm.contractQuery(
     pairAddress,
     {
@@ -86,8 +86,9 @@ export async function getReverseSimulation(pairAddress, amount, askAssetInfo) {
 }
 
 // Returns array with [Native Token weight, Sale Token weight]
-export async function getWeights(pairAddress, nativeToken) {
+export async function getWeights(terraClient, pairAddress, nativeToken) {
   const { ask_weight, offer_weight } = await getSimulation(
+    terraClient,
     pairAddress,
     new Int(0),
     {
@@ -101,7 +102,7 @@ export async function getWeights(pairAddress, nativeToken) {
   return [parseFloat(offer_weight), parseFloat(ask_weight)];
 };
 
-export async function getPool(pairAddress) {
+export async function getPool(terraClient, pairAddress) {
   const response = await terraClient.wasm.contractQuery(
     pairAddress,
     {
@@ -112,13 +113,13 @@ export async function getPool(pairAddress) {
   return response;
 };
 
-export async function getBalance(denom, address) {
+export async function getBalance(terraClient, denom, address) {
   const response = await terraClient.bank.balance(address);
 
   return response.get(denom)?.amount || new Int(0);
 }
 
-export async function getTokenBalance(tokenAddress, walletAddress) {
+export async function getTokenBalance(terraClient, tokenAddress, walletAddress) {
   const response = await terraClient.wasm.contractQuery(
     tokenAddress,
     {
@@ -131,7 +132,7 @@ export async function getTokenBalance(tokenAddress, walletAddress) {
   return new Int(response.balance);
 }
 
-export async function getPairInfo(pairAddress) {
+export async function getPairInfo(terraClient, pairAddress) {
   const response = await terraClient.wasm.contractQuery(
     pairAddress,
     {

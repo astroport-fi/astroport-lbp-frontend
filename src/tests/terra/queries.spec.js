@@ -1,5 +1,4 @@
 import { Coin, Coins, Int } from '@terra-money/terra.js';
-import terraClient from '../../terra/client';
 import {
   getTokenInfo,
   getLBPs,
@@ -13,9 +12,10 @@ import {
 } from '../../terra/queries';
 import { buildPair } from '../test_helpers/factories';
 
-jest.mock('../../terra/client', () => ({
-  __esModule: true,
-  default: {
+let terraClient;
+
+beforeEach(() => {
+  terraClient = {
     wasm: {
       contractQuery: jest.fn()
     },
@@ -23,7 +23,7 @@ jest.mock('../../terra/client', () => ({
       balance: jest.fn()
     }
   }
-}));
+});
 
 describe('getTokenInfo', () => {
   it('queries contract for info and returns name', async () => {
@@ -35,7 +35,7 @@ describe('getTokenInfo', () => {
 
     terraClient.wasm.contractQuery.mockResolvedValue(tokenInfo);
 
-    expect(await getTokenInfo('terra1234')).toEqual(tokenInfo);
+    expect(await getTokenInfo(terraClient, 'terra1234')).toEqual(tokenInfo);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra1234',
@@ -69,7 +69,7 @@ describe('getLBPs', () => {
       pairs: pairs
     });
 
-    expect(await getLBPs()).toEqual(pairs);
+    expect(await getLBPs(terraClient, 'terra-factoryContractAddress')).toEqual(pairs);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra-factoryContractAddress',
@@ -97,6 +97,7 @@ describe('getSimulation', () => {
       .mockImplementation(() => new Date(2021, 6, 14).getTime());
 
     const simulation = await getSimulation(
+      terraClient,
       'terra1234',
       new Int(742),
       {
@@ -146,6 +147,7 @@ describe('getReverseSimulation', () => {
       .mockImplementation(() => new Date(2021, 6, 14).getTime());
 
     const simulation = await getReverseSimulation(
+      terraClient,
       'terra1234',
       new Int(742),
       {
@@ -189,7 +191,7 @@ describe('getWeights', () => {
       .spyOn(Date, 'now')
       .mockImplementation(() => new Date(2021, 6, 14).getTime());
 
-    expect(await getWeights('terra1234', 'uusd')).toEqual([9.42, 90.58]);
+    expect(await getWeights(terraClient, 'terra1234', 'uusd')).toEqual([9.42, 90.58]);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra1234',
@@ -242,7 +244,7 @@ describe('getPool', () => {
 
     terraClient.wasm.contractQuery.mockResolvedValue(pool);
 
-    expect(await getPool('terra1234')).toEqual(pool);
+    expect(await getPool(terraClient, 'terra1234')).toEqual(pool);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra1234',
@@ -261,7 +263,7 @@ describe('getBalance', () => {
     const coins = new Coins([ustCoin, fooCoin]);
     terraClient.bank.balance.mockResolvedValue(coins);
 
-    expect(await getBalance('uusd', 'terra1234')).toEqual(uusdIntAmount);
+    expect(await getBalance(terraClient, 'uusd', 'terra1234')).toEqual(uusdIntAmount);
 
     expect(terraClient.bank.balance).toHaveBeenCalledWith('terra1234');
   });
@@ -271,7 +273,7 @@ describe('getBalance', () => {
     const coins = new Coins([fooCoin]);
     terraClient.bank.balance.mockResolvedValue(coins);
 
-    expect(await getBalance('uusd', 'terra1234')).toEqual(new Int(0));
+    expect(await getBalance(terraClient, 'uusd', 'terra1234')).toEqual(new Int(0));
 
     expect(terraClient.bank.balance).toHaveBeenCalledWith('terra1234');
   });
@@ -283,7 +285,7 @@ describe('getTokenBalance', () => {
       balance: '123456'
     });
 
-    expect(await getTokenBalance('terra-token-addr', 'terra-wallet-addr')).toEqual(new Int(123456));
+    expect(await getTokenBalance(terraClient, 'terra-token-addr', 'terra-wallet-addr')).toEqual(new Int(123456));
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra-token-addr',
@@ -302,7 +304,7 @@ describe('getPairInfo', () => {
 
     terraClient.wasm.contractQuery.mockResolvedValue(pair);
 
-    expect(await getPairInfo('terra-pair-addr')).toEqual(pair);
+    expect(await getPairInfo(terraClient, 'terra-pair-addr')).toEqual(pair);
 
     expect(terraClient.wasm.contractQuery).toHaveBeenCalledWith(
       'terra-pair-addr',

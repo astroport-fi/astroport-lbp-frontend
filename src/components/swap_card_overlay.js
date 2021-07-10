@@ -1,10 +1,11 @@
 import CardOverlay from './card_overlay';
 import { transactionDetailsUrl } from '../terra/urls';
-import terraClient from '../terra/client';
 import classNames from 'classnames';
+import { useNetwork } from '../hooks/use_network';
 
 function SwapCardOverlay({ txState, txHash, waitingDismiss, successDismiss, errorDismiss }) {
   let content, bgColor;
+  const { terraClient } = useNetwork();
 
   // eslint-disable-next-line default-case
   switch(txState) {
