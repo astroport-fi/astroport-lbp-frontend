@@ -642,4 +642,39 @@ describe('SwapCard', () => {
     expect(reportException).toHaveBeenCalledTimes(1);
     expect(reportException).toHaveBeenCalledWith(mockError);
   });
+
+  it('displays and reports error when simulation fails', async () => {
+    const mockError = jest.fn();
+    getSimulation.mockRejectedValue(mockError);
+
+    getBalance.mockResolvedValue(2000 * 1e6); // Simulation does a basic balance check
+
+    renderCard({ ustPrice: new Dec(0.49) });
+
+    // Wait for balance
+    await screen.findByText('Balance: 2,000');
+
+    const fromInput = screen.getByLabelText('From');
+    const toInput = screen.getByLabelText('To (estimated)');
+
+    await act(async () => {
+      await userEvent.type(fromInput, '1');
+    });
+
+    expect(screen.queryByText('Simulation failed')).toBeInTheDocument();
+
+    // "To" value is not set
+    expect(toInput).toHaveDisplayValue('');
+
+    // "To" value is still $0
+    const toField = toInput.closest('.border');
+    expect(within(toField).getByText('($0.00)')).toBeInTheDocument();
+
+    // Price impact is not calculated or displayed
+    expect(screen.queryByText('Price Impact')).not.toBeInTheDocument();
+
+    // Error is reported
+    expect(reportException).toHaveBeenCalledTimes(1);
+    expect(reportException).toHaveBeenCalledWith(mockError);
+  });
 });
