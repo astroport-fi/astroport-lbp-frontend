@@ -13,6 +13,7 @@ import {
   sufficientBalance
 } from '../../terra/swap';
 import { Int, Dec, StdFee, Coins, Coin } from '@terra-money/terra.js';
+import reportException from '../../report_exception';
 
 jest.mock('../../terra/queries', () => ({
   __esModule: true,
@@ -50,6 +51,8 @@ jest.mock('../../hooks/use_network', () => ({
     terraClient: mockTerraClient
   })
 }));
+
+jest.mock('../../report_exception.js');
 
 beforeEach(() => {
   mockTerraClient = {
@@ -617,5 +620,26 @@ describe('SwapCard', () => {
 
     // Does not invoke callback
     expect(onSwapTxMined).not.toHaveBeenCalled();
+  });
+
+  it('displays and reports error when an error is thrown while selecting max balance', async() => {
+    getBalance.mockResolvedValue(new Int(1000 * 1e6));
+    getTokenBalance.mockResolvedValue(new Int(0));
+
+    const mockError = jest.fn();
+    feeForMaxNativeToken.mockRejectedValue(mockError);
+
+    renderCard();
+
+    // Wait for balances to load
+    expect(await screen.findByText('Balance: 1,000')).toBeInTheDocument();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Max' }));
+    });
+
+    expect(screen.queryByText('Unable to swap max balance')).toBeInTheDocument();
+    expect(reportException).toHaveBeenCalledTimes(1);
+    expect(reportException).toHaveBeenCalledWith(mockError);
   });
 });

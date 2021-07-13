@@ -338,14 +338,22 @@ function SwapCard({
     let amount;
 
     if(fromAsset === 'native_token') {
-      const fee = await feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance: balances.native_token });
-      const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
-      const maxAmount = balances.native_token.sub(fee.amount.get(denom).amount);
+      try {
+        const fee = await feeForMaxNativeToken(terraClient, { pair, walletAddress, intBalance: balances.native_token });
+        const denom = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
+        const maxAmount = balances.native_token.sub(fee.amount.get(denom).amount);
 
-      setTx({ fee });
-      setUsingMaxNativeAmount(true);
+        setTx({ fee });
+        setUsingMaxNativeAmount(true);
 
-      amount = maxAmount
+        amount = maxAmount
+      } catch (e) {
+        // Note: We may not want to report this error forever, but for diagnostic purposes, we're reporting it now.
+        //       A legitimate reason for this error might be that the user's balance exceeds the liquidity in the pool
+        reportException(e);
+        setError('Unable to swap max balance');
+        return;
+      }
     } else {
       // Since fees are paid in the native token,
       // we can set the amount to the full balance of contract tokens
