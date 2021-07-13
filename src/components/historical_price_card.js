@@ -8,7 +8,7 @@ import useMeasure from 'react-use-measure';
 import { useState, useEffect, useMemo } from 'react';
 import { formatNumber, formatUSD } from '../helpers/number_formatters';
 import { ApolloClient, gql, InMemoryCache } from '@apollo/client';
-import { useRefreshingEffect } from '../helpers/effects';
+import { useRefreshingEffect } from '../hooks/use_refreshing_effect';
 import { timeString } from '../helpers/time_formatters';
 import OptionsGroup from './historical_price_card/options_group';
 import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';

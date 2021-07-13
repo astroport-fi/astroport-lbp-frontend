@@ -5,7 +5,7 @@ import { getWeights, getPool } from '../terra/queries';
 import fetchUSTExchangeRate from '../services/fetch_ust_exchange_rate';
 import { formatUSD, formatTokenAmount } from '../helpers/number_formatters';
 import { calcPrice } from '../terra/math';
-import { useRefreshingEffect } from '../helpers/effects';
+import { useRefreshingEffect } from '../hooks/use_refreshing_effect';
 import { durationString } from '../helpers/time_formatters';
 import SwapCard from './swap_card';
 import { Int, Dec } from '@terra-money/terra.js';
