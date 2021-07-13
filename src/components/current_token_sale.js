@@ -8,7 +8,7 @@ import { calcPrice } from '../terra/math';
 import { useRefreshingEffect } from '../hooks/use_refreshing_effect';
 import { durationString } from '../helpers/time_formatters';
 import SwapCard from './swap_card';
-import { Int, Dec } from '@terra-money/terra.js';
+import { Int } from '@terra-money/terra.js';
 import Card from './card';
 import CurrentWeightCard from './current_weight_card';
 import ConnectWalletButton from './connect_wallet_button';
