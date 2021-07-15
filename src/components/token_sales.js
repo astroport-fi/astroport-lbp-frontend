@@ -11,6 +11,14 @@ import { ReactComponent as LoadingIndicator } from '../assets/images/loading-ind
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
 
+function sortLBPsAsc(lbps) {
+  return lbps.sort((a, b) => a.start_time - b.start_time);
+}
+
+function sortLBPsDesc(lbps) {
+  return lbps.sort((a, b) => b.start_time - a.start_time);
+}
+
 function TokenSales() {
   const [loading, setLoading] = useState(true);
   const [errorLoadingData, setErrorLoadingData] = useState(false);
@@ -28,13 +36,15 @@ function TokenSales() {
         const lbps = (await getLBPs(terraClient, network.factoryContractAddress)).filter(
           lbp => network.allowedPairContracts.includes(lbp.contract_addr)
         );
-
-        lbps.sort((a, b) => a.start_time - b.start_time);
-
         const currentTime = Math.floor(Date.now() / 1000);
 
-        setScheduledPairs(lbps.filter((lbp) => lbp.start_time > currentTime));
-        setPreviousPairs(lbps.filter((lbp) => lbp.end_time <= currentTime));
+        setScheduledPairs(sortLBPsAsc(
+          lbps.filter((lbp) => lbp.start_time > currentTime)
+        ));
+
+        setPreviousPairs(sortLBPsDesc(
+          lbps.filter((lbp) => lbp.end_time <= currentTime)
+        ));
 
         const currentPair = lbps.find(
           (lbp) => lbp.start_time <= currentTime && lbp.end_time > currentTime
