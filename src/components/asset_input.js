@@ -32,9 +32,9 @@ function AssetInput({
 
   function validateInput() {
     if(inputEl.current.input.validity.rangeOverflow) {
-      setError(`cannot be greater than ${parseFloat(max)}`);
+      setError(`cannot be greater than ${max}`);
     } else if(inputEl.current.input.validity.rangeUnderflow) {
-      setError(`cannot be less than ${parseFloat(min)}`);
+      setError(`cannot be less than ${min}`);
     } else {
       setError(false);
     }

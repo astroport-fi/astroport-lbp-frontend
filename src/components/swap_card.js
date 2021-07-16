@@ -408,7 +408,7 @@ function SwapCard({
         fromAsset={fromAsset}
         fromBalance={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
         fromMin={smallestDecOfAsset(fromAsset)}
-        fromMax={maxFromAmount}
+        fromMax={maxFromAmount?.toFixed(decimals[fromAsset])}
         fromStep={smallestDecOfAsset(fromAsset)}
         fromMaxClick={selectMaxFromAsset}
         toAmount={toAmount}
