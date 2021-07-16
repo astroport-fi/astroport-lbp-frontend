@@ -282,6 +282,12 @@ function SwapCard({
     swapFromTo();
   }
 
+  function assetsReversed() {
+    debouncedSetPendingSimulation({ type: 'forward' });
+
+    swapFromTo();
+  }
+
   const updateBalances = useCallback(async () => {
     if (walletAddress) {
       const nativeToken = nativeTokenFromPair(pair.asset_infos).info.native_token.denom;
@@ -416,7 +422,7 @@ function SwapCard({
         onFromAssetChange={fromAssetChanged}
         onToAmountChange={toAmountChanged}
         onToAssetChange={toAssetChanged}
-        onReverseAssets={() => swapFromTo()}
+        onReverseAssets={assetsReversed}
       >
         {
           ustPrice && ustExchangeRate &&
