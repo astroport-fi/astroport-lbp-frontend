@@ -18,3 +18,7 @@ export function formatTokenAmount(amount, decimals) {
     { maximumSignificantDigits: String(amount).length }
   );
 }
+
+export function dropInsignificantZeroes(numString) {
+  return numString.replace(/(\.\d*?)0*$/, '$1').replace(/\.$/, '');
+}

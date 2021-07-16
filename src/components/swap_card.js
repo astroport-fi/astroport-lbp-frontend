@@ -5,7 +5,7 @@ import { getSimulation, getReverseSimulation, getBalance, getTokenBalance } from
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { NATIVE_TOKEN_DECIMALS, NATIVE_TOKEN_SYMBOLS } from '../constants';
 import { feeForMaxNativeToken, buildSwapFromNativeTokenMsg, buildSwapFromContractTokenMsg, estimateFee, postMsg, sufficientBalance } from '../terra/swap';
-import { formatTokenAmount } from '../helpers/number_formatters';
+import { formatTokenAmount, dropInsignificantZeroes } from '../helpers/number_formatters';
 import { Dec } from '@terra-money/terra.js';
 import SwapRates from './swap_rates';
 import SwapCardOverlay from './swap_card_overlay';
@@ -198,7 +198,7 @@ function SwapCard({
         );
 
         // Set output value and drop insignificant zeroes
-        setter(parseFloat(decOutputAmount.toFixed(decimals[simulationInputAsset])).toString());
+        setter(dropInsignificantZeroes(decOutputAmount.toFixed(decimals[simulationInputAsset])));
 
         // Calculate and set price impact
         let simulatedPrice;
@@ -379,7 +379,7 @@ function SwapCard({
     const amountStr = Dec.withPrec(amount, decimals[fromAsset]).toFixed(decimals[fromAsset]);
 
     // Update from amount state (and drop insignificant zeroes)
-    setFromAmount(parseFloat(amountStr));
+    setFromAmount(dropInsignificantZeroes(amountStr));
 
     // Run simulation to project received tokens if entire wallet balance were swapped
     debouncedSetPendingSimulation({ type: 'forward' });
