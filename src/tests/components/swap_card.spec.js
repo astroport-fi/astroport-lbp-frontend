@@ -76,6 +76,10 @@ beforeEach(() => {
   }
 });
 
+afterEach(() => {
+  jest.useRealTimers();
+});
+
 describe('SwapCard', () => {
   const pair = buildPair({
     contractAddr: 'terra1',
@@ -375,7 +379,7 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
-    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+    expect(screen.getByText('Transaction Complete')).toBeInTheDocument();
 
     const txLink = screen.getByRole('link', { name: '123ABC' });
     expect(txLink).toBeInTheDocument();
@@ -456,7 +460,7 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
-    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+    expect(screen.getByText('Transaction Complete')).toBeInTheDocument();
 
     const txLink = screen.getByRole('link', { name: 'ABC123' });
     expect(txLink).toBeInTheDocument();
@@ -521,7 +525,7 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
-    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+    expect(screen.getByText('Transaction Complete')).toBeInTheDocument();
 
     // Posts message with max fee
     const msg = buildSwapFromNativeTokenMsg({
@@ -579,7 +583,7 @@ describe('SwapCard', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
     });
 
-    expect(screen.getByText('Transaction submitted successfully')).toBeInTheDocument();
+    expect(screen.getByText('Transaction Complete')).toBeInTheDocument();
 
     // Posts message with max contract tokens
     // and still estimates fee (uusd)
@@ -740,5 +744,77 @@ describe('SwapCard', () => {
     // Fees should have been estimated for each key stroke up until "10",
     // then "100" and "1000" exceeded the balance of 50
     expect(estimateFee).toHaveBeenCalledTimes(2);
+  });
+
+  it('displays pending state while waiting for tx to be mined', async () => {
+    jest.useFakeTimers();
+
+    // Simulation is performed on input change
+    getSimulation.mockResolvedValue({
+      return_amount: String(5 * 1e5)
+    });
+
+    // Before balances
+    getBalance.mockResolvedValueOnce(2000000);
+    getTokenBalance.mockResolvedValueOnce(0);
+
+    // After balances
+    getBalance.mockResolvedValueOnce(1000000);
+    getTokenBalance.mockResolvedValueOnce(5 * 1e5);
+
+    // Successful post
+    postMsg.mockResolvedValue({ txhash: '123ABC' });
+
+    // Stub out balance check
+    sufficientBalance.mockResolvedValue(true);
+
+    renderCard();
+
+    // Initial balances
+    expect(await screen.findByText('Balance: 2')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
+
+    const fromInput = screen.getByLabelText('From');
+    await act(async () => {
+      await userEvent.type(fromInput, '1');
+    });
+
+    // Mock pending tx (404)
+    mockTerraClient.tx.txInfo.mockRejectedValue();
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Swap' }));
+    });
+
+    expect(screen.getByText('Please Wait')).toBeInTheDocument();
+
+    let txLink = screen.getByRole('link', { name: '123ABC' });
+    expect(txLink).toBeInTheDocument();
+    expect(txLink.getAttribute('href')).toEqual('https://finder.terra.money/testnet/tx/123ABC');
+
+    // Mock mined tx
+    mockTerraClient.tx.txInfo.mockResolvedValue({});
+
+    // Blockchain is polled every 5s until tx is mined
+    act(() => {
+      jest.advanceTimersByTime(5000);
+    });
+
+    expect(await screen.findByText('Transaction Complete')).toBeInTheDocument();
+
+    txLink = screen.getByRole('link', { name: '123ABC' });
+    expect(txLink).toBeInTheDocument();
+    expect(txLink.getAttribute('href')).toEqual('https://finder.terra.money/testnet/tx/123ABC');
+
+    await act(async () => {
+      await userEvent.click(screen.getByRole('button', { name: 'Continue' }));
+    });
+
+    // New balances
+    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
+    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
+
+    // Invokes callback
+    expect(onSwapTxMined).toHaveBeenCalledTimes(1);
   });
 });

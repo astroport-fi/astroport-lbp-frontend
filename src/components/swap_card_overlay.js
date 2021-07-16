@@ -1,9 +1,10 @@
 import CardOverlay from './card_overlay';
-import { transactionDetailsUrl } from '../terra/urls';
 import classNames from 'classnames';
 import { useNetwork } from '../hooks/use_network';
+import { ReactComponent as WaitingIndicator } from '../assets/images/waiting-indicator.svg';
+import TxHash from './swap_card/tx_hash';
 
-function SwapCardOverlay({ txState, txHash, waitingDismiss, successDismiss, errorDismiss }) {
+function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, errorDismiss }) {
   let content, bgColor;
   const { terraClient } = useNetwork();
 
@@ -17,16 +18,24 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, successDismiss, erro
         <button type="button" className="mt-4" onClick={waitingDismiss}>Cancel</button>
       </>);
       break;
-    case 'success':
+    case 'pending':
+      bgColor = 'bg-blue-800';
+      content = (<>
+        <p className="text-xl">Please Wait</p>
+
+        <WaitingIndicator className="mx-auto my-6 w-12 h-12" />
+
+        <TxHash chainID={terraClient.config.chainID} txHash={txHash} />
+      </>);
+      break;
+    case 'complete':
       bgColor = 'bg-green-500';
       content = (<>
-        <p className="text-xl mb-2">Transaction submitted successfully</p>
+        <p className="text-xl">Transaction Complete</p>
 
-        <a href={transactionDetailsUrl(terraClient.config.chainID, txHash)} target="_blank" rel="noreferrer" className="text-sm block">
-          {txHash}
-        </a>
+        <TxHash chainID={terraClient.config.chainID} txHash={txHash} className="my-6" />
 
-        <button type="button" className="mt-4" onClick={successDismiss}>Continue</button>
+        <button type="button" onClick={completeDismiss}>Continue</button>
       </>);
       break;
     case 'error':

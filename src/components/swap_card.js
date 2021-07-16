@@ -319,20 +319,20 @@ function SwapCard({
     updateBalances();
   }, [updateBalances]);
 
-  // Checks up on the tx until it's mined
-  // NOTE: This could also be used to convey the status
-  //       of the tx to the user
-  const refreshBalancesWhenTxMined = useCallback(async function (txhash) {
+  // Checks up on the tx until it's mined,
+  // then update balances and and state
+  const trackTx = useCallback(async function (txhash) {
     try {
       // Once the tx has been included on the blockchain,
-      // update the balances
+      // update the balances and state
       await terraClient.tx.txInfo(txhash);
 
       updateBalances();
       onSwapTxMined();
+      setLastTx({ state: 'complete', txhash });
     } catch {
       // Not on chain yet, try again in 5s
-      setTimeout(refreshBalancesWhenTxMined, 5000, txhash);
+      setTimeout(trackTx, 5000, txhash);
     }
   // terraClient intentionally omitted
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -348,9 +348,9 @@ function SwapCard({
       try {
         const { txhash } = await postMsg(terraClient, tx);
 
-        refreshBalancesWhenTxMined(txhash);
+        setLastTx({ state: 'pending', txhash });
 
-        setLastTx({ state: 'success', txhash });
+        trackTx(txhash);
       } catch {
         setLastTx({ state: 'error' });
       }
@@ -401,7 +401,7 @@ function SwapCard({
         txState={lastTx.state}
         txHash={lastTx.txhash}
         waitingDismiss={() => setLastTx()}
-        successDismiss={resetForm}
+        completeDismiss={resetForm}
         errorDismiss={() => setLastTx()}
       />
     }>
