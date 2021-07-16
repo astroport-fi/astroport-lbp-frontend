@@ -124,9 +124,13 @@ function SwapCard({
     }
   }
 
+  function nullifyTx() {
+    setTx({ msg: null, fee: null });
+  };
+
   function resetSimulationState() {
     setPriceImpact(null);
-    setTx({ msg: null, fee: null });
+    nullifyTx();
     setSimulating(false);
   }
 
@@ -178,8 +182,8 @@ function SwapCard({
         return;
       }
 
-      // Don't run simulation when from amount is out of bounds
-      if(type === 'forward' && (decInputAmount.lessThan(smallestDecOfAsset(fromAsset)) || decInputAmount.greaterThan(maxFromAmount))) {
+      // Don't run simulation when from amount is below minimum
+      if(type === 'forward' && decInputAmount.lessThan(smallestDecOfAsset(fromAsset))) {
         setter('');
         resetSimulationState();
         return;
@@ -211,8 +215,12 @@ function SwapCard({
 
         setPriceImpact(simulatedPrice.sub(ustPrice).div(ustPrice));
 
-        if(type === 'reverse' && decOutputAmount.greaterThan(maxFromAmount)) {
+        if((type === 'forward' ? decInputAmount : decOutputAmount).greaterThan(maxFromAmount)) {
+          // Don't calculate fees and blank out the tx when the from amount exceeds the balance.
+          // This is mostly an informational state where user may want to see potential
+          // swap amount/price impact.
           setError(`Not enough ${symbols[fromAsset]}`);
+          nullifyTx();
         } else {
           // A successful simulation is a pre-req to building the tx
 

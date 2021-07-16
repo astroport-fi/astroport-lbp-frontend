@@ -688,4 +688,57 @@ describe('SwapCard', () => {
     expect(reportException).toHaveBeenCalledTimes(1);
     expect(reportException).toHaveBeenCalledWith(mockError);
   });
+
+  it('runs simulation and calculates price impact when from balance is insufficient, but displays error and does not calculate fees', async () => {
+    getSimulation.mockResolvedValue({
+      return_amount: '200000000' // 0.50 UST valuation
+    });
+
+    getBalance.mockResolvedValue(50 * 1e6);
+
+    renderCard({ ustPrice: new Dec(0.49) });
+
+    // Wait for balance
+    await screen.findByText('Balance: 50');
+
+    const fromInput = screen.getByLabelText('From');
+    const toInput = screen.getByLabelText('To (estimated)');
+
+    await act(async () => {
+      // We need to delay between inputs otherwise we end up with a field value of "1"
+      await userEvent.type(fromInput, '1000', { delay: 1 });
+    });
+
+    // "From" value is correctly converted to USD
+    const fromField = fromInput.closest('.border');
+    expect(within(fromField).getByText('($990.00)')).toBeInTheDocument(); // 1000 * 0.99
+
+    // "To" value is properly set to value returned by simulation
+    expect(toInput).toHaveDisplayValue('2000');
+
+    // "To" value is correctly converted to USD
+    const toField = toInput.closest('.border');
+    expect(within(toField).getByText('($970.20)')).toBeInTheDocument(); // 2000 * 0.49 * .99
+
+    // Simulated price is $0.01 higher than the spot price ($0.49),
+    // so the price impact is $0.01/$0.49 = 0.0204
+    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('2.04%');
+
+    expect(screen.queryByText('Not enough UST')).toBeInTheDocument();
+
+    expect(getSimulation).toHaveBeenCalledWith(
+      mockTerraClient,
+      'terra1',
+      new Int(1000000000),
+      {
+        native_token: {
+          denom: 'uusd'
+        }
+      }
+    );
+
+    // Fees should have been estimated for each key stroke up until "10",
+    // then "100" and "1000" exceeded the balance of 50
+    expect(estimateFee).toHaveBeenCalledTimes(2);
+  });
 });
