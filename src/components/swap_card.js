@@ -131,6 +131,7 @@ function SwapCard({
   }
 
   // Debounce pending simulations so we don't run too many back-to-back due to rapid input
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetPendingSimulation = useCallback(
     debounce(setPendingSimulation, 300),
     []
