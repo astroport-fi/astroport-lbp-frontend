@@ -54,6 +54,17 @@ jest.mock('../../hooks/use_network', () => ({
 
 jest.mock('../../report_exception.js');
 
+// Simulations are normally debounced
+// This mocks the debounce function to just invoke the
+// normally debounced function immediately
+jest.mock('lodash/debounce', () => ({
+  __esModule: true,
+  default: fn => {
+    fn.cancel = jest.fn();
+    return fn;
+  }
+}));
+
 beforeEach(() => {
   mockTerraClient = {
     tx: {

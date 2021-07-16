@@ -13,6 +13,7 @@ import SwapForm from './swap_form';
 import classNames from 'classnames';
 import { useNetwork } from '../hooks/use_network';
 import { useWallet } from '../hooks/use_wallet';
+import debounce from 'lodash/debounce';
 
 // TODO: Reject input with too many decimals
 
@@ -129,6 +130,15 @@ function SwapCard({
     setSimulating(false);
   }
 
+  // Debounce pending simulations so we don't run too many back-to-back due to rapid input
+  const debouncedSetPendingSimulation = useCallback(
+    debounce(setPendingSimulation, 300),
+    []
+  );
+
+  // Cancel debounced pending simulation on unmount
+  useEffect(() => () => debouncedSetPendingSimulation?.cancel(), [debouncedSetPendingSimulation]);
+
   // Runs either a regular/forward or reverse simulation based on the pendingSimulation.type
   // A forward simulation runs a regular simulation from the fromAmount,
   // and sets the toAmount to the result.
@@ -240,13 +250,13 @@ function SwapCard({
 
     setFromAmount(amount);
 
-    setPendingSimulation({ type: 'forward' });
+    debouncedSetPendingSimulation({ type: 'forward' });
   }
 
   function toAmountChanged (amount) {
     setToAmount(amount);
 
-    setPendingSimulation({ type: 'reverse' });
+    debouncedSetPendingSimulation({ type: 'reverse' });
   }
 
   function swapFromTo() {
@@ -261,13 +271,13 @@ function SwapCard({
   // While these are onAssetChange handlers, since we assume only two assets,
   // we don't bother checking what the actual change was - any change implies a reversal
   function fromAssetChanged() {
-    setPendingSimulation({ type: 'forward' });
+    debouncedSetPendingSimulation({ type: 'forward' });
 
     swapFromTo();
   }
 
   function toAssetChanged() {
-    setPendingSimulation({ type: 'reverse' });
+    debouncedSetPendingSimulation({ type: 'reverse' });
 
     swapFromTo();
   }
@@ -366,7 +376,7 @@ function SwapCard({
     setFromAmount(parseFloat(amountStr));
 
     // Run simulation to project received tokens if entire wallet balance were swapped
-    setPendingSimulation({ type: 'forward' });
+    debouncedSetPendingSimulation({ type: 'forward' });
   }
 
   return (
