@@ -21,18 +21,34 @@ describe('formatNumber', () => {
 });
 
 describe('formatTokenAmount', () => {
-  it("formats given number of tokens as number of whole tokens as formatted string with all decimals", () => {
-    const germanLocale = Intl.NumberFormat('de-DE', { maximumSignificantDigits: 12 });
+  let intlSpy;
 
-    const intlSpy = jest
+  function stubNumberFormat(maximumSignificantDigits) {
+    const germanFormatter = Intl.NumberFormat('de-DE', { maximumSignificantDigits });
+
+    intlSpy = jest
       .spyOn(Intl, 'NumberFormat')
-      .mockImplementation(() => germanLocale);
+      .mockImplementation(() => germanFormatter);
+  }
+
+  afterEach(() => {
+    intlSpy.mockRestore();
+  });
+
+  it("formats given number of tokens as number of whole tokens as formatted string with all decimals", () => {
+    stubNumberFormat(12);
 
     expect(formatTokenAmount(999999999999, 6)).toEqual('999.999,999999');
 
     expect(intlSpy).toHaveBeenCalledWith(undefined, { maximumSignificantDigits: 12 });
+  });
 
-    intlSpy.mockRestore();
+  it('uses accurate fractional amount when number would otherwise be imprecise', () => {
+    stubNumberFormat(16);
+
+    expect(formatTokenAmount('9999949991216613', 6)).toEqual('9.999.949.991,216613');
+
+    expect(intlSpy).toHaveBeenCalledWith(undefined, { maximumSignificantDigits: 16 });
   });
 });
 

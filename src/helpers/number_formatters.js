@@ -12,11 +12,14 @@ export function formatNumber(amount, opts={}) {
 
 export function formatTokenAmount(amount, decimals) {
   const tokens = Dec.withPrec(amount, decimals);
+  const formatter = new Intl.NumberFormat(undefined, { maximumSignificantDigits: String(amount).length });
+  const parts = formatter.formatToParts(parseFloat(tokens.toString()));
 
-  return formatNumber(
-    parseFloat(tokens.toString()),
-    { maximumSignificantDigits: String(amount).length }
-  );
+  if(parts[parts.length-1].type === 'fraction') {
+    parts[parts.length-1].value = tokens.toFixed(decimals).split('.')[1];
+  }
+
+  return parts.map(part => part.value).join('');
 }
 
 export function dropInsignificantZeroes(numString) {
