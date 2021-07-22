@@ -19,7 +19,7 @@ export const networks = {
     gasPrices: { uusd: 0.15 },
     allowedPairContracts: [
       'terra1ttz2s465khrrmv2ck2ct4v9cqhx4f3h7kgqmrq', // FOO
-      'terra109mvhus4fl50mh4c84cuk4ul3lcpuk2cwhdf6d', // TESTC
+      'terra1k6pxssp0e2gpcf6q8fgtmgmp7kzs3sfqjg6lpd', // TESTC
       'terra1yw6mwa4nz38zaacd7kzxy79h9rndpud0dvzxm3'  // TESTA
     ]
   },
