@@ -11,10 +11,10 @@ import SwapCard from './swap_card';
 import { Int } from '@terra-money/terra.js';
 import Card from './card';
 import CurrentWeightCard from './current_weight_card';
-import ConnectWalletButton from './connect_wallet_button';
 import HistoricalPriceCard from './historical_price_card';
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
+import DisconnectedSwapCard from './disconnected_swap_card';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -122,15 +122,7 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
               onSwapTxMined={() => refreshPairInfo()}
             />
           :
-            <Card className="p-6 border border-blue-gray-300 col-span-5 flex flex-col">
-              <h2 className="text-xl font-bold">
-                Swap
-              </h2>
-
-              <div className="flex-grow flex items-center mb-8">
-                <ConnectWalletButton className="w-full" />
-              </div>
-            </Card>
+            <DisconnectedSwapCard pair={pair} />
         }
 
         <HistoricalPriceCard
@@ -143,7 +135,11 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
       </div>
 
       {
-        pair.description &&
+        // When the wallet is connected, the About card is displayed beneath
+        // the swap card/historical price chart.
+        // When the wallet is disconnected, the About info is displayed
+        // in the Swap card
+        walletAddress && pair.description &&
         <Card className="my-8 px-6 pb-6">
           <h2 className="text-xl font-bold mb-4 py-4 border-b border-blue-gray-400">About</h2>
 
