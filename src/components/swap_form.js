@@ -5,24 +5,21 @@ import { ReactComponent as ReverseArrows } from '../assets/images/reverse-arrows
 
 function SwapForm({
   onSubmit,
-  assets,
   fromAmount,
   fromUSDAmount,
-  fromAsset,
+  fromAssetSymbol,
   fromBalance,
   fromMin,
   fromMax,
   fromStep,
   onFromAmountChange,
-  onFromAssetChange,
   fromMaxClick,
   toAmount,
   toUSDAmount,
-  toAsset,
+  toAssetSymbol,
   toBalance,
   toStep,
   onToAmountChange,
-  onToAssetChange,
   error,
   canSubmit,
   onReverseAssets,
@@ -35,9 +32,7 @@ function SwapForm({
         amount={fromAmount}
         onAmountChange={onFromAmountChange}
         usdAmount={fromUSDAmount}
-        assets={assets}
-        selectedAsset={fromAsset}
-        onAssetChange={onFromAssetChange}
+        assetSymbol={fromAssetSymbol}
         required={true}
         balanceString={fromBalance}
         maxClick={fromMaxClick}
@@ -54,7 +49,7 @@ function SwapForm({
         <button type="button" className="absolute right-8" onClick={onReverseAssets}>
           <span className="sr-only">Reverse assets</span>
 
-          <ReverseArrows className="h-5 w-5 opacity-60 hover:opacity-100 transition-opacity" />
+          <ReverseArrows className="h-5 w-5 opacity-60 hover:opacity-100 transition-opacity" aria-hidden="true" />
         </button>
       </div>
 
@@ -63,9 +58,7 @@ function SwapForm({
         amount={toAmount}
         onAmountChange={onToAmountChange}
         usdAmount={toUSDAmount}
-        assets={assets}
-        selectedAsset={toAsset}
-        onAssetChange={onToAssetChange}
+        assetSymbol={toAssetSymbol}
         balanceString={toBalance}
         step={toStep}
       />

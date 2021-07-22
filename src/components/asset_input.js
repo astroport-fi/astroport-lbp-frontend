@@ -13,18 +13,15 @@ function AssetInput({
   className,
   amount,
   usdAmount,
-  assets,
-  selectedAsset,
+  assetSymbol,
   balanceString,
   onAmountChange,
-  onAssetChange,
   maxClick,
   min,
   max,
   step
 }) {
   const inputId = nextId();
-  const selectId = nextId();
   const inputEl = useRef();
   const [error, setError] = useState(false);
   const [focused, setFocused] = useState(false);
@@ -103,13 +100,7 @@ function AssetInput({
           </button>
         }
         <div className="border-l border-blue-gray-350 pl-4">
-          <label htmlFor={selectId} className="sr-only">Asset</label>
-
-          <select id={selectId} className="bg-transparent outline-none cursor-pointer" value={selectedAsset} onChange={e => onAssetChange(e.target.value)}>
-            {
-              assets.map(asset => <option value={asset.type} key={asset.type}>{asset.symbol}</option>)
-            }
-          </select>
+          {assetSymbol}
         </div>
       </div>
 

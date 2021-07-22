@@ -197,7 +197,7 @@ describe('SwapCard', () => {
     );
   });
 
-  it('runs new simulation when from asset is changed', async () => {
+  it('runs new simulation when assets are reversed', async () => {
     getSimulation.mockImplementation((_, pairAddress, amount, offerAssetInfo) => {
       if(offerAssetInfo.native_token) {
         // Mocked response when offer asset is the native token
@@ -229,10 +229,9 @@ describe('SwapCard', () => {
     // Assert simulated value set
     expect(screen.getByLabelText('To (estimated)')).toHaveDisplayValue('2100');
 
-    // Now change the from asset (FOO -> UST)
-    const fromSelect = screen.getAllByLabelText('Asset')[0];
+    // Reverse the assets (FOO -> UST)
     await act(async () => {
-      await userEvent.selectOptions(fromSelect, 'FOO');
+      await userEvent.click(screen.getByRole('button', { name: 'Reverse assets' }));
     });
 
     // "To" value is properly set to value returned by simulation
@@ -262,76 +261,6 @@ describe('SwapCard', () => {
       {
         token: {
           contract_addr: 'terra2'
-        }
-      }
-    );
-  });
-
-  it('runs new reverse simulation when to asset is changed', async () => {
-    getReverseSimulation.mockImplementation((_, pairAddress, amount, askAssetInfo) => {
-      if(askAssetInfo.native_token) {
-        // Mocked response when ask asset is the native token
-        return {
-          offer_amount: '909000' // 5 decimals
-        };
-      } else {
-        // Mocked response when ask asset is the sale token
-        return {
-          offer_amount: '2600000' // 6 decimals
-        }
-      }
-    });
-
-    getBalance.mockResolvedValue(2000 * 1e6);
-    getTokenBalance.mockResolvedValue(2000 * 1e6);
-
-    renderCard({ ustPrice: new Dec(0.50) });
-
-    // Wait for balances
-    await screen.findByText('Balance: 2,000');
-
-    // First enter a to value (UST <- FOO)
-    const fromInput = screen.getByLabelText('To (estimated)');
-    await act(async () => {
-      await userEvent.type(fromInput, '5');
-    });
-
-    // Assert simulated value set
-    expect(screen.getByLabelText('From')).toHaveDisplayValue('2.6');
-
-    // Now change the to asset (FOO <- UST)
-    const fromSelect = screen.getAllByLabelText('Asset')[1];
-    await act(async () => {
-      await userEvent.selectOptions(fromSelect, 'UST');
-    });
-
-    // "From" value is properly set to value returned by reverse simulation
-    expect(screen.getByLabelText('From')).toHaveDisplayValue('9.09');
-
-    // Simulated price is $0.05005 higher than the spot price ($0.50),
-    // so the price impact is $0.05005/$0.50 = 0.1001
-    expect(getDescriptionByTermEl(screen.getByText('Price Impact'))).toHaveTextContent('10.01%');
-
-    // First reverse simulation when initial "to" amount was entered
-    expect(getReverseSimulation).toHaveBeenCalledWith(
-      mockTerraClient,
-      'terra1',
-      new Int(5 * 1e5), // 5 decimals
-      {
-        token: {
-          contract_addr: 'terra2'
-        }
-      }
-    );
-
-    // Second reverse simulation when "to" asset was changed
-    expect(getReverseSimulation).toHaveBeenCalledWith(
-      mockTerraClient,
-      'terra1',
-      new Int(5 * 1e6), // 6 decimals
-      {
-        native_token: {
-          denom: 'uusd'
         }
       }
     );
@@ -442,10 +371,9 @@ describe('SwapCard', () => {
     expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
     expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
 
-    // Change the from asset (FOO -> UST)
-    const fromSelect = screen.getAllByLabelText('Asset')[0];
+    // Reverse the assets (FOO -> UST)
     await act(async () => {
-      await userEvent.selectOptions(fromSelect, 'FOO');
+      await userEvent.click(screen.getByRole('button', { name: 'Reverse assets' }));
     });
 
     const fromInput = screen.getByLabelText('From');
@@ -564,10 +492,9 @@ describe('SwapCard', () => {
     // Wait for balances to load
     expect(await screen.findByText('Balance: 5,000')).toBeInTheDocument();
 
-    // Change the from asset (FOO -> UST)
-    const fromSelect = screen.getAllByLabelText('Asset')[0];
+    // Reverse the assets (FOO -> UST)
     await act(async () => {
-      await userEvent.selectOptions(fromSelect, 'FOO');
+      await userEvent.click(screen.getByRole('button', { name: 'Reverse assets' }));
     });
 
     // Use max FOO tokens

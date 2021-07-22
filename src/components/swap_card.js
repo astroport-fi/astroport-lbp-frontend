@@ -92,17 +92,6 @@ function SwapCard({
     return new Dec(1).div(10 ** decimals[asset]);
   }
 
-  const pairAssets = [
-    {
-      type: 'native_token',
-      symbol: symbols.native_token
-    },
-    {
-      type: 'token',
-      symbol: symbols.token
-    }
-  ];
-
   async function buildTx(fromAmount, fromAsset) {
     const builders = {
       native_token: buildSwapFromNativeTokenMsg,
@@ -268,33 +257,15 @@ function SwapCard({
     debouncedSetPendingSimulation({ type: 'reverse' });
   }
 
-  function swapFromTo() {
+  function assetsReversed() {
     // If the assets are swapped, we're no longer using
     // the calculated max amount
     setUsingMaxNativeAmount(false);
 
     setFromAsset(toAsset);
     setToAsset(fromAsset);
-  }
 
-  // While these are onAssetChange handlers, since we assume only two assets,
-  // we don't bother checking what the actual change was - any change implies a reversal
-  function fromAssetChanged() {
     debouncedSetPendingSimulation({ type: 'forward' });
-
-    swapFromTo();
-  }
-
-  function toAssetChanged() {
-    debouncedSetPendingSimulation({ type: 'reverse' });
-
-    swapFromTo();
-  }
-
-  function assetsReversed() {
-    debouncedSetPendingSimulation({ type: 'forward' });
-
-    swapFromTo();
   }
 
   const updateBalances = useCallback(async () => {
@@ -411,10 +382,9 @@ function SwapCard({
 
       <SwapForm
         onSubmit={swapFormSubmitted}
-        assets={pairAssets}
         fromAmount={fromAmount}
         fromUSDAmount={fromUSDAmount}
-        fromAsset={fromAsset}
+        fromAssetSymbol={symbols[fromAsset]}
         fromBalance={balances[fromAsset] && formatTokenAmount(balances[fromAsset], decimals[fromAsset])}
         fromMin={smallestDecOfAsset(fromAsset)}
         fromMax={maxFromAmount?.toFixed(decimals[fromAsset])}
@@ -422,15 +392,13 @@ function SwapCard({
         fromMaxClick={selectMaxFromAsset}
         toAmount={toAmount}
         toUSDAmount={toUSDAmount}
-        toAsset={toAsset}
+        toAssetSymbol={symbols[toAsset]}
         toBalance={balances[toAsset] && formatTokenAmount(balances[toAsset], decimals[toAsset])}
         toStep={smallestDecOfAsset(toAsset)}
         error={error}
         canSubmit={!(simulating || error)}
         onFromAmountChange={fromAmountChanged}
-        onFromAssetChange={fromAssetChanged}
         onToAmountChange={toAmountChanged}
-        onToAssetChange={toAssetChanged}
         onReverseAssets={assetsReversed}
       >
         {
