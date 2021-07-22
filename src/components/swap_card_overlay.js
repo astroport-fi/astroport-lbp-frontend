@@ -13,7 +13,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
     case 'waitingForExtension':
       bgColor = 'bg-blue-gray-700';
       content = (<>
-        <p className="text-xl animate-pulse">Waiting for extension</p>
+        <p className="text-xl animate-pulse">Waiting for Terra Station</p>
 
         <button type="button" className="mt-4" onClick={waitingDismiss}>Cancel</button>
       </>);
