@@ -63,6 +63,8 @@ function TokenSales() {
           setSaleTokenInfo(
             await getTokenInfo(terraClient, saleTokenAddress)
           );
+        } else {
+          setCurrentPair();
         }
       } catch(e) {
         reportException(e);
