@@ -8,14 +8,14 @@ function DisconnectedSwapCard({ pair }) {
   // When the pair does not have a description, it's just a blank card
   // with a vertically centered Connect Wallet button.
   return (
-    <Card className="p-6 border border-blue-gray-300 col-span-5 flex flex-col">
+    <Card className="py-6 px-5 col-span-5 flex flex-col">
       { pair.description &&
         <>
-          <h2 className="text-xl font-bold mb-4">
+          <h2 className="font-bold mb-8">
             About
           </h2>
 
-          <p>
+          <p className="text-xs opacity-50">
             {pair.description}
           </p>
         </>

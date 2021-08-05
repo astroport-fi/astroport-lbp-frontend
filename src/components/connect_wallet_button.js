@@ -26,7 +26,7 @@ function ConnectWalletButton({ className }) {
   }, [connectWallet]);
 
   return(
-    <button className={classNames('bg-yellow text-black py-2 px-6 rounded-lg flex justify-center', className)} onClick={connect} disabled={connecting}>
+    <button className={classNames('btn-primary py-2 px-14 rounded-lg flex justify-center', className)} onClick={connect} disabled={connecting}>
       {
         connecting ?
           <LoadingIndicator className="w-6 h-6" /> :

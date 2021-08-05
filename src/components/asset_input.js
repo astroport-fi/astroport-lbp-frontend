@@ -7,6 +7,8 @@ import classNames from 'classnames';
 
 // TODO: Better display of huge numbers (currently overflows container)
 
+const DEFAULT_BORDER_CLASSES = 'border-white border-opacity-30';
+
 function AssetInput({
   label,
   required,
@@ -25,7 +27,7 @@ function AssetInput({
   const inputEl = useRef();
   const [error, setError] = useState(false);
   const [focused, setFocused] = useState(false);
-  const [borderColorClass, setBorderColorClass] = useState('border-blue-gray-300');
+  const [borderClasses, setBorderClasses] = useState(DEFAULT_BORDER_CLASSES);
 
   function validateInput() {
     if(inputEl.current.input.validity.rangeOverflow) {
@@ -50,25 +52,26 @@ function AssetInput({
 
   useEffect(() => {
     if(error) {
-      setBorderColorClass('border-red-500');
+      setBorderClasses('border-red-500');
     } else if(focused) {
-      setBorderColorClass('border-white');
+      setBorderClasses('border-white');
     } else {
-      setBorderColorClass('border-blue-gray-300');
+      setBorderClasses(DEFAULT_BORDER_CLASSES);
     }
   }, [error, focused]);
 
   return (
     <div className={className}>
-      <div className="flex justify-between text-sm text-white text-opacity-60">
-        <label htmlFor={inputId}>{label}</label>
+      <div className="flex justify-between">
+        <label htmlFor={inputId} className="text-secondary">{label}</label>
 
-        <span>
-          Balance: {balanceString}
+        <span className="flex">
+          <span className="text-secondary mr-1">Balance:</span>
+          <span className="text-xs">{balanceString}</span>
         </span>
       </div>
 
-      <div className={classNames('transition-colors border rounded-lg py-3 px-4 flex justify-between mt-2', borderColorClass)}>
+      <div className={classNames('transition-colors border rounded-lg py-3 px-3.5 flex justify-between mt-2 items-center', borderClasses)}>
         <div className="flex items-center flex-grow cursor-text" onClick={() => inputEl.current.focus()}>
           <AutosizeInput
             id={inputId}
@@ -76,7 +79,7 @@ function AssetInput({
             value={amount}
             onChange={amountChanged}
             className="max-w-max"
-            inputClassName="bg-transparent outline-none input-no-spinner"
+            inputClassName="bg-transparent outline-none input-no-spinner text-sm"
             autoComplete="off"
             placeholder="0.000"
             ref={inputEl}
@@ -88,18 +91,18 @@ function AssetInput({
             onBlur={() => setFocused(false)}
           />
 
-          <span className="text-white text-opacity-50 text-xs select-none">
+          <span className={classNames('text-white text-xs select-none', { 'text-opacity-50': !amount })}>
             ({formatUSD(usdAmount)})
           </span>
         </div>
 
         {
           maxClick &&
-          <button type="button" className="text-yellow text-xs uppercase mr-3 outline-none" onClick={maxClick}>
+          <button type="button" className="text-yellow text-xs uppercase mr-6 outline-none" onClick={maxClick}>
             Max
           </button>
         }
-        <div className="border-l border-blue-gray-350 pl-4">
+        <div className="text-xs">
           {assetSymbol}
         </div>
       </div>

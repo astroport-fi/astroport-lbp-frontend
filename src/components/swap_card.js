@@ -366,7 +366,7 @@ function SwapCard({
   }
 
   return (
-    <Card className={classNames('p-6 pb-8 border border-blue-gray-300', className)} overlay={
+    <Card className={classNames('p-6 pb-8', className)} overlay={
       lastTx &&
       <SwapCardOverlay
         txState={lastTx.state}
@@ -376,7 +376,7 @@ function SwapCard({
         errorDismiss={() => setLastTx()}
       />
     }>
-      <h2 className="text-xl font-bold mb-7">
+      <h2 className="font-bold mb-7">
         Swap
       </h2>
 

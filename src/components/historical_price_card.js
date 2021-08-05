@@ -35,19 +35,19 @@ const PRICE_QUERY = gql`
 const INTERVALS = [
   {
     minutes: 5,
-    label: '5m'
+    label: '5M'
   },
   {
     minutes: 15,
-    label: '15m'
+    label: '15M'
   },
   {
     minutes: 60,
-    label: '1h'
+    label: '1HR'
   },
   {
     minutes: 4 * 60,
-    label: '4h'
+    label: '4HR'
   }
 ]
 
@@ -104,15 +104,15 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const prices = useMemo(() => data?.map(({ price }) => price), [data]);
 
   const areaDataStyle = {
-    stroke: '#4E6EFF',
-    strokeWidth: 3,
+    stroke: '#83FFCB',
+    strokeWidth: 2,
     fill: 'url(#fillGradient)'
   }
 
   return (
-    <Card className={classNames('p-6 flex flex-col', className)} style={style}>
+    <Card className={classNames('py-6 px-5 flex flex-col', className)} style={style}>
       <div className="flex justify-between">
-        <h2 className="text-lg font-bold">
+        <h2 className="font-bold">
           {nativeSymbol} / {saleTokenInfo.symbol}
         </h2>
 
@@ -143,7 +143,7 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
 
       {
         usdPrice &&
-        <h3 className="text-2xl font-bold my-5">
+        <h3 className="font-bold my-5">
           {formatUSD(usdPrice)}
         </h3>
       }
@@ -156,8 +156,8 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             y1="0%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="#4e6eff" stopOpacity="0.2" />
-            <stop offset="100%" stopColor="#86a7ff" stopOpacity="0" />
+            <stop offset="0%" stopColor="#83ffcb" stopOpacity="0.49" />
+            <stop offset="78%" stopColor="#83ffcb" stopOpacity="0" />
           </linearGradient>
         </defs>
       </svg>
@@ -186,7 +186,6 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
               x="timestamp"
               y="price"
               style={{data: areaDataStyle}}
-              interpolation={'natural'}
             />
           </Chart>
         }

@@ -140,10 +140,10 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
         // When the wallet is disconnected, the About info is displayed
         // in the Swap card
         walletAddress && pair.description &&
-        <Card className="my-8 px-6 pb-6">
-          <h2 className="text-xl font-bold mb-4 py-4 border-b border-blue-gray-400">About</h2>
+        <Card className="my-8 px-5 py-4">
+          <h2 className="font-bold mb-8">About</h2>
 
-          <p>
+          <p className="text-xs opacity-50">
             {pair.description}
           </p>
         </Card>

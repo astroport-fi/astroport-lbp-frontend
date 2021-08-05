@@ -10,15 +10,14 @@ module.exports = {
         yellow: {
           DEFAULT: '#ffd04e'
         },
-        'blue-gray': {
-          300: '#636379',
-          350: '#525263',
-          400: '#464658',
-          500: '#373743',
-          600: '#353543',
-          700: '#2e2e38',
-          800: '#24242D',
-          900: '#1c1c23'
+        primary: {
+          DEFAULT: '#5643F2'
+        },
+        positive: {
+          DEFAULT: '#83FFCB'
+        },
+        negative: {
+          DEFAULT: '#FF8383'
         }
       }
     },

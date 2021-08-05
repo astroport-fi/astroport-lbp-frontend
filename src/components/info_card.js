@@ -14,8 +14,8 @@ function InfoCard({ label, value, loading, moreInfo, className }) {
       onMouseEnter={() => setShowMoreInfo(true)}
       onMouseLeave={() => setShowMoreInfo(false)}
     >
-      <div className="p-5 text-center">
-        <h3 className="text-gray-400 text-xs mb-2 flex items-center justify-center">
+      <div className="px-5 pt-4 pb-5 text-center">
+        <h3 className="text-secondary mb-2 flex items-center justify-center">
           {label}
           {
             !loading && moreInfo &&
@@ -23,7 +23,7 @@ function InfoCard({ label, value, loading, moreInfo, className }) {
           }
         </h3>
 
-        <span className="text-2xl">
+        <span>
           {
             loading ?
               <div className="flex justify-center">

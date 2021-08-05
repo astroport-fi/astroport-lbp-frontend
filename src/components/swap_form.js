@@ -1,6 +1,5 @@
 import classNames from 'classnames';
 import AssetInput from './asset_input';
-import { ReactComponent as DownArrow } from '../assets/images/down-arrow.svg';
 import { ReactComponent as ReverseArrows } from '../assets/images/reverse-arrows.svg';
 
 function SwapForm({
@@ -41,15 +40,11 @@ function SwapForm({
         step={fromStep}
       />
 
-      <div className="relative flex items-center justify-center">
-        <div className="rounded-full bg-blue-gray-500 text-yellow w-8 h-8 p-1 flex items-center justify-center my-4">
-          <DownArrow className="h-5 w-5" />
-        </div>
-
-        <button type="button" className="absolute right-8" onClick={onReverseAssets}>
+      <div className="flex items-center justify-center mt-5 mb-2">
+        <button type="button" onClick={onReverseAssets}>
           <span className="sr-only">Reverse assets</span>
 
-          <ReverseArrows className="h-5 w-5 opacity-60 hover:opacity-100 transition-opacity" aria-hidden="true" />
+          <ReverseArrows className="h-5 w-5 opacity-50 hover:opacity-100 transition-opacity" aria-hidden="true" />
         </button>
       </div>
 
@@ -74,9 +69,9 @@ function SwapForm({
         type="submit"
         className={
           classNames(
-            "text-black py-3 px-6 rounded-lg w-full mt-12 transition", {
-              'bg-yellow hover:animate-pulse': canSubmit,
-              'bg-gray-400 cursor-not-allowed': !canSubmit
+            "py-3 px-6 rounded-lg w-full mt-12 transition", {
+              'btn-primary hover:animate-pulse': canSubmit,
+              'btn-disabled': !canSubmit
             }
           )
         }

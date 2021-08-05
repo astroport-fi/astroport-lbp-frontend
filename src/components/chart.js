@@ -18,12 +18,11 @@ const axisLabel = {
 const theme = {
   dependentAxis: {
     style: {
-      grid: {
-        stroke: '#ffffff',
-        opacity: 0.2
-      },
       axis,
       axisLabel,
+      grid: {
+        stroke: 'none'
+      },
       tickLabels: {
         ...tickLabels,
         textAnchor: 'start'
@@ -58,7 +57,6 @@ function Chart({ xAxis, yAxis, children, ...rest }) {
       <VictoryAxis
         dependentAxis
         tickLabelComponent={<VictoryLabel dy={-5} verticalAnchor={"end"} />}
-        gridComponent={<LineSegment x1={0} />}
         { ...yAxis }
       />
 

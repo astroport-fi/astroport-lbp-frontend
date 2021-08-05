@@ -11,7 +11,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
   // eslint-disable-next-line default-case
   switch(txState) {
     case 'waitingForExtension':
-      bgColor = 'bg-blue-gray-700';
+      bgColor = 'bg-primary';
       content = (<>
         <p className="text-xl animate-pulse">Waiting for Terra Station</p>
 
@@ -19,7 +19,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
       </>);
       break;
     case 'pending':
-      bgColor = 'bg-blue-800';
+      bgColor = 'bg-primary';
       content = (<>
         <p className="text-xl">Please Wait</p>
 
@@ -29,7 +29,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
       </>);
       break;
     case 'complete':
-      bgColor = 'bg-green-500';
+      bgColor = 'bg-positive';
       content = (<>
         <p className="text-xl">Transaction Complete</p>
 
@@ -39,7 +39,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
       </>);
       break;
     case 'error':
-      bgColor = 'bg-red-500';
+      bgColor = 'bg-negative';
       content = (<>
         <p className="text-xl">Error submitting transaction</p>
 
@@ -49,7 +49,7 @@ function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, err
   }
 
   return (
-    <CardOverlay className={classNames('backdrop-filter backdrop-blur-sm transition-colors duration-300 ease-out', bgColor)}>
+    <CardOverlay className={classNames('bg-opacity-90 backdrop-filter backdrop-blur-sm transition-colors duration-300 ease-out', bgColor)}>
       {content}
     </CardOverlay>
   );

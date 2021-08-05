@@ -3,5 +3,20 @@
 @tailwind utilities;
 
 body {
-  @apply text-white bg-blue-gray-900;
+  @apply text-white;
+
+  background-image: url(./assets/images/background.png);
+  background-size: cover;
+}
+
+.btn-primary {
+  @apply bg-primary;
+}
+
+.btn-disabled {
+  @apply bg-gray-400 cursor-not-allowed text-black;
+}
+
+.text-secondary {
+  @apply opacity-50 text-xs;
 }
