@@ -4,14 +4,20 @@ const axis = {
   stroke: 'none'
 }
 
-const tickLabels = {
+const fontStyles = {
   fill: '#ffffff',
-  fontSize: 12
+  fontSize: 10,
+  fontFamily: 'Inter, sans-serif',
+  fontWeight: 500
+}
+
+const tickLabels = {
+  ...fontStyles,
+  opacity: 0.3
 }
 
 const axisLabel = {
-  fontSize: 12,
-  fill: '#ffffff',
+  ...fontStyles,
   padding: 20
 }
 
