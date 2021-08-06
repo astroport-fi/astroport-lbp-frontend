@@ -66,8 +66,9 @@ function AssetInput({
         <label htmlFor={inputId} className="text-secondary">{label}</label>
 
         <span className="flex">
-          <span className="text-secondary mr-1">Balance:</span>
-          <span className="text-xs">{balanceString}</span>
+          <span className="text-secondary mr-1" aria-hidden="true">Balance:</span>
+
+          <span className="text-xs" aria-label={`${assetSymbol} Balance`}>{balanceString}</span>
         </span>
       </div>
 
