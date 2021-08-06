@@ -41,7 +41,7 @@ const theme = {
       grid: {
         stroke: '#ffffff',
         strokeDasharray: '4, 6',
-        opacity: 0.2
+        opacity: 0.3
       },
       axis,
       axisLabel,
