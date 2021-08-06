@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 body {
-  @apply text-white;
+  @apply text-white font-medium;
 
   background-image: url(./assets/images/background.png);
   background-size: cover;
+  font-family: 'Inter', sans-serif;
 }
 
 .btn-primary {
