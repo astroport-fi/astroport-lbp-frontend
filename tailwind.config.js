@@ -21,6 +21,9 @@ module.exports = {
         }
       }
     },
+    letterSpacing: {
+      widest: '.18em'
+    }
   },
   variants: {
     extend: {
