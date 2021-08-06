@@ -1,6 +1,5 @@
 .card {
   @apply rounded-2xl;
-  background: rgba(0, 13, 55, 0.8);
+  background: rgba(0, 13, 55, 0.7);
   border: 1px solid rgba(86, 67, 242, 0.4);
-  opacity: 0.9;
 }
