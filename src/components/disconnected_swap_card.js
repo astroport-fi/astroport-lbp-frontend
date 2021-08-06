@@ -1,6 +1,7 @@
 import classNames from 'classnames';
 import ConnectWalletButton from './connect_wallet_button';
 import Card from './card';
+import PairDescription from './pair_description';
 
 function DisconnectedSwapCard({ pair }) {
   // When the pair has a description, this card looks like an About card,
@@ -15,9 +16,7 @@ function DisconnectedSwapCard({ pair }) {
             About
           </h2>
 
-          <p className="text-xs opacity-50">
-            {pair.description}
-          </p>
+          <PairDescription pair={pair} />
         </>
       }
 

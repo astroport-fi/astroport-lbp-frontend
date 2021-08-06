@@ -15,6 +15,7 @@ import HistoricalPriceCard from './historical_price_card';
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
 import DisconnectedSwapCard from './disconnected_swap_card';
+import PairDescription from './pair_description';
 
 const REFRESH_INTERVAL = 30_000; // 30s
 
@@ -143,9 +144,7 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
         <Card className="my-8 px-5 py-4">
           <h2 className="font-bold mb-8">About</h2>
 
-          <p className="text-xs opacity-50">
-            {pair.description}
-          </p>
+          <PairDescription pair={pair} />
         </Card>
       }
     </>
