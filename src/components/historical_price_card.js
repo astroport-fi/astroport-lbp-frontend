@@ -42,6 +42,10 @@ const INTERVALS = [
     label: '15M'
   },
   {
+    minutes: 30,
+    label: '30M'
+  },
+  {
     minutes: 60,
     label: '1HR'
   },
