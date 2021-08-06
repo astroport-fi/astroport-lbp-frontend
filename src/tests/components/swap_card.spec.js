@@ -80,6 +80,18 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
+async function waitForBalances({ fromBalance, toBalance }) {
+  const [fromBalanceLabel, toBalanceLabel] = screen.getAllByText('Balance:');
+
+  if(fromBalance !== undefined) {
+    expect(await within(fromBalanceLabel.parentElement).findByText(fromBalance)).toBeInTheDocument();
+  }
+
+  if(toBalance !== undefined) {
+    expect(await within(toBalanceLabel.parentElement).findByText(toBalance)).toBeInTheDocument();
+  }
+}
+
 describe('SwapCard', () => {
   const pair = buildPair({
     contractAddr: 'terra1',
@@ -121,7 +133,7 @@ describe('SwapCard', () => {
     renderCard({ ustPrice: new Dec(0.49) });
 
     // Wait for balance
-    await screen.findByText('Balance: 2,000');
+    await waitForBalances({ fromBalance: '2,000' });
 
     const fromInput = screen.getByLabelText('From');
     const toInput = screen.getByLabelText('To (estimated)');
@@ -172,7 +184,7 @@ describe('SwapCard', () => {
     const toInput = screen.getByLabelText('To (estimated)');
 
     // Wait for balances
-    await screen.findByText('Balance: 2,000');
+    await waitForBalances({ fromBalance: '2,000' });
 
     await act(async () => {
       await userEvent.type(toInput, '7');
@@ -218,7 +230,7 @@ describe('SwapCard', () => {
     renderCard({ ustPrice: new Dec(.48) });
 
     // Wait for balances
-    await screen.findByText('Balance: 2,000');
+    await waitForBalances({ fromBalance: '2,000' });
 
     // First enter a from value (UST -> FOO)
     const fromInput = screen.getByLabelText('From');
@@ -293,8 +305,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Initial balances
-    expect(await screen.findByText('Balance: 2')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '2', toBalance: '0' });
 
     const fromInput = screen.getByLabelText('From');
     await act(async () => {
@@ -319,8 +330,7 @@ describe('SwapCard', () => {
     });
 
     // New balances
-    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '1', toBalance: '5' });
 
     // Estimates fee and posts message with estimated fee
     const msg = buildSwapFromNativeTokenMsg({
@@ -368,8 +378,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Initial balances
-    expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '0', toBalance: '10' });
 
     // Reverse the assets (FOO -> UST)
     await act(async () => {
@@ -399,8 +408,7 @@ describe('SwapCard', () => {
     });
 
     // New balances
-    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '5', toBalance: '1' });
 
     // Estimates fee and posts message with estimated fee
     const msg = buildSwapFromContractTokenMsg({
@@ -439,7 +447,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Wait for balances to load
-    expect(await screen.findByText('Balance: 1,000')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '1,000' });
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Max' }));
@@ -490,7 +498,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Wait for balances to load
-    expect(await screen.findByText('Balance: 5,000')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '1,000', toBalance: '5,000' });
 
     // Reverse the assets (FOO -> UST)
     await act(async () => {
@@ -542,7 +550,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Wait for balances
-    expect(await screen.findByText('Balance: 10')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '10' });
 
     await act(async () => {
       await userEvent.type(screen.getByLabelText('From'), '5');
@@ -574,7 +582,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Wait for balances to load
-    expect(await screen.findByText('Balance: 1,000')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '1,000' });
 
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: 'Max' }));
@@ -594,7 +602,7 @@ describe('SwapCard', () => {
     renderCard({ ustPrice: new Dec(0.49) });
 
     // Wait for balance
-    await screen.findByText('Balance: 2,000');
+    await waitForBalances({ fromBalance: '2,000' });
 
     const fromInput = screen.getByLabelText('From');
     const toInput = screen.getByLabelText('To (estimated)');
@@ -630,7 +638,7 @@ describe('SwapCard', () => {
     renderCard({ ustPrice: new Dec(0.49) });
 
     // Wait for balance
-    await screen.findByText('Balance: 50');
+    await waitForBalances({ fromBalance: '50' });
 
     const fromInput = screen.getByLabelText('From');
     const toInput = screen.getByLabelText('To (estimated)');
@@ -698,8 +706,7 @@ describe('SwapCard', () => {
     renderCard();
 
     // Initial balances
-    expect(await screen.findByText('Balance: 2')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 0')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '2', toBalance: '0' });
 
     const fromInput = screen.getByLabelText('From');
     await act(async () => {
@@ -738,8 +745,7 @@ describe('SwapCard', () => {
     });
 
     // New balances
-    expect(await screen.findByText('Balance: 1')).toBeInTheDocument();
-    expect(await screen.findByText('Balance: 5')).toBeInTheDocument();
+    await waitForBalances({ fromBalance: '1', toBalance: '5' });
 
     // Invokes callback
     expect(onSwapTxMined).toHaveBeenCalledTimes(1);
