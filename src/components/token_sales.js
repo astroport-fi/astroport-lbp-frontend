@@ -10,6 +10,7 @@ import ConnectedWallet from './connected_wallet';
 import { ReactComponent as LoadingIndicator } from '../assets/images/loading-indicator.svg';
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
+import { ReactComponent as Logo } from '../assets/images/logo.svg';
 
 function sortLBPsAsc(lbps) {
   return lbps.sort((a, b) => a.start_time - b.start_time);
@@ -87,20 +88,24 @@ function TokenSales() {
     return <div className="m-10 text-center text-red-500">Error connecting to node</div>;
   } else {
     return (
-      <div className="container mx-auto mt-10">
+      <div className="container mx-auto">
+        <div className="flex justify-between mt-6 mb-12">
+          <Logo className="h-8" />
+
+          {
+            walletAddress ?
+              <ConnectedWallet />
+              :
+              <ConnectWalletButton />
+          }
+        </div>
+
         {
           currentPair &&
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-bold">
                 {saleTokenInfo.name} Token Sale
               </h1>
-
-              {
-                walletAddress ?
-                  <ConnectedWallet />
-                  :
-                  <ConnectWalletButton />
-              }
             </div>
         }
 
