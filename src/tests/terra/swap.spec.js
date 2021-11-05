@@ -75,7 +75,7 @@ describe('buildSwapFromNativeTokenMsg', () => {
                 denom: 'uusd'
               }
             },
-            amount: intAmount
+            amount: '42000000'
           },
           to: walletAddress
         }
@@ -102,7 +102,7 @@ describe('buildSwapFromContractTokenMsg', () => {
       {
         send: {
           contract: 'terra-pair-addr',
-          amount: intAmount,
+          amount: '7000000',
           msg: 'eyJzd2FwIjp7fX0='
         }
       }
@@ -222,7 +222,7 @@ describe('feeForMaxNativeToken', () => {
                 denom: 'uusd'
               }
             },
-            amount: new Int(1)
+            amount: '1'
           },
           to: walletAddress
         }

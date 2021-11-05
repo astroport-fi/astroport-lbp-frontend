@@ -74,7 +74,7 @@ export function buildSwapFromNativeTokenMsg({ pair, walletAddress, intAmount }) 
               denom
             }
           },
-          amount: intAmount
+          amount: intAmount.toString()
         },
         to: walletAddress
       }
@@ -100,7 +100,7 @@ export function buildSwapFromContractTokenMsg({ pair, walletAddress, intAmount }
     {
       send: {
         contract: pair.contract_addr,
-        amount: intAmount,
+        amount: intAmount.toString(),
         msg: btoa(
           JSON.stringify({
             swap: {}
