@@ -43,13 +43,13 @@ beforeEach(() => {
 describe('estimateFee', () => {
   it('queries node for estimated fee for given message', () => {
     const mockPromise = jest.fn();
-    const msg = jest.fn();
+    const msg = { sender: 'terra-addr-42' }
 
     terraClient.tx.estimateFee.mockReturnValue(mockPromise);
 
     expect(estimateFee(terraClient, msg)).toEqual(mockPromise);
 
-    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(new StdTx([msg], new StdFee(0), []));
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith('terra-addr-42', [msg]);
   });
 });
 
@@ -229,7 +229,7 @@ describe('feeForMaxNativeToken', () => {
       },
       { uusd: new Int(1) }
     );
-    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(new StdTx([msg], new StdFee(0), []))
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(walletAddress, [msg])
 
     // Should have fetched tax rate
     expect(terraClient.treasury.taxRate).toHaveBeenCalledTimes(1);

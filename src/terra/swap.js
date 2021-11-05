@@ -1,4 +1,4 @@
-import { Extension, MsgExecuteContract, StdTx, StdFee, Int, Coin, Coins } from '@terra-money/terra.js';
+import { Extension, MsgExecuteContract, StdFee, Int, Coin, Coins } from '@terra-money/terra.js';
 import { nativeTokenFromPair, saleAssetFromPair } from '../helpers/asset_pairs';
 import { getBalance, getTokenBalance } from './queries';
 
@@ -9,10 +9,7 @@ import { getBalance, getTokenBalance } from './queries';
 
 export function estimateFee(terraClient, msg) {
   // Estimate the fee (gas + stability fee/tax)
-  // This is very similar to what the TxAPI create method does to estimate fees:
-  //    https://github.com/terra-money/terra.js/blob/b7e7c88151fe2f404437ce7de88b9fa2a03de26a/src/client/lcd/api/TxAPI.ts#L181-L185
-  const stdTx = new StdTx([msg], new StdFee(0), [])
-  return terraClient.tx.estimateFee(stdTx);
+  return terraClient.tx.estimateFee(msg.sender, [msg]);
 }
 
 export function postMsg(terraClient, { msg, fee }) {
