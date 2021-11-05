@@ -5,4 +5,5 @@
 import '@testing-library/jest-dom';
 
 import { enableFetchMocks } from 'jest-fetch-mock';
+global.crypto = require('crypto'); // TODO: Without this, we get an error running tests after terra.js update - find out why
 enableFetchMocks();
