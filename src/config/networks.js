@@ -8,13 +8,13 @@ if(process.env.NODE_ENV !== 'production') {
 export const networks = {
   mainnet: {
     lcdURL: 'https://lcd.terra.dev',
-    chainID: 'columbus-4',
+    chainID: 'columbus-5',
     factoryContractAddress: '', // TBD
     gasPrices: { uusd: 0.15 }
   },
   testnet: {
-    lcdURL: 'https://tequila-lcd.terra.dev',
-    chainID: 'tequila-0004',
+    lcdURL: 'https://bombay-lcd.terra.dev',
+    chainID: 'bombay-12',
     factoryContractAddress: 'terra1y358sk0fcdc8zkhrwwrwkaph93jmw5kctvn6fw',
     gasPrices: { uusd: 0.15 },
     allowedPairContracts: [
