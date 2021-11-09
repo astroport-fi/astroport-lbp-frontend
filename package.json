@@ -7,7 +7,7 @@
     "@craco/craco": "^6.1.2",
     "@sentry/react": "^6.8.0",
     "@sentry/tracing": "^6.8.0",
-    "@terra-money/terra.js": "^1.8.0",
+    "@terra-money/terra.js": "^2.0.15",
     "@testing-library/jest-dom": "^5.13.0",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",

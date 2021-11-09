@@ -43,13 +43,13 @@ beforeEach(() => {
 describe('estimateFee', () => {
   it('queries node for estimated fee for given message', () => {
     const mockPromise = jest.fn();
-    const msg = jest.fn();
+    const msg = { sender: 'terra-addr-42' }
 
     terraClient.tx.estimateFee.mockReturnValue(mockPromise);
 
     expect(estimateFee(terraClient, msg)).toEqual(mockPromise);
 
-    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(new StdTx([msg], new StdFee(0), []));
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith('terra-addr-42', [msg]);
   });
 });
 
@@ -75,7 +75,7 @@ describe('buildSwapFromNativeTokenMsg', () => {
                 denom: 'uusd'
               }
             },
-            amount: intAmount
+            amount: '42000000'
           },
           to: walletAddress
         }
@@ -102,7 +102,7 @@ describe('buildSwapFromContractTokenMsg', () => {
       {
         send: {
           contract: 'terra-pair-addr',
-          amount: intAmount,
+          amount: '7000000',
           msg: 'eyJzd2FwIjp7fX0='
         }
       }
@@ -222,14 +222,14 @@ describe('feeForMaxNativeToken', () => {
                 denom: 'uusd'
               }
             },
-            amount: new Int(1)
+            amount: '1'
           },
           to: walletAddress
         }
       },
       { uusd: new Int(1) }
     );
-    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(new StdTx([msg], new StdFee(0), []))
+    expect(terraClient.tx.estimateFee).toHaveBeenCalledWith(walletAddress, [msg])
 
     // Should have fetched tax rate
     expect(terraClient.treasury.taxRate).toHaveBeenCalledTimes(1);
