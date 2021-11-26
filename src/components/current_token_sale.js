@@ -11,7 +11,6 @@ import SwapCard from './swap_card';
 import { Int } from '@terra-money/terra.js';
 import Card from './card';
 import CurrentWeightCard from './current_weight_card';
-import HistoricalPriceCard from './historical_price_card';
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
 import DisconnectedSwapCard from './disconnected_swap_card';
@@ -123,30 +122,22 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
               onSwapTxMined={() => refreshPairInfo()}
             />
           :
-            <DisconnectedSwapCard pair={pair} />
+            <DisconnectedSwapCard pair={pair} className="col-start-4 col-span-6" />
         }
 
-        <HistoricalPriceCard
-          className="col-span-7"
-          pair={pair}
-          saleTokenInfo={saleTokenInfo}
-          usdPrice={usdPrice}
-          style={{ minHeight: '500px' }}
-        />
+        {
+          // When the wallet is connected, the About card is displayed beneath
+          // the swap card/historical price chart.
+          // When the wallet is disconnected, the About info is displayed
+          // in the Swap card
+          walletAddress && pair.description &&
+          <Card className="px-5 py-4 col-span-7">
+            <h2 className="font-bold mb-8">About</h2>
+
+            <PairDescription pair={pair} />
+          </Card>
+        }
       </div>
-
-      {
-        // When the wallet is connected, the About card is displayed beneath
-        // the swap card/historical price chart.
-        // When the wallet is disconnected, the About info is displayed
-        // in the Swap card
-        walletAddress && pair.description &&
-        <Card className="my-8 px-5 py-4">
-          <h2 className="font-bold mb-8">About</h2>
-
-          <PairDescription pair={pair} />
-        </Card>
-      }
     </>
   );
 }
