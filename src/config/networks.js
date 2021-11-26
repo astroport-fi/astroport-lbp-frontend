@@ -15,12 +15,10 @@ export const networks = {
   testnet: {
     lcdURL: 'https://bombay-lcd.terra.dev',
     chainID: 'bombay-12',
-    factoryContractAddress: 'terra1y358sk0fcdc8zkhrwwrwkaph93jmw5kctvn6fw',
+    factoryContractAddress: 'terra1nt459erudaug8d2vsqjmhv7zc9c9vmamj3esn9',
     gasPrices: { uusd: 0.15 },
     allowedPairContracts: [
-      'terra1ttz2s465khrrmv2ck2ct4v9cqhx4f3h7kgqmrq', // FOO
-      'terra1yw6mwa4nz38zaacd7kzxy79h9rndpud0dvzxm3',  // TESTA
-      'terra139ch6l8n9vvcrs64mpfvcjmtptxtklapn7xmlv', // TESTC
+
     ]
   },
   ...envNetworks
