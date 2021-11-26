@@ -20,7 +20,7 @@ function ConnectWalletButton({ className }) {
       setConnecting(false);
 
       if(reason === EXTENSION_UNAVAILABLE ) {
-        window.open('https://terra.money/extension');
+        window.open('https://chrome.google.com/webstore/detail/terra-station/aiifbnbfobpmeekipheeijimdpnlpgpp');
       }
     }
   }, [connectWallet]);

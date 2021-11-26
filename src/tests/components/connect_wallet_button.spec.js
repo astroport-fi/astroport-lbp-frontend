@@ -38,7 +38,7 @@ describe('ConnectWalletButton', () => {
       await userEvent.click(screen.getByText('Connect Wallet'));
     })
 
-    expect(windowOpenSpy).toHaveBeenCalledWith('https://terra.money/extension');
+    expect(windowOpenSpy).toHaveBeenCalledWith('https://chrome.google.com/webstore/detail/terra-station/aiifbnbfobpmeekipheeijimdpnlpgpp');
     expect(connectExtension).toHaveBeenCalledTimes(1);
 
     windowOpenSpy.mockRestore();
