@@ -90,6 +90,8 @@ function AssetInput({
             step={step}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
+            style={{ display: 'flex' }}
+            placeholderIsMinWidth={true}
           />
 
           <span className={classNames('text-white text-xs select-none', { 'text-opacity-50': !amount })}>
