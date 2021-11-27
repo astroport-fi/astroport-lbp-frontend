@@ -9,8 +9,11 @@ export const networks = {
   mainnet: {
     lcdURL: 'https://lcd.terra.dev',
     chainID: 'columbus-5',
-    factoryContractAddress: '', // TBD
-    gasPrices: { uusd: 0.15 }
+    factoryContractAddress: '', // Fill in with your project's factory contract
+    gasPrices: { uusd: 0.15 },
+    allowedPairContracts: [
+      // Fill in with your project's pair contract(s)
+    ]
   },
   testnet: {
     lcdURL: 'https://bombay-lcd.terra.dev',

@@ -1,6 +1,60 @@
-# Astroport Token Sales
+# Astroport Token Sales Frontend
+Frontend app to buy & sell tokens using [Astroport's LBP contracts](https://github.com/astroport-fi/astroport-lbp/).
+
+## Getting Started
+Teams are expected to customize and host the frontend themselves.
+This guide will walk you through the steps necessary to configure and deploy the app.
+If further customization is desired, check out the [Development](#Development) section below.
+
+It is recommended that you fork this repo and then make your changes there. 
+
+**Important Note:** The frontend assumes that one side of the LBP pair is UST. Changes will need to be made to the app to support other assets. 
+
+### Configuration
+- Replace `src/assets/images/logo.svg` with your own logo
+  - You may want/need to tweak the logo's size, or if your logo is not an SVG, change its import. The logo is rendered in the [`TokenSales`](src/components/token_sales.js) component.
+- Configure your color scheme in [`theme.css`](src/theme.css)
+- Update `src/config/networks.js` with:
+  - Your mainnet Astroport LBP factory contract address (you are expected to deploy the factory and pair contracts yourself)
+  - Your mainnet Astroport LBP pair contract address(es) (these are whitelisted by the frontend to control the asset pairs that are visible on the UI)
+  - If you'd like to test the frontend on the testnet first, you could also deploy the necessary contracts to the testnet and update the testnet portion of `networks.js` with the factory and pair addresses. 
+- If further UI customization is desired, the CSS entrypoint is [`src/index.css`](src/index.css), and there are also component-specific CSS files in [`src/components`](src/components).
+  - You also have full access to [Tailwind](https://tailwindcss.com/)'s wonderful suite of utility classes. 
+
+### Deployment
+The recommended process is to configure continuous deployment via [Github Actions](https://github.com/features/actions) or some other means, but you could also build the project yourself and upload the resulting static site to any web host.
+
+#### Via Github Actions
+If deploying via Github Actions, you can reference [`.github/workflows/staging_ci_cd.yml`](.github/workflows/staging_ci_cd.yml) as a template.
+
+That workflow will run the test suite and then, if it passes, deploy to [Netlify](https://www.netlify.com/). If you'd like to deploy to Netlify as well, you'll only need to make a few changes:
+1. Update `REACT_APP_DEFAULT_NETWORK` in `staging_ci_cd.yml` to `mainnet` for your production workflow.
+2. Configure the `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` Github Actions secrets.
+
+#### Manual Deployment
+To build the project, you'll need to set up your local environment by installing `node` and `npm` and then all project dependencies as described in the [Development](#Development) section below.
+
+Once your local environment is set up, building the project is as easy as running:
+
+```console
+$ npm run build
+```
+
+That will build everything that you need to host the app in the `build` folder. Simply upload that to your web host of choice.
+
+**Note:** The network that's used in the build is pulled from the `REACT_APP_DEFAULT_NETWORK` environment variable, which [defaults](.env) to `mainnet`.
+If you'd like to generate a build using another network by default (e.g. `testnet` for a test deployment), you should run something like:
+
+```console
+$ REACT_APP_DEFAULT_NETWORK=testnet npm run build
+```
 
 ## Development
+
+### Stack
+- [React](https://reactjs.org/)
+  - `create-react-app`, configured via [craco](https://github.com/gsoft-inc/craco)
+- [Tailwind](https://tailwindcss.com/)
 
 ### Requirements
 
