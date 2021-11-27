@@ -20,6 +20,10 @@ It is recommended that you fork this repo and then make your changes there.
   - If you'd like to test the frontend on the testnet first, you could also deploy the necessary contracts to the testnet and update the testnet portion of `networks.js` with the factory and pair addresses. 
 - If further UI customization is desired, the CSS entrypoint is [`src/index.css`](src/index.css), and there are also component-specific CSS files in [`src/components`](src/components).
   - You also have full access to [Tailwind](https://tailwindcss.com/)'s wonderful suite of utility classes. 
+- This app is configured out-of-the-box with [Sentry](https://sentry.io) support for error tracking/reporting.
+  - If you'd prefer not to use Sentry, no action is necessary.
+  - If you'd like to use it, you'll need to set the `REACT_APP_SENTRY_DSN` environment variable at build time (more on this below in the [Deployment](#deployment) section).
+  - If you'd like to use a different service for error tracking, you can make the necessary changes in [`src/index.js`](src/index.js) and [`src/report_exception.js`](src/report_exception.js).
 
 ### Deployment
 The recommended process is to configure continuous deployment via [Github Actions](https://github.com/features/actions) or some other means, but you could also build the project yourself and upload the resulting static site to any web host.
@@ -30,6 +34,7 @@ If deploying via Github Actions, you can reference [`.github/workflows/staging_c
 That workflow will run the test suite and then, if it passes, deploy to [Netlify](https://www.netlify.com/). If you'd like to deploy to Netlify as well, you'll only need to make a few changes:
 1. Update `REACT_APP_DEFAULT_NETWORK` in `staging_ci_cd.yml` to `mainnet` for your production workflow.
 2. Configure the `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` Github Actions secrets.
+3. Configure the `SENTRY_DSN` Github Actions secret if using Sentry.
 
 #### Manual Deployment
 To build the project, you'll need to set up your local environment by installing `node` and `npm` and then all project dependencies as described in the [Development](#Development) section below.
@@ -38,6 +43,12 @@ Once your local environment is set up, building the project is as easy as runnin
 
 ```console
 $ npm run build
+```
+
+_Or, if using Sentry:_
+
+```console
+$ REACT_APP_SENTRY_DSN=https://your-sentry-dsn npm run build
 ```
 
 That will build everything that you need to host the app in the `build` folder. Simply upload that to your web host of choice.

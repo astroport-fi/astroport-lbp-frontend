@@ -6,9 +6,9 @@ import './index.css';
 import App from './components/app';
 import reportWebVitals from './reportWebVitals';
 
-if(process.env.NODE_ENV === 'production') {
+if(process.env.NODE_ENV === 'production' && process.env.REACT_APP_SENTRY_DSN) {
   Sentry.init({
-    dsn: "https://c390ecaab4c240d0824667141ff307e5@o916914.ingest.sentry.io/5858773",
+    dsn: process.env.SENTRY_DSN,
     integrations: [new Integrations.BrowserTracing()],
 
     // Set tracesSampleRate to 1.0 to capture 100%

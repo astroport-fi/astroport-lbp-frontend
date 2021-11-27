@@ -35,6 +35,7 @@ jobs:
         run: npm run build
         env:
           REACT_APP_DEFAULT_NETWORK: testnet
+          REACT_APP_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Deploy app to Netlify
         uses: netlify/actions/cli@master
