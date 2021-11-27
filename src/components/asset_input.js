@@ -80,7 +80,7 @@ function AssetInput({
             value={amount}
             onChange={amountChanged}
             className="max-w-max"
-            inputClassName="bg-transparent outline-none input-no-spinner text-sm"
+            inputClassName="bg-transparent outline-none input-no-spinner text-xs"
             autoComplete="off"
             placeholder="0.000"
             ref={inputEl}
@@ -101,7 +101,7 @@ function AssetInput({
 
         {
           maxClick &&
-          <button type="button" className="text-yellow text-xs uppercase mr-6 outline-none" onClick={maxClick}>
+          <button type="button" className="asset-input__max-button text-xs uppercase mr-6 outline-none" onClick={maxClick}>
             Max
           </button>
         }
@@ -111,7 +111,7 @@ function AssetInput({
       </div>
 
       { error &&
-        <span className="text-red-500 text-sm">{error}</span>
+        <span className="text-red-500 text-xs">{error}</span>
       }
     </div>
   );

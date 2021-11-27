@@ -1,3 +1,4 @@
+import './historical_price_card.css';
 import Card from './card';
 import classNames from 'classnames';
 import { NATIVE_TOKEN_SYMBOLS } from '../constants';
@@ -108,49 +109,49 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
   const prices = useMemo(() => data?.map(({ price }) => price), [data]);
 
   const areaDataStyle = {
-    stroke: '#83FFCB',
+    stroke: 'var(--theme-historical-price-chart-line-color)',
     strokeWidth: 2,
     fill: 'url(#fillGradient)'
   }
 
   return (
-    <Card className={classNames('py-6 px-5 flex flex-col', className)} style={style}>
+    <Card className={classNames('py-8 px-12 flex flex-col historical-price-card', className)} style={style}>
       <div className="flex justify-between">
         <h2 className="font-bold">
           {nativeSymbol} / {saleTokenInfo.symbol}
         </h2>
 
-        <div className="flex">
-          <OptionsGroup
-            options={INTERVALS.map(({minutes: value, label}) => ({ value, label }))}
-            selected={interval}
-            onOptionSelect={setInterval}
-            className="mr-4"
-          />
-
-          <OptionsGroup
-            options={[
-              {
-                value: 'linear',
-                label: 'Lin'
-              },
-              {
-                value: 'log',
-                label: 'Log'
-              }
-            ]}
-            selected={scale}
-            onOptionSelect={setScale}
-          />
-        </div>
+        {
+          usdPrice &&
+          <h3 className="font-bold text-lg">
+            {formatUSD(usdPrice)}
+          </h3>
+        }
       </div>
 
-      {
-        usdPrice &&
-        <h3 className="font-bold my-5">
-          {formatUSD(usdPrice)}
-        </h3>
-      }
+      <div className="flex justify-between my-4">
+        <OptionsGroup
+          options={[
+            {
+              value: 'linear',
+              label: 'Lin'
+            },
+            {
+              value: 'log',
+              label: 'Log'
+            }
+          ]}
+          selected={scale}
+          onOptionSelect={setScale}
+        />
+
+        <OptionsGroup
+          options={INTERVALS.map(({minutes: value, label}) => ({ value, label }))}
+          selected={interval}
+          onOptionSelect={setInterval}
+          className="mr-4"
+        />
+      </div>
 
       <svg className="h-0">
         <defs>
@@ -160,8 +161,8 @@ function HistoricalPriceCard({ className, pair, saleTokenInfo, usdPrice, style }
             y1="0%"
             y2="100%"
           >
-            <stop offset="0%" stopColor="#83ffcb" stopOpacity="0.49" />
-            <stop offset="78%" stopColor="#83ffcb" stopOpacity="0" />
+            <stop offset="0%" stopOpacity="0.5" className="from-stop" />
+            <stop offset="50%" stopOpacity="0" className="to-stop" />
           </linearGradient>
         </defs>
       </svg>

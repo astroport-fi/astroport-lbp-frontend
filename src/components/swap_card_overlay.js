@@ -1,55 +1,53 @@
+import './swap_card_overlay.css';
 import CardOverlay from './card_overlay';
-import classNames from 'classnames';
 import { useNetwork } from '../hooks/use_network';
 import { ReactComponent as WaitingIndicator } from '../assets/images/waiting-indicator.svg';
 import TxHash from './swap_card/tx_hash';
 
 function SwapCardOverlay({ txState, txHash, waitingDismiss, completeDismiss, errorDismiss }) {
-  let content, bgColor;
+  let content;
   const { terraClient } = useNetwork();
 
   // eslint-disable-next-line default-case
   switch(txState) {
     case 'waitingForExtension':
-      bgColor = 'bg-primary';
-      content = (<>
-        <p className="text-xl animate-pulse">Waiting for Terra Station</p>
+      content = <>
+        <h3 className="animate-pulse">Waiting for Terra Station</h3>
 
-        <button type="button" className="mt-4" onClick={waitingDismiss}>Cancel</button>
-      </>);
+        <button type="button" onClick={waitingDismiss}>Cancel</button>
+      </>;
       break;
     case 'pending':
-      bgColor = 'bg-primary';
-      content = (<>
-        <p className="text-xl">Please Wait</p>
+      content = <>
+        <h3>Please Wait</h3>
 
         <WaitingIndicator className="mx-auto my-6 w-12 h-12" />
 
-        <TxHash chainID={terraClient.config.chainID} txHash={txHash} />
-      </>);
+        <TxHash chainID={terraClient.config.chainID} txHash={txHash} className="text-center" />
+      </>;
       break;
     case 'complete':
-      bgColor = 'bg-positive';
-      content = (<>
-        <p className="text-xl">Transaction Complete</p>
+      content = <>
+        <div className="text-center">
+          <h3 className="mb-5">Transaction Complete</h3>
 
-        <TxHash chainID={terraClient.config.chainID} txHash={txHash} className="my-6" />
+          <TxHash chainID={terraClient.config.chainID} txHash={txHash} />
+        </div>
 
         <button type="button" onClick={completeDismiss}>Continue</button>
-      </>);
+      </>;
       break;
     case 'error':
-      bgColor = 'bg-negative';
-      content = (<>
-        <p className="text-xl">Error submitting transaction</p>
+      content = <>
+        <h3>Error submitting transaction</h3>
 
-        <button type="button" className="mt-4" onClick={errorDismiss}>Continue</button>
-      </>);
+        <button type="button" onClick={errorDismiss}>Continue</button>
+      </>;
       break;
   }
 
   return (
-    <CardOverlay className={classNames('bg-opacity-90 backdrop-filter backdrop-blur-sm transition-colors duration-300 ease-out', bgColor)}>
+    <CardOverlay className={`swap-card-overlay swap-card-overlay--${txState}`}>
       {content}
     </CardOverlay>
   );

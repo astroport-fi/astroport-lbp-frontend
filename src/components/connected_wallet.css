@@ -1,0 +1,5 @@
+.connected-wallet__chain-id {
+  @apply mr-4 text-black font-bold px-2 py-1 rounded;
+
+  background-color: var(--theme-connected-chain-id-background-color);
+}

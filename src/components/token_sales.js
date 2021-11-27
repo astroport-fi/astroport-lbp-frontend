@@ -1,3 +1,4 @@
+import './token_sales.css';
 import { useEffect, useState } from 'react';
 import reportException from '../report_exception';
 import ScheduledTokenSalesCard from './scheduled_token_sales_card';
@@ -90,7 +91,7 @@ function TokenSales() {
     return (
       <div className="container mx-auto">
         <div className="flex justify-between mt-6 mb-12">
-          <Logo className="h-8" />
+          <Logo className="w-32" />
 
           {
             walletAddress ?
@@ -103,7 +104,7 @@ function TokenSales() {
         {
           currentPair &&
             <div className="flex justify-between items-center">
-              <h1 className="text-xl font-bold">
+              <h1 className="token-sale-heading text-2xl font-bold">
                 {saleTokenInfo.name} Token Sale
               </h1>
             </div>

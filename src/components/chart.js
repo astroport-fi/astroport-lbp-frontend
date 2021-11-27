@@ -6,14 +6,13 @@ const axis = {
 
 const fontStyles = {
   fill: '#ffffff',
-  fontSize: 10,
+  fontSize: 12,
   fontFamily: 'Inter, sans-serif',
   fontWeight: 500
 }
 
 const tickLabels = {
-  ...fontStyles,
-  opacity: 0.3
+  ...fontStyles
 }
 
 const axisLabel = {
@@ -27,7 +26,8 @@ const theme = {
       axis,
       axisLabel,
       grid: {
-        stroke: 'none'
+        stroke: '#ffffff',
+        opacity: 0.3
       },
       tickLabels: {
         ...tickLabels,

@@ -1,17 +1,18 @@
+@import 'theme.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   @apply text-white font-medium;
-
-  background-image: url(./assets/images/background.png);
-  background-size: cover;
+  background-color: var(--theme-background-color);
   font-family: 'Inter', sans-serif;
 }
 
 .btn-primary {
-  @apply bg-primary;
+  @apply text-sm font-bold;
+  background-color: var(--theme-primary-button-background-color);
+  color: var(--theme-primary-button-text-color);
 }
 
 .btn-disabled {
@@ -19,5 +20,6 @@ body {
 }
 
 .text-secondary {
-  @apply opacity-50 text-xs;
+  @apply text-xs;
+  opacity: var(--theme-secondary-text-opacity);
 }

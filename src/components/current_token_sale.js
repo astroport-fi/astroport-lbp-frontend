@@ -126,12 +126,11 @@ function CurrentTokenSale({ pair, saleTokenInfo }) {
         }
 
         {
-          // When the wallet is connected, the About card is displayed beneath
-          // the swap card/historical price chart.
+          // When the wallet is connected, the About card is displayed next to the swap card.
           // When the wallet is disconnected, the About info is displayed
           // in the Swap card
           walletAddress && pair.description &&
-          <Card className="px-5 py-4 col-span-7">
+          <Card className="py-8 px-12 col-span-7">
             <h2 className="font-bold mb-8">About</h2>
 
             <PairDescription pair={pair} />

@@ -1,0 +1,22 @@
+.historical-price-card__option-button {
+  @apply text-xs text-white rounded py-1 w-12 rounded mr-2 tracking-widest font-bold;
+}
+
+.historical-price-card__option-button--inactive {
+  @apply bg-white bg-opacity-30;
+}
+
+.historical-price-card__option-button--active {
+  @apply bg-opacity-100;
+
+  background-color: var(--theme-historical-price-card-option-button-background-color);
+  color: var(--theme-historical-price-card-option-button-text-color);
+}
+
+.historical-price-card #fillGradient .from-stop {
+  stop-color: var(--theme-historical-price-chart-area-gradient-from-color);
+}
+
+.historical-price-card #fillGradient .to-stop {
+  stop-color: var(--theme-historical-price-chart-area-gradient-to-color);
+}

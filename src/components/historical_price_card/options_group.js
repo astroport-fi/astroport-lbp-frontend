@@ -10,10 +10,10 @@ function OptionsGroup({ className, options, onOptionSelect, selected }) {
             type="button"
             onClick={() => onOptionSelect(value)}
             className={classNames(
-              'text-xs text-white text-opacity-60 rounded py-1 w-12 rounded mr-2 tracking-widest',
+              'historical-price-card__option-button',
               {
-                'bg-white bg-opacity-10': selected !== value,
-                'bg-primary bg-opacity-100 text-opacity-90': selected === value
+                'historical-price-card__option-button--inactive': selected !== value,
+                'historical-price-card__option-button--active': selected === value
               }
             )}
           >

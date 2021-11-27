@@ -23,7 +23,7 @@ function InfoCard({ label, value, loading, moreInfo, className }) {
           }
         </h3>
 
-        <span>
+        <span className="text-lg">
           {
             loading ?
               <div className="flex justify-center">

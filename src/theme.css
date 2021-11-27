@@ -1,0 +1,44 @@
+:root {
+  /* Colors */
+  --theme-white: #FFFFFF;
+  --theme-dark-yellow: #FFB300;
+  --theme-light-yellow: #FFE54C;
+  --theme-dark-blue: #0E0D44;
+  --theme-light-blue: #3864D8;
+  --theme-green: #36CAB0;
+  --theme-red: #ED6374;
+  --theme-medium-blue: #17388F;
+
+  /* Wallet controls */
+  --theme-connected-chain-id-background-color: var(--theme-dark-yellow);
+
+  /* Generic styles */
+  --theme-token-sale-heading-color: var(--theme-white);
+  --theme-background-color: var(--theme-dark-blue);
+  --theme-card-background-color: var(--theme-medium-blue);
+  --theme-card-border-color: var(--theme-card-background-color);
+  --theme-secondary-text-opacity: 0.6;
+  --theme-primary-button-background-color: var(--theme-dark-yellow);
+  --theme-primary-button-text-color: var(--theme-dark-blue);
+
+  /* Swap card form */
+  --theme-from-amount-max-button-color: var(--theme-dark-yellow);
+
+  /*
+     Swap card overlay - displayed after clicking swap button, has various states that tracks
+     transaction from extension prompt through success/failure
+   */
+  --theme-swap-card-overlay-waitingForExtension-background-color: var(--theme-light-blue);
+  --theme-swap-card-overlay-pending-background-color: var(--theme-light-blue);
+  --theme-swap-card-overlay-complete-background-color: var(--theme-green);
+  --theme-swap-card-overlay-error-background-color: var(--theme-red);
+  --theme-swap-card-overlay-complete-continue-button-background-color: var(--theme-medium-blue);
+  --theme-swap-card-overlay-error-continue-button-background-color: #A43D4A;
+
+  /* Historical price card/chart */
+  --theme-historical-price-card-option-button-background-color: var(--theme-dark-yellow);
+  --theme-historical-price-card-option-button-text-color: var(--theme-medium-blue);
+  --theme-historical-price-chart-line-color: var(--theme-dark-yellow);
+  --theme-historical-price-chart-area-gradient-from-color: var(--theme-dark-yellow);
+  --theme-historical-price-chart-area-gradient-to-color: var(--theme-light-yellow);
+}

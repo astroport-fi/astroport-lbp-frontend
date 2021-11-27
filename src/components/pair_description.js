@@ -1,6 +1,8 @@
-function PairDescription({ pair }) {
+import classNames from 'classnames';
+
+function PairDescription({ pair, className }) {
   return(
-    <p className="text-xs opacity-50 font-normal">
+    <p className={classNames('text-xs font-normal', className)}>
       {pair.description}
     </p>
   );

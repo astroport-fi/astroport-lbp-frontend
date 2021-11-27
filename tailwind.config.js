@@ -7,18 +7,6 @@ module.exports = {
     extend: {
       colors: {
         gray: colors.trueGray,
-        yellow: {
-          DEFAULT: '#ffd04e'
-        },
-        primary: {
-          DEFAULT: '#5643F2'
-        },
-        positive: {
-          DEFAULT: '#83FFCB'
-        },
-        negative: {
-          DEFAULT: '#FF8383'
-        }
       }
     },
     letterSpacing: {

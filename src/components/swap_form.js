@@ -25,7 +25,7 @@ function SwapForm({
   children
 }) {
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} className="flex flex-col flex-grow">
       <AssetInput
         label="From"
         amount={fromAmount}
@@ -40,7 +40,7 @@ function SwapForm({
         step={fromStep}
       />
 
-      <div className="flex items-center justify-center mt-5 mb-2">
+      <div className="flex items-center justify-center mt-6 mb-3">
         <button type="button" onClick={onReverseAssets}>
           <span className="sr-only">Reverse assets</span>
 
@@ -62,14 +62,14 @@ function SwapForm({
 
       {
         error &&
-        <div className="bg-red-600 bg-opacity-50 text-white text-center mt-4 p-2 rounded rounded-lg">{error}</div>
+        <div className="bg-red-600 bg-opacity-50 text-white text-center my-4 p-2 rounded rounded-lg">{error}</div>
       }
 
       <button
         type="submit"
         className={
           classNames(
-            "py-3 px-6 rounded-lg w-full mt-12 transition", {
+            "py-2 rounded-lg w-full mt-auto transition", {
               'btn-primary hover:animate-pulse': canSubmit,
               'btn-disabled': !canSubmit
             }

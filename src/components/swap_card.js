@@ -366,7 +366,7 @@ function SwapCard({
   }
 
   return (
-    <Card className={classNames('p-6 pb-8', className)} overlay={
+    <Card className={classNames('py-8 px-12 flex flex-col', className)} overlay={
       lastTx &&
       <SwapCardOverlay
         txState={lastTx.state}

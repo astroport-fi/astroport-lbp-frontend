@@ -1,3 +1,4 @@
+import './connected_wallet.css';
 import { useWallet } from '../hooks/use_wallet';
 import { useNetwork } from '../hooks/use_network';
 import { networks } from '../config/networks';
@@ -7,10 +8,10 @@ function ConnectedWallet() {
   const { network } = useNetwork();
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center connected-wallet">
       {
         network.chainID !== networks.mainnet.chainID &&
-        <small className="mr-4 bg-yellow-300 text-black font-bold px-2 py-1 rounded">{network.chainID}</small>
+        <small className="connected-wallet__chain-id">{network.chainID}</small>
       }
 
       <div className="text-white bg-white bg-opacity-10 text-opacity-90 py-2 px-6 rounded-lg">

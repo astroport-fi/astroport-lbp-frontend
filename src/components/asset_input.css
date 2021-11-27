@@ -2,3 +2,7 @@ input.input-no-spinner::-webkit-outer-spin-button,
 input.input-no-spinner::-webkit-inner-spin-button {
   appearance: none
 }
+
+.asset-input__max-button {
+  color: var(--theme-from-amount-max-button-color);
+}
