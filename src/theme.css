@@ -4,10 +4,10 @@
   --theme-dark-yellow: #FFB300;
   --theme-light-yellow: #FFE54C;
   --theme-dark-blue: #0E0D44;
-  --theme-light-blue: #3864D8;
-  --theme-green: #36CAB0;
-  --theme-red: #ED6374;
   --theme-medium-blue: #17388F;
+  --theme-light-blue-90: #3864D8E6; /* 90% transparency */
+  --theme-green-90: #36CAB0E6; /* 90% transparency */
+  --theme-red-90: #ED6374E6; /* 90% transparency */
 
   /* Wallet controls */
   --theme-connected-chain-id-background-color: var(--theme-dark-yellow);
@@ -28,10 +28,10 @@
      Swap card overlay - displayed after clicking swap button, has various states that tracks
      transaction from extension prompt through success/failure
    */
-  --theme-swap-card-overlay-waitingForExtension-background-color: var(--theme-light-blue);
-  --theme-swap-card-overlay-pending-background-color: var(--theme-light-blue);
-  --theme-swap-card-overlay-complete-background-color: var(--theme-green);
-  --theme-swap-card-overlay-error-background-color: var(--theme-red);
+  --theme-swap-card-overlay-waitingForExtension-background-color: var(--theme-light-blue-90);
+  --theme-swap-card-overlay-pending-background-color: var(--theme-light-blue-90);
+  --theme-swap-card-overlay-complete-background-color: var(--theme-green-90);
+  --theme-swap-card-overlay-error-background-color: var(--theme-red-90);
   --theme-swap-card-overlay-complete-continue-button-background-color: var(--theme-medium-blue);
   --theme-swap-card-overlay-error-continue-button-background-color: #A43D4A;
 

@@ -7,19 +7,19 @@
 }
 
 .swap-card-overlay--waitingForExtension {
-  background-color: color-mod(var(--theme-swap-card-overlay-waitingForExtension-background-color) alpha(90%));
+  background-color: var(--theme-swap-card-overlay-waitingForExtension-background-color);
 }
 
 .swap-card-overlay--pending {
-  background-color: color-mod(var(--theme-swap-card-overlay-pending-background-color) alpha(90%));
+  background-color: var(--theme-swap-card-overlay-pending-background-color);
 }
 
 .swap-card-overlay--complete {
-  background-color: color-mod(var(--theme-swap-card-overlay-complete-background-color) alpha(90%));
+  background-color: var(--theme-swap-card-overlay-complete-background-color);
 }
 
 .swap-card-overlay--error {
-  background-color: color-mod(var(--theme-swap-card-overlay-error-background-color) alpha(90%));
+  background-color: var(--theme-swap-card-overlay-error-background-color);
 }
 
 .swap-card-overlay button {
