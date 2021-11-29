@@ -124,3 +124,7 @@ The build is minified and the filenames include the hashes.
 
 ## TODO
 - [ ] Add historical pricing plot
+
+## LICENSE
+
+This repo is under a [MIT license](https://github.com/astroport-fi/astroport-lbp-frontend/blob/master/LICENSE).
