@@ -19,7 +19,9 @@ It is recommended that you fork this repo and then make your changes there.
   - Your mainnet Astroport LBP pair contract address(es) (these are whitelisted by the frontend to control the asset pairs that are visible on the UI)
   - If you'd like to test the frontend on the testnet first, you could also deploy the necessary contracts to the testnet and update the testnet portion of `networks.js` with the factory and pair addresses. 
 - If further UI customization is desired, the CSS entrypoint is [`src/index.css`](src/index.css), and there are also component-specific CSS files in [`src/components`](src/components).
-  - You also have full access to [Tailwind](https://tailwindcss.com/)'s wonderful suite of utility classes. 
+  - You also have full access to [Tailwind](https://tailwindcss.com/)'s wonderful suite of utility classes.
+  - The app makes extensive use of Tailwind's utility classes for things like spacing, font size, weight, etc., and generally avoids custom styles wherever possible.
+    You can [configure](https://tailwindcss.com/docs/configuration) Tailwind in [`tailwind.config.js`](tailwind.config.js).
 - This app is configured out-of-the-box with [Sentry](https://sentry.io) support for error tracking/reporting.
   - If you'd prefer not to use Sentry, no action is necessary.
   - If you'd like to use it, you'll need to set the `REACT_APP_SENTRY_DSN` environment variable at build time (more on this below in the [Deployment](#deployment) section).
