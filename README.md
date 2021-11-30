@@ -23,9 +23,9 @@ It is recommended that you fork this repo and then make your changes there.
   - The app makes extensive use of Tailwind's utility classes for things like spacing, font size, weight, etc., and generally avoids custom styles wherever possible.
     You can [configure](https://tailwindcss.com/docs/configuration) Tailwind in [`tailwind.config.js`](tailwind.config.js).
 - This app is configured out-of-the-box with [Sentry](https://sentry.io) support for error tracking/reporting.
-  - If you'd prefer not to use Sentry, no action is necessary.
-  - If you'd like to use it, you'll need to set the `REACT_APP_SENTRY_DSN` environment variable at build time (more on this below in the [Deployment](#deployment) section).
-  - If you'd like to use a different service for error tracking, you can make the necessary changes in [`src/index.js`](src/index.js) and [`src/report_exception.js`](src/report_exception.js).
+  - If you do not plan on using Sentry, or any other error tracking/reporting service, no action is necessary.
+  - If you'd like to use Sentry, you'll need to set the `REACT_APP_SENTRY_DSN` environment variable at build time (more on this below in the [Deployment](#deployment) section).
+  - If you'd like to use a different service, you can make the necessary changes in [`src/index.js`](src/index.js) and [`src/report_exception.js`](src/report_exception.js).
 
 ### Deployment
 The recommended process is to configure continuous deployment via [Github Actions](https://github.com/features/actions) or some other means, but you could also build the project yourself and upload the resulting static site to any web host.
