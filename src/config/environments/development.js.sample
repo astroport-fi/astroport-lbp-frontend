@@ -1,7 +1,7 @@
 module.exports = {
   networks: {
     localterra: {
-      lcdUrl: 'http://localhost:1317',
+      lcdURL: 'http://localhost:1317',
       chainID: 'localterra',
 
       // Set to the address of the LBP factory contract on your localterra
